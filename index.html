@@ -3,25 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>บัญชีแชตอัจฉริยะ</title>
+<title>เหมียวบัญชี</title>
+
+<!-- ICON -->
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="เหมียวบัญชี">
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 :root{
-  --bg:#ffffff;
-  --card:#f3f4f6;
-  --text:#111827;
-  --sub:#6b7280;
-  --border:#e5e7eb;
-  --accent:#6366f1;
-}
-body.dark{
   --bg:#121212;
   --card:#1e1e1e;
   --text:#e5e7eb;
   --sub:#9ca3af;
   --border:#2a2a2a;
-  --accent:#818cf8;
+  --accent:#6366f1;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{
@@ -33,6 +33,7 @@ header{
   padding:20px;
   display:flex;
   justify-content:space-between;
+  align-items:center;
   border-bottom:1px solid var(--border);
 }
 .container{max-width:900px;margin:auto;padding:20px}
@@ -55,13 +56,11 @@ input,select{
   padding:10px;
   border-radius:10px;
   border:1px solid var(--border);
+  background:#000;
+  color:#fff;
   width:100%;
 }
-.summary{
-  display:grid;
-  gap:12px;
-  margin-bottom:20px;
-}
+.summary{display:grid;gap:12px;margin-bottom:20px}
 .amount{font-size:1.3rem;font-weight:600}
 .income{color:#22c55e}
 .expense{color:#ef4444}
@@ -73,25 +72,24 @@ input,select{
   border-bottom:1px solid var(--border);
 }
 .chat-box{
-  height:280px;
+  height:260px;
   overflow-y:auto;
   border:1px solid var(--border);
   border-radius:12px;
   padding:10px;
   margin-bottom:10px;
-  background:var(--bg);
+  background:#000;
 }
 .msg{margin-bottom:8px}
 .user{text-align:right}
-.system{color:var(--sub)}
+.system{color:#9ca3af}
 </style>
 </head>
 
-<body class="dark">
+<body>
 
 <header>
-  <h2>บัญชีแชต</h2>
-  <button class="btn" onclick="toggleTheme()">สลับธีม</button>
+  <h2>🐱 เหมียวบัญชี</h2>
 </header>
 
 <div class="container">
@@ -111,8 +109,22 @@ input,select{
   <h3>แชตบันทึกรายการ</h3>
   <div id="chatBox" class="chat-box"></div>
   <div style="display:flex;gap:8px;">
-    <input type="text" id="chatInput" placeholder="พิมพ์ เช่น ซื้อข้าว 80">
+    <input type="text" id="chatInput" placeholder="เช่น ซื้อข้าว 80">
     <button class="btn" onclick="sendChat()">ส่ง</button>
+  </div>
+</div>
+
+<div class="card">
+  <h3>กรอกข้อมูลเอง</h3>
+  <div style="display:grid;gap:8px;">
+    <select id="manualType">
+      <option value="expense">รายจ่าย</option>
+      <option value="income">รายรับ</option>
+    </select>
+    <input type="number" id="manualAmount" placeholder="จำนวนเงิน">
+    <input type="text" id="manualCategory" placeholder="หมวด">
+    <input type="text" id="manualDesc" placeholder="รายละเอียด">
+    <button class="btn" onclick="addManual()">บันทึก</button>
   </div>
 </div>
 
@@ -136,10 +148,6 @@ let barChart;
 function save(){
   localStorage.setItem('accounts',JSON.stringify(accounts));
   localStorage.setItem('currentAccount',currentAccount);
-}
-
-function toggleTheme(){
-  document.body.classList.toggle('dark');
 }
 
 function renderAccounts(){
@@ -179,7 +187,7 @@ function detectCategory(text){
     'สาธารณูปโภค':['ค่าไฟ','ค่าน้ำ','ค่าเน็ต'],
     'ช้อปปิ้ง':['เสื้อ','รองเท้า','กระเป๋า'],
     'สุขภาพ':['หมอ','ยา'],
-    'เงินเดือน':['เงินเดือน'],
+    'เงินเดือน':['เงินเดือน']
   };
   for(const cat in map){
     if(map[cat].some(w=>text.includes(w))) return cat;
@@ -191,6 +199,7 @@ function sendChat(){
   const input=document.getElementById('chatInput');
   const text=input.value.trim();
   if(!text)return;
+
   addMessage(text,'user');
 
   const expenseWords=['จ่าย','ซื้อ','ค่า','เติม'];
@@ -222,8 +231,38 @@ function sendChat(){
   save();
   render();
 
-  addMessage(`บันทึก ${type==='income'?'รายรับ':'รายจ่าย'} ${amount.toLocaleString()} บาท หมวด ${category} เรียบร้อยแล้ว`,'system');
+  addMessage(`บันทึก ${type==='income'?'รายรับ':'รายจ่าย'} ${amount.toLocaleString()} บาท หมวด ${category}`,'system');
   input.value='';
+}
+
+function addManual(){
+  const type=document.getElementById('manualType').value;
+  const amount=parseFloat(document.getElementById('manualAmount').value);
+  const category=document.getElementById('manualCategory').value||'อื่นๆ';
+  const desc=document.getElementById('manualDesc').value||category;
+
+  if(!amount){ alert('กรอกจำนวนเงินก่อน'); return; }
+
+  const entry={
+    id:Date.now(),
+    type,amount,category,
+    date:new Date().toISOString().slice(0,10),
+    desc
+  };
+
+  accounts[currentAccount].push(entry);
+  save();
+  render();
+
+  document.getElementById('manualAmount').value='';
+  document.getElementById('manualCategory').value='';
+  document.getElementById('manualDesc').value='';
+}
+
+function deleteEntry(id){
+  accounts[currentAccount]=accounts[currentAccount].filter(e=>e.id!==id);
+  save();
+  render();
 }
 
 function render(){
@@ -240,8 +279,12 @@ function render(){
   txList.innerHTML=month.map(e=>`
     <div class="tx-item">
       <div>${e.desc}<br><small>${e.category} • ${e.date}</small></div>
-      <div class="${e.type==='income'?'income':'expense'}">
-      ${e.type==='income'?'+':'-'}฿${e.amount.toLocaleString()}</div>
+      <div>
+        <span class="${e.type==='income'?'income':'expense'}">
+        ${e.type==='income'?'+':'-'}฿${e.amount.toLocaleString()}
+        </span>
+        <button onclick="deleteEntry(${e.id})" style="margin-left:8px;background:none;border:none;color:red;">ลบ</button>
+      </div>
     </div>
   `).join('');
 
