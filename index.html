@@ -3,70 +3,72 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Don Note Ultimate</title>
+<title>Don Note PRO</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body{margin:0;font-family:'Kanit',sans-serif;background:#f6f6f8;}
-.container{max-width:480px;margin:auto;padding:16px;padding-bottom:120px;}
-.card{background:#fff;border-radius:18px;padding:16px;margin-bottom:14px;}
-h2{margin:0 0 8px}
+body{margin:0;font-family:'Kanit',sans-serif;background:#fafafa;color:#333}
+.container{max-width:480px;margin:auto;padding:16px;padding-bottom:120px}
+.card{background:#fff;border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.bear{font-size:40px}
+.app{font-weight:700;font-size:20px}
 
-/* top boxes */
-.top{display:flex;gap:10px}
-.box{flex:1;padding:14px;border-radius:16px;background:#fff}
-.expense{background:#fff1f6;color:#ff4f8b}
-.income{background:#f2fffb;color:#38b2a6}
-.money{font-size:24px;font-weight:700}
+.summary{display:flex;gap:10px}
+.sum{flex:1;padding:12px;border-radius:16px}
+.exp{background:#fff0f4;color:#ff5c8a}
+.inc{background:#eefaf6;color:#2fbfa5}
 
-/* chat */
 .chat{height:160px;overflow:auto;border-bottom:1px solid #eee;margin-bottom:8px}
 .msg{padding:8px 12px;border-radius:14px;margin:6px 0;max-width:80%}
 .user{background:#111;color:#fff;margin-left:auto}
 .bot{background:#f1f1f5}
 
-/* inputs */
-input,select,button{
-width:100%;padding:12px;border-radius:12px;border:1px solid #eee;margin-top:6px}
+input,select,button{width:100%;padding:12px;border-radius:12px;border:1px solid #eee;margin-top:6px}
 button{background:#111;color:#fff;border:none}
 
-/* mascot */
+.item{display:flex;justify-content:space-between;margin:6px 0}
+.item button{background:none;border:none}
+
 .mascot{position:fixed;bottom:90px;left:-80px;font-size:48px;transition:1s linear}
 .mascot.run{left:110%}
-.speech{
-position:fixed;bottom:150px;left:20px;background:#fff;padding:10px 14px;
-border-radius:14px;border:1px solid #eee;opacity:0;transition:.4s}
+.speech{position:fixed;bottom:150px;left:20px;background:#fff;padding:10px 14px;border-radius:14px;border:1px solid #eee;opacity:0;transition:.4s}
 .speech.show{opacity:1}
 </style>
 </head>
 
 <body>
 
-<div class="mascot" id="mascot">🐻🏺</div>
-<div class="speech" id="speech">ดงดงอยู่ข้างเธอ</div>
+<div id="mascot" class="mascot">🐻🏺</div>
+<div id="speech" class="speech">ดงดงอยู่ข้างเธอ</div>
 
 <div class="container">
 
-<!-- SUMMARY -->
-<div class="card">
-<h2>สรุป</h2>
-<div class="top">
-<div class="box expense">รายจ่าย<div id="exp" class="money">฿0</div></div>
-<div class="box income">รายรับ<div id="inc" class="money">฿0</div></div>
+<div class="header">
+<div class="bear">🐻</div>
+<div>
+<div class="app">Don Note</div>
+<div style="font-size:12px;color:#888">DongDong Money Tracker</div>
 </div>
 </div>
 
-<!-- CHAT -->
 <div class="card">
-<h2>💬 แชตบันทึก</h2>
+<h3>สรุป</h3>
+<div class="summary">
+<div class="sum exp">รายจ่าย<div id="exp">฿0</div></div>
+<div class="sum inc">รายรับ<div id="inc">฿0</div></div>
+</div>
+</div>
+
+<div class="card">
+<h3>💬 แชตบันทึก</h3>
 <div id="chat" class="chat"></div>
-<input id="chatInput" placeholder="กาแฟ 60" onkeypress="if(event.key==='Enter')sendChat()">
+<input id="chatInput" placeholder="เช่น กาแฟ 60">
 <button onclick="sendChat()">ส่ง</button>
 </div>
 
-<!-- MANUAL -->
 <div class="card">
-<h2>📝 กรอกเอง</h2>
+<h3>📝 กรอกเอง</h3>
 <input id="desc" placeholder="รายการ">
 <input id="amount" type="number" placeholder="จำนวนเงิน">
 <select id="type">
@@ -76,18 +78,21 @@ border-radius:14px;border:1px solid #eee;opacity:0;transition:.4s}
 <button onclick="addManual()">บันทึก</button>
 </div>
 
-<!-- PIE CHART -->
 <div class="card">
-<h2>📊 รายรับ / รายจ่าย</h2>
+<h3>📋 รายการ</h3>
+<div id="list"></div>
+</div>
+
+<div class="card">
+<h3>📊 รายรับ/รายจ่าย</h3>
 <canvas id="pie"></canvas>
 </div>
 
-<!-- SAVING GOAL -->
 <div class="card">
-<h2>🎯 เป้าการออม</h2>
-<input id="goalInput" type="number" placeholder="ตั้งเป้าเงิน">
-<button onclick="setGoal()">ตั้งเป้า</button>
-<div id="goalText">ยังไม่ได้ตั้ง</div>
+<h3>🎯 เป้าออม</h3>
+<input id="goalInput" type="number" placeholder="ตั้งเป้า">
+<button onclick="setGoal()">ตั้ง</button>
+<div id="goalText"></div>
 </div>
 
 </div>
@@ -99,71 +104,75 @@ let goal=localStorage.getItem("goal")||0;
 const mascot=document.getElementById('mascot');
 const speech=document.getElementById('speech');
 
+function run(){mascot.classList.remove('run');void mascot.offsetWidth;mascot.classList.add('run');}
 function talk(){
-speech.textContent=["เก่งมาก 🐻","ดงดงภูมิใจ","เราจะรวย!"][Math.floor(Math.random()*3)];
+speech.textContent=["ดงดงเชียร์อยู่ 🐻","เก่งมากเลย","ออมต่อไป!"][Math.floor(Math.random()*3)];
 speech.classList.add('show');
 setTimeout(()=>speech.classList.remove('show'),2000);
 }
 
-function run(){mascot.classList.remove('run');void mascot.offsetWidth;mascot.classList.add('run');}
-
-function save(){localStorage.setItem("donnote",JSON.stringify(data));update();}
+function save(){localStorage.setItem("donnote",JSON.stringify(data));update();render();}
 
 function add(desc,amount,type){
 data.push({desc,amount:+amount,type});
 save();run();talk();
 }
 
-function addManual(){
-add(desc.value,amount.value,type.value);
-desc.value="";amount.value="";
-}
+function addManual(){add(desc.value,amount.value,type.value);desc.value="";amount.value="";}
 
 function sendChat(){
-const txt=chatInput.value;
-if(!txt)return;
+const txt=chatInput.value;if(!txt)return;
 addMsg(txt,"user");
 
-let amount=txt.match(/\d+/);
-amount=amount?amount[0]:0;
+let amount=(txt.match(/\d+/)||[0])[0];
+let incomeWords=["เงินเดือน","โบนัส","ขาย","รับ","โอนเข้า"];
+let type=incomeWords.some(w=>txt.includes(w))?"income":"expense";
 
-let type=/เงินเดือน|ขาย/.test(txt)?"income":"expense";
 add(txt,amount,type);
-
 addMsg("บันทึกแล้ว 🐻","bot");
 chatInput.value="";
 }
 
-function addMsg(t,c){
-chat.innerHTML+=`<div class="msg ${c}">${t}</div>`;
-chat.scrollTop=9999;
+function addMsg(t,c){chat.innerHTML+=`<div class="msg ${c}">${t}</div>`;chat.scrollTop=9999;}
+
+function render(){
+list.innerHTML=data.map((i,index)=>`
+<div class="item">
+<span>${i.desc}</span>
+<span>
+<span style="color:${i.type==='income'?'#2fbfa5':'#ff5c8a'}">
+${i.type==='income'?'+':'-'}฿${i.amount}
+</span>
+<button onclick="removeItem(${index})">❌</button>
+</span>
+</div>`).join('');
 }
 
-function setGoal(){
-goal=goalInput.value;
-localStorage.setItem("goal",goal);
-goalText.innerText="เป้า: ฿"+goal;
-}
+function removeItem(i){data.splice(i,1);save();}
+
+function setGoal(){goal=goalInput.value;localStorage.setItem("goal",goal);goalText.innerText="เป้า: ฿"+goal;}
 
 function update(){
 let inc=0,exp=0;
 data.forEach(d=>d.type=="income"?inc+=d.amount:exp+=d.amount);
-document.getElementById("inc").innerText="฿"+inc;
-document.getElementById("exp").innerText="฿"+exp;
-
+incEl.innerText="฿"+inc;
+expEl.innerText="฿"+exp;
 pie.data.datasets[0].data=[inc,exp];
 pie.update();
 }
 
 goalText.innerText=goal?("เป้า: ฿"+goal):"ยังไม่ได้ตั้ง";
 
+const incEl=document.getElementById("inc");
+const expEl=document.getElementById("exp");
+
 const pie=new Chart(document.getElementById('pie'),{
 type:'doughnut',
-data:{labels:["รายรับ","รายจ่าย"],
-datasets:[{data:[0,0],backgroundColor:["#7fd6c2","#ff8fb3"]}]}
+data:{labels:["รายรับ","รายจ่าย"],datasets:[{data:[0,0],backgroundColor:["#7fd6c2","#ff8fb3"]}]}
 });
 
 update();
+render();
 </script>
 
 </body>
