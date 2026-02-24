@@ -3,106 +3,115 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>น้องเสือช่วยจด v6</title>
+<title>น้องเสือช่วยจด v6.5 - Tiger Vision</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <style>
 :root {
-    --bg: #fffcf9; --card: rgba(255, 255, 255, 0.95); --text: #2d3436;
+    --bg: #fffcf9; --card: rgba(255, 255, 255, 0.98); --text: #2d3436;
     --accent: #f39c12; --income: #27ae60; --expense: #e74c3c; --border: #f1f2f6;
 }
 [data-theme="dark"] {
-    --bg: #1e272e; --card: rgba(47, 54, 64, 0.9); --text: #f5f6fa; --border: #353b48;
+    --bg: #1e272e; --card: rgba(47, 54, 64, 0.95); --text: #f5f6fa; --border: #353b48;
 }
-body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; transition: 0.3s; padding-bottom: 50px; }
+body { font-family: 'Inter', 'Kanit', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 50px; transition: 0.3s; }
 .container { max-width: 500px; margin: auto; padding: 15px; }
-.card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.card { background: var(--card); border-radius: 24px; padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
 .tab-group { display: flex; gap: 8px; margin-bottom: 15px; }
-.tab { flex: 1; padding: 10px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); cursor: pointer; text-align: center; font-weight: bold; color: var(--text); }
+.tab { flex: 1; padding: 12px; border-radius: 14px; border: 1px solid var(--border); background: var(--card); cursor: pointer; text-align: center; font-weight: bold; }
 .tab.active { background: var(--accent); color: white; border-color: var(--accent); }
-.btn { background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 14px; cursor: pointer; font-weight: bold; width: 100%; }
-input, select, textarea { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 10px; box-sizing: border-box; outline: none; }
-.chat-box { height: 160px; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
-.msg { padding: 8px 14px; border-radius: 14px; font-size: 0.9rem; max-width: 80%; }
+.btn { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 14px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+.btn:disabled { background: #ccc; cursor: not-allowed; }
+input, select, textarea { width: 100%; padding: 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 12px; box-sizing: border-box; outline: none; }
+.chat-box { height: 180px; overflow-y: auto; padding: 10px; border-bottom: 1px solid var(--border); margin-bottom: 10px; display: flex; flex-direction: column; gap: 10px; }
+.msg { padding: 10px 16px; border-radius: 18px; font-size: 0.9rem; max-width: 85%; line-height: 1.4; }
 .user { background: var(--accent); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
 .system { background: var(--border); align-self: flex-start; border-bottom-left-radius: 2px; }
-.tx-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.tx-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); }
 .hidden { display: none; }
+#loadingOcr { font-size: 0.8rem; color: var(--accent); display: none; margin-bottom: 10px; }
 </style>
 </head>
 <body data-theme="light">
 
 <div class="container">
-    <div style="text-align: center; padding: 10px;">
-        <h2 style="margin:0;">🐯 น้องเสือช่วยจด</h2>
-        <button onclick="toggleTheme()" style="background:none; border:none; cursor:pointer; margin-top:5px;">🌓 สลับโหมด</button>
+    <div style="text-align: center; padding: 15px;">
+        <h2 style="margin:0;">🐯 น้องเสือช่วยจด <small style="font-size:0.7rem;">v6.5</small></h2>
+        <button onclick="toggleTheme()" style="background:none; border:none; cursor:pointer; font-size: 0.9rem; color:var(--text); opacity:0.7;">🌓 สลับโหมด</button>
     </div>
 
     <div class="card" style="background: linear-gradient(135deg, #f39c12, #e67e22); color: white; border: none;">
-        <div style="display:flex; justify-content: space-between;"><small>คงเหลือเดือนนี้</small><small id="todayStatus">วันนี้: ฿0</small></div>
-        <div id="totalBal" style="font-size: 2.2rem; font-weight: bold; margin: 10px 0;">฿0</div>
-        <div style="display:flex; justify-content: space-between; font-size: 0.85rem; opacity: 0.9;"><span id="txtInc">รับ: ฿0</span><span id="txtExp">จ่าย: ฿0</span></div>
+        <div style="display:flex; justify-content: space-between;"><small>ยอดเงินปัจจุบัน</small><small id="todayStatus">วันนี้: ฿0</small></div>
+        <div id="totalBal" style="font-size: 2.4rem; font-weight: 800; margin: 10px 0;">฿0</div>
+        <div style="display:flex; justify-content: space-between; opacity: 0.9; font-size: 0.9rem;">
+            <span id="txtInc">รับ: ฿0</span><span id="txtExp">จ่าย: ฿0</span>
+        </div>
     </div>
 
     <div class="card">
         <div class="tab-group">
-            <div class="tab active" id="tabChat" onclick="switchTab('chat')">💬 คุยกับเสือ</div>
+            <div class="tab active" id="tabChat" onclick="switchTab('chat')">💬 แชตกับเสือ</div>
             <div class="tab" id="tabManual" onclick="switchTab('manual')">📝 กรอกเอง</div>
         </div>
 
         <div id="panelChat">
             <div id="chatBox" class="chat-box"></div>
+            <div id="loadingOcr">🐯 กำลังอ่านรูปภาพ... อดใจรอแป๊บนึงนะโฮก</div>
             <div style="display:flex; gap:8px;">
-                <input type="text" id="chatInput" placeholder="ซื้อราดหน้า 60, ชาไข่มุก 45..." onkeypress="if(event.key==='Enter') processChat()">
-                <button class="btn" style="width: auto;" onclick="processChat()">ส่ง</button>
+                <input type="text" id="chatInput" placeholder="ซื้ออาหาร 60, ราดหน้า 50..." onkeypress="if(event.key==='Enter') processChat()">
+                <button class="btn" style="padding: 12px 20px;" onclick="processChat()">ส่ง</button>
             </div>
+            <button class="btn" style="width:100%; margin-top:10px; background:#34495e;" onclick="document.getElementById('ocrInput').click()">📷 สแกนรูปภาพใบเสร็จ</button>
+            <input type="file" id="ocrInput" class="hidden" accept="image/*" onchange="handleOcr(event)">
         </div>
 
         <div id="panelManual" class="hidden">
-            <div style="display:flex; gap:5px; margin-bottom:10px;">
+            <div style="display:flex; gap:8px; margin-bottom:12px;">
                 <button class="tab active" id="mBtnExp" style="background:var(--expense); color:white; border:none;" onclick="setManualType('expense')">รายจ่าย</button>
                 <button class="tab" id="mBtnInc" onclick="setManualType('income')">รายรับ</button>
             </div>
-            <input type="text" id="mDesc" placeholder="ชื่อรายการ">
-            <input type="number" id="mAmount" placeholder="จำนวนเงิน">
+            <input type="text" id="mDesc" placeholder="รายการนี้คืออะไร?">
+            <input type="number" id="mAmount" placeholder="จำนวนเงิน (บาท)">
             <select id="mCat">
                 <option value="อาหาร">🍱 อาหาร/เครื่องดื่ม</option>
                 <option value="เดลิเวอรี">🛵 เดลิเวอรี</option>
-                <option value="เดินทาง">⛽ เดินทาง</option>
+                <option value="เดินทาง">⛽ เดินทาง/น้ำมัน</option>
                 <option value="ช้อปปิ้ง">🛍️ ช้อปปิ้ง</option>
+                <option value="ที่พัก">🏠 ที่พัก/บิล</option>
                 <option value="รายได้">💰 รายได้/เงินต้น</option>
             </select>
-            <textarea id="mNote" rows="2" placeholder="โน้ตเพิ่มเติม..."></textarea>
-            <button class="btn" onclick="processManual()">บันทึกรายการ</button>
+            <textarea id="mNote" rows="2" placeholder="จดบันทึกเพิ่มเติม..."></textarea>
+            <button class="btn" style="width:100%" onclick="processManual()">บันทึกข้อมูล</button>
         </div>
     </div>
 
     <div class="card">
-        <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom:10px;">
-            <h3 style="margin:0; font-size:1rem;">📊 สัดส่วนรายจ่าย</h3>
+        <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom:12px;">
+            <h3 style="margin:0; font-size:1rem;">📊 รายจ่าย</h3>
             <select id="chartPeriod" style="width:auto; margin:0; padding:5px;" onchange="render()">
                 <option value="month">เดือนนี้</option>
                 <option value="today">วันนี้</option>
             </select>
         </div>
-        <canvas id="mainChart" style="max-height: 200px;"></canvas>
+        <canvas id="tigerChart" style="max-height: 200px;"></canvas>
     </div>
 
     <div class="card">
-        <h3 style="font-size:1rem; margin-top:0;">🕒 ประวัติล่าสุด</h3>
+        <h3 style="margin:0 0 10px 0; font-size:1rem;">🕒 ประวัติล่าสุด</h3>
         <div id="txList"></div>
     </div>
 
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-        <button class="btn" style="background:#bdc3c7;" onclick="exportData()">💾 Backup</button>
-        <button class="btn" style="background:#bdc3c7;" onclick="document.getElementById('importFile').click()">📥 Restore</button>
-        <input type="file" id="importFile" class="hidden" onchange="importData(event)">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top: 10px;">
+        <button class="btn" style="background:#95a5a6;" onclick="exportData()">💾 Backup</button>
+        <button class="btn" style="background:#95a5a6;" onclick="document.getElementById('restoreInput').click()">📥 Restore</button>
+        <input type="file" id="restoreInput" class="hidden" onchange="importData(event)">
     </div>
 </div>
 
 <script>
-let tigerEntries = JSON.parse(localStorage.getItem('tiger_data_v6') || '[]');
-let currentType = 'expense';
-let chartObj = null;
+let entries = JSON.parse(localStorage.getItem('tiger_data_v6_5') || '[]');
+let currentManualType = 'expense';
+let tigerChart = null;
 
 function toggleTheme() {
     const b = document.body;
@@ -117,31 +126,57 @@ function switchTab(mode) {
 }
 
 function setManualType(t) {
-    currentType = t;
+    currentManualType = t;
     document.getElementById('mBtnExp').style.background = t === 'expense' ? 'var(--expense)' : '';
-    document.getElementById('mBtnExp').style.color = t === 'expense' ? 'white' : 'var(--text)';
     document.getElementById('mBtnInc').style.background = t === 'income' ? 'var(--income)' : '';
-    document.getElementById('mBtnInc').style.color = t === 'income' ? 'white' : 'var(--text)';
+}
+
+// ฟังก์ชันอ่านรูปภาพ (OCR)
+async function handleOcr(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const loader = document.getElementById('loadingOcr');
+    loader.style.display = 'block';
+    addMsg("🐅 น้องเสือกำลังเพ่งดูรูปให้โฮก...", "system");
+
+    try {
+        const result = await Tesseract.recognize(file, 'eng+tha', {
+            logger: m => console.log(m)
+        });
+        
+        const text = result.data.text;
+        // พยายามหาตัวเลขที่ดูเหมือนราคาสุทธิ (Total)
+        const prices = text.match(/\d+(\.\d{2})?/g);
+        let suggestedAmount = prices ? Math.max(...prices.map(Number)) : "";
+        
+        document.getElementById('chatInput').value = `รายการจากรูป ${suggestedAmount}`;
+        loader.style.display = 'none';
+        addMsg("เสืออ่านข้อมูลได้ประมาณนี้ ลองตรวจสอบแล้วกดส่งนะโฮก!", "system");
+    } catch (err) {
+        loader.style.display = 'none';
+        alert("ขอโทษทีโฮก เสืออ่านรูปนี้ไม่ออก ลองใช้รูปที่ชัดกว่านี้ดูนะ");
+    }
 }
 
 function processChat() {
     const input = document.getElementById('chatInput');
     const text = input.value.trim();
     if(!text) return;
+
     const amount = (text.match(/\d+(\.\d+)?/) || [0])[0];
-    if(amount == 0) return alert("ใส่ตัวเลขด้วยนะโฮก!");
+    if(amount == 0) return alert("ระบุจำนวนเงินด้วยนะโฮก!");
 
     const isInc = ['รับ','ได้','เงินเข้า','เงินต้น','ยกมา','เงินเดือน'].some(w => text.includes(w));
-    let cat = isInc ? "รายได้" : "อื่นๆ";
-    if(!isInc) {
-        if(['grab','lineman','foodpanda','แกร็บ'].some(w => text.toLowerCase().includes(w))) cat = "เดลิเวอรี";
-        else if(['กิน','ข้าว','ราดหน้า','ชาไข่มุก','กาแฟ','น้ำ','อาหาร'].some(w => text.includes(w))) cat = "อาหาร";
-        else if(['รถ','น้ำมัน','mrt','bts'].some(w => text.includes(w))) cat = "เดินทาง";
-    }
+    let cat = "อื่นๆ";
+    if(isInc) cat = "รายได้";
+    else if(['grab','lineman','foodpanda','แกร็บ'].some(w => text.toLowerCase().includes(w))) cat = "เดลิเวอรี";
+    else if(['กิน','ข้าว','ราดหน้า','ชาไข่มุก','กาแฟ','น้ำ','อาหาร'].some(w => text.includes(w))) cat = "อาหาร";
+    else if(['รถ','น้ำมัน','mrt','bts'].some(w => text.includes(w))) cat = "เดินทาง";
 
-    addTigerEntry(text, parseFloat(amount), isInc ? 'income' : 'expense', cat, "");
+    saveEntry(text, parseFloat(amount), isInc ? 'income' : 'expense', cat, "");
     addMsg(text, 'user');
-    addMsg(`เสือจด ${cat} ฿${amount} ให้แล้วโฮก!`, 'system');
+    addMsg(`บันทึก ${cat} ฿${amount} สำเร็จโฮก!`, 'system');
     input.value = "";
 }
 
@@ -150,24 +185,26 @@ function processManual() {
     const a = document.getElementById('mAmount').value;
     const c = document.getElementById('mCat').value;
     const n = document.getElementById('mNote').value;
-    if(!d || !a) return alert("กรอกข้อมูลให้ครบนะโฮก!");
-    addTigerEntry(d, parseFloat(a), currentType, c, n);
+    if(!d || !a) return alert("กรอกข้อมูลให้ครบโฮก!");
+
+    saveEntry(d, parseFloat(a), currentManualType, c, n);
+    alert("บันทึกสำเร็จ!");
     document.getElementById('mDesc').value = "";
     document.getElementById('mAmount').value = "";
     document.getElementById('mNote').value = "";
     switchTab('chat');
 }
 
-function addTigerEntry(desc, amount, type, category, note) {
-    tigerEntries.push({ id: Date.now(), desc, amount, type, category, note, date: new Date().toISOString().slice(0, 10) });
-    localStorage.setItem('tiger_data_v6', JSON.stringify(tigerEntries));
+function saveEntry(desc, amount, type, category, note) {
+    entries.push({ id: Date.now(), desc, amount, type, category, note, date: new Date().toISOString().slice(0, 10) });
+    localStorage.setItem('tiger_data_v6_5', JSON.stringify(entries));
     render();
 }
 
 function deleteItem(id) {
     if(confirm('จะลบรายการนี้ใช่ไหมโฮก?')) {
-        tigerEntries = tigerEntries.filter(e => e.id !== id);
-        localStorage.setItem('tiger_data_v6', JSON.stringify(tigerEntries));
+        entries = entries.filter(e => e.id !== id);
+        localStorage.setItem('tiger_data_v6_5', JSON.stringify(entries));
         render();
     }
 }
@@ -184,8 +221,8 @@ function addMsg(t, type) {
 function render() {
     const today = new Date().toISOString().slice(0, 10);
     const month = new Date().toISOString().slice(0, 7);
-    const mData = tigerEntries.filter(e => e.date.startsWith(month));
-    const tExp = tigerEntries.filter(e => e.date === today && e.type === 'expense').reduce((s, e) => s + e.amount, 0);
+    const mData = entries.filter(e => e.date.startsWith(month));
+    const tExp = entries.filter(e => e.date === today && e.type === 'expense').reduce((s, e) => s + e.amount, 0);
     const inc = mData.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
     const exp = mData.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
 
@@ -194,11 +231,18 @@ function render() {
     document.getElementById('txtExp').innerText = `จ่าย: ฿${exp.toLocaleString()}`;
     document.getElementById('todayStatus').innerText = `วันนี้: ฿${tExp.toLocaleString()}`;
 
-    const icons = { 'อาหาร': '🍱', 'เดลิเวอรี': '🛵', 'ช้อปปิ้ง': '🛍️', 'เดินทาง': '⛽', 'รายได้': '💰', 'อื่นๆ': '✨' };
+    const icons = { 'อาหาร': '🍱', 'เดลิเวอรี': '🛵', 'ช้อปปิ้ง': '🛍️', 'เดินทาง': '⛽', 'ที่พัก': '🏠', 'รายได้': '💰', 'อื่นๆ': '✨' };
     document.getElementById('txList').innerHTML = mData.slice().reverse().map(e => `
         <div class="tx-item">
-            <div style="flex:1"><strong>${icons[e.category]||'✨'} ${e.desc}</strong><br><small style="opacity:0.5">${e.date} | ${e.category}</small></div>
-            <div style="text-align:right"><span style="color:var(--${e.type}); font-weight:bold;">${e.type==='income'?'+':'-'}฿${e.amount.toLocaleString()}</span><br><button onclick="deleteItem(${e.id})" style="border:none; background:none; cursor:pointer;">🗑️</button></div>
+            <div style="flex:1">
+                <strong>${icons[e.category]||'✨'} ${e.desc}</strong>
+                ${e.note ? `<br><small style="color:var(--accent)">📝 ${e.note}</small>` : ''}
+                <br><small style="opacity:0.5">${e.date}</small>
+            </div>
+            <div style="text-align:right">
+                <span style="color:var(--${e.type}); font-weight:bold;">${e.type==='income'?'+':'-'}฿${e.amount.toLocaleString()}</span><br>
+                <button onclick="deleteItem(${e.id})" style="border:none; background:none; cursor:pointer;">🗑️</button>
+            </div>
         </div>
     `).join('');
 
@@ -207,38 +251,38 @@ function render() {
 
 function updateChart() {
     const period = document.getElementById('chartPeriod').value;
-    const filterStr = period === 'today' ? new Date().toISOString().slice(0, 10) : new Date().toISOString().slice(0, 7);
-    const cData = tigerEntries.filter(e => e.date.startsWith(filterStr) && e.type === 'expense');
+    const filter = period === 'today' ? new Date().toISOString().slice(0, 10) : new Date().toISOString().slice(0, 7);
+    const cData = entries.filter(e => e.date.startsWith(filter) && e.type === 'expense');
     const cats = {};
     cData.forEach(e => cats[e.category] = (cats[e.category] || 0) + e.amount);
 
-    if(chartObj) chartObj.destroy();
-    chartObj = new Chart(document.getElementById('mainChart').getContext('2d'), {
+    if(tigerChart) tigerChart.destroy();
+    tigerChart = new Chart(document.getElementById('tigerChart').getContext('2d'), {
         type: 'doughnut',
-        data: { labels: Object.keys(cats), datasets: [{ data: Object.values(cats), backgroundColor: ['#f39c12', '#e74c3c', '#27ae60', '#3498db', '#9b59b6'] }] },
-        options: { cutout: '65%', plugins: { legend: { position: 'bottom' } } }
+        data: { labels: Object.keys(cats), datasets: [{ data: Object.values(cats), backgroundColor: ['#f39c12', '#e74c3c', '#27ae60', '#3498db', '#9b59b6', '#1abc9c'] }] },
+        options: { cutout: '65%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10 } } } }
     });
 }
 
 function exportData() {
-    const blob = new Blob([JSON.stringify(tigerEntries)], { type: 'application/json' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'tiger_backup.json'; a.click();
+    const blob = new Blob([JSON.stringify(entries)], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'tiger_data.json'; a.click();
 }
 
 function importData(ev) {
     const f = ev.target.files[0];
     const r = new FileReader();
     r.onload = (e) => {
-        tigerEntries = JSON.parse(e.target.result);
-        localStorage.setItem('tiger_data_v6', JSON.stringify(tigerEntries));
+        entries = JSON.parse(e.target.result);
+        localStorage.setItem('tiger_data_v6_5', JSON.stringify(entries));
         render();
-        alert("น้องเสือคืนค่าข้อมูลให้แล้วโฮก!");
+        alert("กู้คืนข้อมูลสำเร็จโฮก!");
     };
     r.readAsText(f);
 }
 
 render();
-addMsg("สวัสดีโฮก! น้องเสือช่วยจดพร้อมทำงานแล้วครับ", "system");
+addMsg("โฮก! น้องเสือพร้อมช่วยจดแล้ว ลองปุ่มสแกนรูปดูได้นะ!", "system");
 </script>
 </body>
 </html>
