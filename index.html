@@ -1,135 +1,252 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Don Note</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ดงดง Universe</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body{margin:0;font-family:'Kanit',sans-serif;background:#f7f7fb;color:#333}
-.container{max-width:480px;margin:auto;padding:16px;padding-bottom:90px}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont;
+  background:#f6f7fb;
+}
 
-.page{display:none}
-.page.active{display:block}
+/* ===== HEADER ===== */
+.header{
+  background:white;
+  padding:16px;
+  font-weight:700;
+  font-size:20px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  box-shadow:0 2px 10px rgba(0,0,0,.05);
+}
+.bear{font-size:28px}
 
-.card{background:#fff;border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+/* ===== SUMMARY ===== */
+.card{
+  background:white;
+  margin:14px;
+  padding:16px;
+  border-radius:18px;
+  box-shadow:0 4px 20px rgba(0,0,0,.05);
+}
 
-.summary{display:flex;gap:10px}
-.sum{flex:1;padding:14px;border-radius:16px;text-align:center;font-weight:700}
-.exp{background:#ffeef3;color:#ff5c8a}
-.inc{background:#e9fbf7;color:#2fbfa5}
+.flex{display:flex;gap:10px}
+.box{
+  flex:1;
+  padding:12px;
+  border-radius:14px;
+  font-weight:700;
+}
+.expense{background:#ffe7ef;color:#ff4f87}
+.income{background:#e7fbf5;color:#00a889}
 
-/* Bottom Nav */
+/* ===== LIST ===== */
+.item{
+  display:flex;
+  justify-content:space-between;
+  padding:10px 0;
+  border-bottom:1px solid #eee;
+}
+
+/* ===== FLOAT BUTTON ===== */
+.fab{
+  position:fixed;
+  bottom:80px;
+  right:20px;
+  background:#ff4f87;
+  color:white;
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  box-shadow:0 8px 20px rgba(0,0,0,.2);
+}
+
+/* ===== NAV ===== */
 .nav{
-position:fixed;bottom:0;left:0;right:0;
-background:#fff;
-display:flex;
-justify-content:space-around;
-padding:8px 0;
-box-shadow:0 -2px 10px rgba(0,0,0,.05)
+  position:fixed;
+  bottom:0;
+  width:100%;
+  background:white;
+  display:flex;
+  justify-content:space-around;
+  padding:8px 0;
+  box-shadow:0 -2px 10px rgba(0,0,0,.05);
 }
-.nav div{font-size:12px;text-align:center;color:#888}
-.nav .active{color:#ff5c8a}
 
-/* Mascot */
-.mascot{
-position:fixed;
-bottom:70px;
-right:16px;
-font-size:48px;
-animation:bounce 2s infinite;
+/* ===== MODAL ===== */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.3);
+  display:none;
+  align-items:center;
+  justify-content:center;
 }
-@keyframes bounce{
-0%,100%{transform:translateY(0)}
-50%{transform:translateY(-8px)}
+.modalbox{
+  background:white;
+  padding:20px;
+  border-radius:18px;
+  width:90%;
+  max-width:380px;
+}
+input,select{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:12px;
+  border:1px solid #ddd;
+}
+button{
+  margin-top:14px;
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:#ff4f87;
+  color:white;
+  font-weight:700;
 }
 </style>
 </head>
 
 <body>
 
-<div class="mascot">🐻🏺</div>
+<!-- HEADER -->
+<div class="header">
+  <div class="bear">🐻</div>
+  ดงดง Universe
+</div>
 
-<div class="container">
-
-<!-- 🏠 SUMMARY -->
-<div id="home" class="page active">
+<!-- SUMMARY -->
 <div class="card">
-<h3>สรุป</h3>
-<div class="summary">
-<div class="sum exp">รายจ่าย<br><span id="exp">฿0</span></div>
-<div class="sum inc">รายรับ<br><span id="inc">฿0</span></div>
-</div>
-</div>
+  <div class="flex">
+    <div class="box expense">
+      รายจ่าย<br>
+      <span id="expenseTotal">฿0</span>
+    </div>
+    <div class="box income">
+      รายรับ<br>
+      <span id="incomeTotal">฿0</span>
+    </div>
+  </div>
 </div>
 
-<!-- 📊 ANALYTICS -->
-<div id="analytics" class="page">
+<!-- LIST -->
 <div class="card">
-<h3>วิเคราะห์</h3>
-<p>กราฟและสถิติจะอยู่ตรงนี้</p>
-</div>
+  <b>รายการล่าสุด</b>
+  <div id="list"></div>
 </div>
 
-<!-- ⏰ GOAL -->
-<div id="goal" class="page">
+<!-- CHART -->
 <div class="card">
-<h3>เป้าการออม</h3>
-<input id="goalInput" type="number" placeholder="ตั้งเป้า">
-<button onclick="setGoal()">ตั้งเป้า</button>
-<div id="goalText"></div>
-</div>
+  <canvas id="chart"></canvas>
 </div>
 
-<!-- 📋 LIST -->
-<div id="listPage" class="page">
-<div class="card">
-<h3>รายการ</h3>
-<div id="list"></div>
-</div>
-</div>
+<!-- FLOAT BUTTON -->
+<div class="fab" onclick="openModal()">＋</div>
 
-<!-- ⚙️ SETTINGS -->
-<div id="settings" class="page">
-<div class="card">
-<h3>ตั้งค่า</h3>
-<p>ธีม / โปรไฟล์ / อื่น ๆ</p>
-</div>
-</div>
-
-</div>
-
-<!-- 🌸 Bottom Nav -->
+<!-- NAV -->
 <div class="nav">
-<div class="active" onclick="show('home',this)">🏠<br>สรุป</div>
-<div onclick="show('analytics',this)">📊<br>วิเคราะห์</div>
-<div onclick="show('goal',this)">⏰<br>เป้า</div>
-<div onclick="show('listPage',this)">📋<br>รายการ</div>
-<div onclick="show('settings',this)">⚙️<br>ตั้งค่า</div>
+  <div>🏠</div>
+  <div>📊</div>
+  <div>🐻</div>
+  <div>📋</div>
+  <div>⚙️</div>
+</div>
+
+<!-- MODAL ADD -->
+<div class="modal" id="modal">
+  <div class="modalbox">
+    <b>เพิ่มรายการ</b>
+
+    <select id="type">
+      <option value="expense">รายจ่าย</option>
+      <option value="income">รายรับ</option>
+    </select>
+
+    <input id="name" placeholder="รายการ เช่น ชาไข่มุก"/>
+    <input id="amount" type="number" placeholder="จำนวนเงิน"/>
+
+    <button onclick="add()">บันทึก</button>
+  </div>
 </div>
 
 <script>
-let data=JSON.parse(localStorage.getItem("donnote")||"[]");
+let data=[]
 
-function show(page,el){
-document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-document.getElementById(page).classList.add('active');
-
-document.querySelectorAll('.nav div').forEach(n=>n.classList.remove('active'));
-el.classList.add('active');
+function openModal(){
+  modal.style.display="flex"
+}
+modal.onclick=e=>{
+  if(e.target.id==="modal") modal.style.display="none"
 }
 
-function update(){
-let inc=0,exp=0;
-data.forEach(d=>d.type=="income"?inc+=d.amount:exp+=d.amount);
-expEl.innerText="฿"+exp;
-incEl.innerText="฿"+inc;
+function add(){
+  let type=typeSelect.value
+}
+</script>
+
+<script>
+const modal=document.getElementById("modal")
+const list=document.getElementById("list")
+const incomeTotal=document.getElementById("incomeTotal")
+const expenseTotal=document.getElementById("expenseTotal")
+const typeSelect=document.getElementById("type")
+
+function add(){
+  const name=document.getElementById("name").value
+  const amount=Number(document.getElementById("amount").value)
+  const type=typeSelect.value
+
+  if(!name||!amount) return
+
+  data.push({name,amount,type})
+  modal.style.display="none"
+
+  render()
 }
 
-const expEl=document.getElementById("exp");
-const incEl=document.getElementById("inc");
+function render(){
+  list.innerHTML=""
+  let inc=0,exp=0
 
-update();
+  data.slice().reverse().forEach(d=>{
+    const div=document.createElement("div")
+    div.className="item"
+    div.innerHTML=`${d.name} <b>฿${d.amount}</b>`
+    list.appendChild(div)
+
+    if(d.type==="income") inc+=d.amount
+    else exp+=d.amount
+  })
+
+  incomeTotal.textContent="฿"+inc
+  expenseTotal.textContent="฿"+exp
+
+  chart.data.datasets[0].data=[exp,inc]
+  chart.update()
+}
+
+const chart=new Chart(document.getElementById("chart"),{
+  type:"doughnut",
+  data:{
+    labels:["รายจ่าย","รายรับ"],
+    datasets:[{
+      data:[0,0],
+      backgroundColor:["#ff4f87","#00a889"]
+    }]
+  }
+})
 </script>
 
 </body>
