@@ -907,5 +907,65 @@ function showToast(msg) {
 
 init();
 </script>
+<script>
+function parseChat(text){
+
+  const expenseWords = ['จ่าย','ซื้อ','ค่า','เติม','โอน'];
+  const incomeWords = ['รับ','ได้','เงินเข้า','โอนเข้า'];
+
+  const categoryMap = {
+    'อาหาร': ['ข้าว','อาหาร','ก๋วยเตี๋ยว','กาแฟ','ชานม','หมูกระทะ','ของกิน'],
+    'เดินทาง': ['รถ','แท็กซี่','grab','น้ำมัน','bts','mrt','ค่าโดยสาร','เติมน้ำมัน'],
+    'ที่พัก': ['ค่าเช่า','ห้อง','บ้าน','คอนโด'],
+    'สาธารณูปโภค': ['ค่าไฟ','ค่าน้ำ','ค่าเน็ต','อินเตอร์เน็ต','โทรศัพท์'],
+    'ช้อปปิ้ง': ['เสื้อ','รองเท้า','กระเป๋า','ครีม','เครื่องสำอาง','ของใช้'],
+    'สุขภาพ': ['หมอ','ยา','โรงพยาบาล','คลินิก'],
+    'เงินเดือน': ['เงินเดือน','salary'],
+    'ธุรกิจ': ['ขาย','ลูกค้า','ออเดอร์'],
+  };
+
+  let type = null;
+
+  if(expenseWords.some(w => text.includes(w))){
+    type = 'expense';
+  }
+
+  if(incomeWords.some(w => text.includes(w))){
+    type = 'income';
+  }
+
+  const amountMatch = text.match(/\d+(\.\d+)?/);
+  const amount = amountMatch ? parseFloat(amountMatch[0]) : null;
+
+  if(!type || !amount){
+    alert('พิมพ์เช่น: ซื้อข้าว 80');
+    return;
+  }
+
+  // 🔹 เดาหมวด
+  let category = 'อื่นๆ';
+
+  for(const cat in categoryMap){
+    if(categoryMap[cat].some(keyword => text.includes(keyword))){
+      category = cat;
+      break;
+    }
+  }
+
+  const entry = {
+    id: Date.now(),
+    type: type,
+    amount: amount,
+    category: category,
+    date: new Date().toISOString().slice(0,10),
+    desc: text
+  };
+
+  accounts[currentAccount].push(entry);
+  save();
+  render();
+}
+</script>
+
 </body>
 </html>
