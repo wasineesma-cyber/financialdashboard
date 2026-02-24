@@ -3,268 +3,259 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>เหมียวบัญชี v2</title>
+<title>เหมียวบัญชี Ultra v4</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root {
-    --bg: #ffffff; --card: #f8fafc; --text: #1e293b;
-    --border: #e2e8f0; --accent: #6366f1; --income: #22c55e; --expense: #ef4444;
+    --bg: #f0f2f5; --card: rgba(255, 255, 255, 0.8); --text: #1e293b;
+    --border: rgba(226, 232, 240, 0.8); --accent: #6366f1;
+    --glass: blur(10px);
 }
 [data-theme="dark"] {
-    --bg: #0f172a; --card: #1e293b; --text: #f8fafc;
-    --border: #334155; --accent: #818cf8;
+    --bg: #0f172a; --card: rgba(30, 41, 59, 0.7); --text: #f8fafc;
+    --border: rgba(51, 65, 85, 0.5);
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', -apple-system, sans-serif;
     background: var(--bg); color: var(--text);
-    transition: all 0.3s ease; margin: 0; padding-bottom: 50px;
+    background-image: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.1) 0%, transparent 20%),
+                      radial-gradient(circle at 90% 80%, rgba(244, 114, 182, 0.1) 0%, transparent 20%);
+    min-height: 100vh; transition: 0.3s; margin: 0; padding-bottom: 40px;
 }
+
 header {
-    padding: 20px; text-align: center; background: var(--card);
-    border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100;
+    backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
+    background: var(--card); padding: 15px; text-align: center;
+    border-bottom: 1px solid var(--border); sticky; top: 0; z-index: 100;
 }
-.container { max-width: 600px; margin: auto; padding: 15px; }
+
+.container { max-width: 500px; margin: auto; padding: 15px; }
+
 .card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 16px; padding: 16px; margin-bottom: 16px;
+    background: var(--card); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
+    border: 1px solid var(--border); border-radius: 24px;
+    padding: 20px; margin-bottom: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.05);
 }
-.btn-group { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+
+.balance-card {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    color: white; border: none;
+}
+
+.chip-group { display: flex; gap: 8px; overflow-x: auto; padding: 5px 0; scrollbar-width: none; }
+.chip-group::-webkit-scrollbar { display: none; }
+.chip {
+    padding: 6px 14px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; font-size: 0.8rem; white-space: nowrap; cursor: pointer;
+}
+
 .btn {
-    padding: 8px 16px; border: none; border-radius: 8px;
-    cursor: pointer; background: var(--accent); color: white; font-size: 0.9rem;
+    padding: 12px 24px; border: none; border-radius: 16px;
+    background: var(--accent); color: white; font-weight: 600; cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
-.btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
-.btn-danger { background: #fee2e2; color: #ef4444; padding: 4px 8px; font-size: 0.7rem; }
+.btn:active { transform: scale(0.95); }
 
-input {
-    padding: 12px; border-radius: 8px; border: 1px solid var(--border);
-    background: var(--bg); color: var(--text); width: 100%;
-}
-
-.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.tx-item {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 10px 0; border-bottom: 1px solid var(--border);
-}
 .chat-box {
-    height: 180px; overflow-y: auto; background: var(--bg);
-    border-radius: 8px; padding: 10px; margin-bottom: 10px; border: 1px solid var(--border);
+    height: 200px; overflow-y: auto; padding: 10px; margin-bottom: 10px;
+    display: flex; flex-direction: column; gap: 8px;
 }
-.msg { margin-bottom: 8px; padding: 6px 12px; border-radius: 12px; font-size: 0.9rem; width: fit-content; }
-.user { background: var(--accent); color: white; margin-left: auto; }
-.system { background: var(--border); color: var(--text); }
+.msg { padding: 10px 16px; border-radius: 18px; font-size: 0.95rem; max-width: 80%; line-height: 1.4; }
+.user { background: var(--accent); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+.system { background: var(--card); border: 1px solid var(--border); align-self: flex-start; border-bottom-left-radius: 4px; }
 
-.icon-logo { width: 50px; height: 50px; fill: var(--accent); margin-bottom: 5px; }
+input, select {
+    background: var(--card); border: 1px solid var(--border); color: var(--text);
+    padding: 14px; border-radius: 16px; width: 100%; outline: none;
+}
+
+.progress-container { background: rgba(0,0,0,0.1); border-radius: 10px; height: 8px; margin: 10px 0; }
+.progress-bar { background: #fff; height: 100%; border-radius: 10px; transition: 0.5s; }
+
+.tx-item {
+    display: flex; align-items: center; gap: 12px; padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+.cat-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; background: var(--bg); }
 </style>
 </head>
 <body data-theme="light">
 
 <header>
-    <svg class="icon-logo" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm4 0h-2V7h2v10z"/></svg>
-    <h2>เหมียวบัญชี</h2>
-    <div class="btn-group" style="justify-content: center; margin-top: 10px;">
-        <button class="btn btn-outline" onclick="toggleTheme()">สลับโหมด มืด/สว่าง</button>
+    <div style="display:flex; justify-content: space-between; align-items: center; max-width: 500px; margin: auto;">
+        <span style="font-size: 1.5rem; font-weight: 800; color: var(--accent);">🐱 Meow.</span>
+        <button class="btn" style="padding: 8px 12px; font-size: 0.7rem;" onclick="toggleTheme()">🌙 สลับโหมด</button>
     </div>
 </header>
 
 <div class="container">
-    <div class="card">
-        <h3>จัดการข้อมูล</h3>
-        <div class="btn-group">
-            <button class="btn" onclick="exportData()">Backup (ส่งออก)</button>
-            <button class="btn btn-outline" onclick="document.getElementById('importFile').click()">Restore (นำเข้า)</button>
-            <input type="file" id="importFile" style="display:none" onchange="importData(event)">
-        </div>
-    </div>
-
-    <div class="card summary-grid">
-        <div style="text-align:center">
-            <small>รายรับเดือนนี้</small>
-            <div id="totalIncome" style="color:var(--income); font-weight:bold; font-size:1.2rem">฿0</div>
-        </div>
-        <div style="text-align:center">
-            <small>รายจ่ายเดือนนี้</small>
-            <div id="totalExpense" style="color:var(--expense); font-weight:bold; font-size:1.2rem">฿0</div>
+    
+    <div class="card balance-card">
+        <small style="opacity: 0.8;">คงเหลือเดือนนี้</small>
+        <div id="totalBalance" style="font-size: 2.2rem; font-weight: 800; margin: 5px 0;">฿0</div>
+        <div class="progress-container"><div id="budgetBar" class="progress-bar" style="width: 0%"></div></div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; opacity: 0.9;">
+            <span id="txtIncome">รับ: ฿0</span>
+            <span id="txtExpense">จ่าย: ฿0</span>
         </div>
     </div>
 
     <div class="card">
         <div id="chatBox" class="chat-box"></div>
-        <div style="display:flex; gap:8px;">
-            <input type="text" id="chatInput" list="suggestions" placeholder="เช่น ซื้อกาแฟ 60" onkeypress="if(event.key==='Enter') sendChat()">
-            <datalist id="suggestions">
-                <option value="ซื้อข้าว">
-                <option value="ค่าน้ำมัน">
-                <option value="เงินเดือนออก">
-                <option value="ค่ากาแฟ">
-                <option value="โอนค่าของ">
-                <option value="สั่ง Grab">
-            </datalist>
-            <button class="btn" onclick="sendChat()">ส่ง</button>
+        <div class="chip-group">
+            <div class="chip" onclick="quickFill('ซื้อข้าว 60')">🍱 ข้าว 60</div>
+            <div class="chip" onclick="quickFill('ค่ากาแฟ 55')">☕ กาแฟ 55</div>
+            <div class="chip" onclick="quickFill('เติมน้ำมัน 500')">⛽ น้ำมัน 500</div>
+            <div class="chip" onclick="quickFill('เงินเดือน 30000')">💰 เงินเดือน</div>
+        </div>
+        <div style="display:flex; gap:8px; margin-top: 10px;">
+            <input type="text" id="chatInput" placeholder="คุยกับเหมียว..." onkeypress="if(event.key==='Enter') sendChat()">
+            <button class="btn" onclick="sendChat()">🚀</button>
         </div>
     </div>
 
     <div class="card">
-        <h3>รายจ่ายแยกรายวัน (เดือนนี้)</h3>
-        <canvas id="dailyChart"></canvas>
+        <h3 style="font-size: 1rem; margin-bottom: 15px;">🔍 วิเคราะห์การจ่าย</h3>
+        <canvas id="categoryChart" style="max-height: 250px;"></canvas>
     </div>
 
     <div class="card">
-        <h3>ประวัติเดือนนี้</h3>
+        <h3 style="font-size: 1rem; margin-bottom: 10px;">🕒 รายการล่าสุด</h3>
         <div id="txList"></div>
+        <button class="btn btn-outline" style="width:100%; margin-top: 15px; border: 1px solid var(--border); background: none; color: var(--text);" onclick="exportData()">📦 สำรองข้อมูล</button>
     </div>
 </div>
 
 <script>
 let entries = JSON.parse(localStorage.getItem('meow_data') || '[]');
-let dailyChart;
+let categoryChart;
 
-// --- ฟีเจอร์พื้นฐาน ---
+const icons = { 'อาหาร': '🍱', 'เดินทาง': '⛽', 'ช้อปปิ้ง': '🛍️', 'ที่พัก': '🏠', 'สุขภาพ': '💊', 'รายได้': '💰', 'อื่นๆ': '✨' };
+
 function toggleTheme() {
-    const body = document.body;
-    const current = body.getAttribute('data-theme');
-    body.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
+    const b = document.body;
+    b.setAttribute('data-theme', b.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
 }
 
-function save() {
-    localStorage.setItem('meow_data', JSON.stringify(entries));
+function quickFill(val) {
+    document.getElementById('chatInput').value = val;
+    sendChat();
 }
 
-function addMessage(text, type) {
-    const div = document.createElement('div');
-    div.className = `msg ${type}`;
-    div.innerText = text;
-    const box = document.getElementById('chatBox');
-    box.appendChild(div);
-    box.scrollTop = box.scrollHeight;
+function analyzeFinances(monthData) {
+    const expense = monthData.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
+    const income = monthData.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
+    
+    if (expense > income && income > 0) return "ช่วงนี้จ่ายหนักกว่ารับนะเมี๊ยว! เพลาๆ ลงหน่อยนะ";
+    if (expense > 0) {
+        const topCat = getTopCategory(monthData);
+        return `เดือนนี้หมดไปกับ "${topCat}" เยอะที่สุดเลยนะเมี๊ยว!`;
+    }
+    return "เริ่มบันทึกรายการแรกกันเลย!";
 }
 
-// --- วิเคราะห์ข้อมูล ---
+function getTopCategory(data) {
+    const cats = {};
+    data.filter(e => e.type === 'expense').forEach(e => cats[e.category] = (cats[e.category] || 0) + e.amount);
+    return Object.keys(cats).reduce((a, b) => cats[a] > cats[b] ? a : b, "...");
+}
+
 function sendChat() {
     const input = document.getElementById('chatInput');
     const text = input.value.trim();
     if(!text) return;
 
-    addMessage(text, 'user');
     const amount = (text.match(/\d+(\.\d+)?/) || [null])[0];
-    
     if(!amount) {
-        addMessage("เมี๊ยวไม่เห็นตัวเลขเลย ลองพิมพ์ใหม่นะ", "system");
+        addMessage(text, 'user');
+        addMessage("เมี๊ยวไม่เห็นจำนวนเงินเลย พิมพ์ใหม่นะ เช่น 'ค่าข้าว 50'", "system");
         return;
     }
 
-    const isIncome = ['รับ','ได้','เงินเข้า','เดือนออก'].some(w => text.includes(w));
+    const isIncome = ['รับ','ได้','เงินเข้า','เดือนออก','โบนัส'].some(w => text.includes(w));
+    const cat = detectCategory(text);
     
-    const newEntry = {
-        id: Date.now(),
-        desc: text,
-        amount: parseFloat(amount),
+    const entry = {
+        id: Date.now(), desc: text, amount: parseFloat(amount),
         type: isIncome ? 'income' : 'expense',
-        date: new Date().toISOString().slice(0, 10)
+        category: cat, date: new Date().toISOString().slice(0, 10)
     };
 
-    entries.push(newEntry);
-    save();
+    entries.push(entry);
+    localStorage.setItem('meow_data', JSON.stringify(entries));
+    
+    addMessage(text, 'user');
     render();
-    addMessage("จดให้แล้วเมี๊ยว!", "system");
+    addMessage(analyzeFinances(entries.filter(e => e.date.startsWith(new Date().toISOString().slice(0, 7)))), 'system');
     input.value = "";
 }
 
-function deleteEntry(id) {
-    if(confirm('ลบรายการนี้ใช่ไหม?')) {
-        entries = entries.filter(e => e.id !== id);
-        save();
-        render();
-    }
+function detectCategory(text) {
+    const cats = { 'อาหาร': ['ข้าว','น้ำ','กาแฟ','กิน','ขนม'], 'เดินทาง': ['รถ','น้ำมัน','mrt','bts'], 'ช้อปปิ้ง': ['ของ','เสื้อ','shopee'], 'ที่พัก': ['ไฟ','เน็ต','ห้อง'] };
+    for(let c in cats) if(cats[c].some(w => text.includes(w))) return c;
+    return 'อื่นๆ';
 }
 
-// --- Backup & Restore ---
-function exportData() {
-    const blob = new Blob([JSON.stringify(entries)], {type: 'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'meow_backup.json';
-    a.click();
+function addMessage(text, type) {
+    const box = document.getElementById('chatBox');
+    const div = document.createElement('div');
+    div.className = `msg ${type}`;
+    div.innerText = text;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
 }
 
-function importData(event) {
-    const file = event.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const data = JSON.parse(e.target.result);
-            if(Array.isArray(data)) {
-                entries = data;
-                save();
-                render();
-                alert('คืนค่าข้อมูลสำเร็จ!');
-            }
-        } catch(err) { alert('ไฟล์ไม่ถูกต้อง'); }
-    };
-    reader.readAsText(file);
-}
-
-// --- แสดงผล ---
 function render() {
-    const monthStr = new Date().toISOString().slice(0, 7);
-    const monthData = entries.filter(e => e.date.startsWith(monthStr));
-    
-    // สรุปยอด
-    const income = monthData.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
-    const expense = monthData.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
-    document.getElementById('totalIncome').innerText = `฿${income.toLocaleString()}`;
-    document.getElementById('totalExpense').innerText = `฿${expense.toLocaleString()}`;
+    const month = new Date().toISOString().slice(0, 7);
+    const mData = entries.filter(e => e.date.startsWith(month));
+    const inc = mData.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
+    const exp = mData.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
+    const bal = inc - exp;
 
-    // รายการประวัติ
-    document.getElementById('txList').innerHTML = monthData.slice().reverse().map(e => `
+    document.getElementById('totalBalance').innerText = `฿${bal.toLocaleString()}`;
+    document.getElementById('txtIncome').innerText = `รับ: ฿${inc.toLocaleString()}`;
+    document.getElementById('txtExpense').innerText = `จ่าย: ฿${exp.toLocaleString()}`;
+    
+    const prog = inc > 0 ? (exp / inc) * 100 : 0;
+    document.getElementById('budgetBar').style.width = Math.min(prog, 100) + '%';
+    document.getElementById('budgetBar').style.background = prog > 80 ? '#ef4444' : '#fff';
+
+    document.getElementById('txList').innerHTML = mData.slice(-5).reverse().map(e => `
         <div class="tx-item">
-            <div>${e.desc} <br><small>${e.date}</small></div>
-            <div style="text-align:right">
-                <span style="color:var(--${e.type})">${e.type==='income'?'+':'-'}฿${e.amount}</span><br>
-                <button class="btn-danger" onclick="deleteEntry(${e.id})">ลบ</button>
+            <div class="cat-icon">${icons[e.category] || '✨'}</div>
+            <div style="flex:1"><strong>${e.desc}</strong><br><small style="opacity:0.6">${e.date}</small></div>
+            <div style="color:var(--${e.type === 'income' ? 'income' : 'expense'})">
+                ${e.type === 'income' ? '+' : '-'}฿${e.amount}
             </div>
         </div>
     `).join('');
 
-    // กราฟรายวัน
-    updateChart(monthData);
+    updateChart(mData);
 }
 
 function updateChart(data) {
-    const days = {};
-    data.filter(e => e.type === 'expense').forEach(e => {
-        const day = e.date.split('-')[2];
-        days[day] = (days[day] || 0) + e.amount;
-    });
-
-    if(dailyChart) dailyChart.destroy();
-    const ctx = document.getElementById('dailyChart').getContext('2d');
-    dailyChart = new Chart(ctx, {
-        type: 'line',
+    const cats = {};
+    data.filter(e => e.type === 'expense').forEach(e => cats[e.category] = (cats[e.category] || 0) + e.amount);
+    if(categoryChart) categoryChart.destroy();
+    categoryChart = new Chart(document.getElementById('categoryChart'), {
+        type: 'doughnut',
         data: {
-            labels: Object.keys(days).sort(),
-            datasets: [{
-                label: 'รายจ่ายรายวัน',
-                data: Object.values(days),
-                borderColor: '#6366f1',
-                tension: 0.3,
-                fill: true,
-                backgroundColor: 'rgba(99, 102, 241, 0.1)'
-            }]
+            labels: Object.keys(cats),
+            datasets: [{ data: Object.values(cats), backgroundColor: ['#6366f1', '#f472b6', '#fbbf24', '#34d399', '#60a5fa'] }]
         },
-        options: {
-            scales: { y: { beginAtZero: true } }
-        }
+        options: { cutout: '70%', plugins: { legend: { position: 'right' } } }
     });
 }
 
-// เริ่มต้นแอป
-render();
-addMessage("สวัสดี! เหมียวพร้อมช่วยจดแล้วค่ะ", "system");
-</script>
+function exportData() {
+    const blob = new Blob([JSON.stringify(entries)], {type: 'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'meow_data.json'; a.click();
+}
 
+render();
+addMessage("สวัสดีเมี๊ยว! วันนี้ใช้จ่ายอะไรไปบ้าง บอกเหมียวได้เลยนะ", "system");
+</script>
 </body>
 </html>
