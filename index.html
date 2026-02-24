@@ -3,176 +3,105 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Don Note PRO</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<title>Summary</title>
 
 <style>
-body{margin:0;font-family:'Kanit',sans-serif;background:#fafafa;color:#333}
-.container{max-width:480px;margin:auto;padding:16px;padding-bottom:120px}
+body{margin:0;font-family:'Kanit',sans-serif;background:#f7f7fb;color:#333}
+.container{max-width:480px;margin:auto;padding:16px}
+
 .card{background:#fff;border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
-.header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-.bear{font-size:40px}
-.app{font-weight:700;font-size:20px}
 
 .summary{display:flex;gap:10px}
-.sum{flex:1;padding:12px;border-radius:16px}
-.exp{background:#fff0f4;color:#ff5c8a}
-.inc{background:#eefaf6;color:#2fbfa5}
+.sum{flex:1;padding:14px;border-radius:16px;text-align:center;font-weight:700}
+.exp{background:#ffeef3;color:#ff5c8a}
+.inc{background:#e9fbf7;color:#2fbfa5}
 
-.chat{height:160px;overflow:auto;border-bottom:1px solid #eee;margin-bottom:8px}
-.msg{padding:8px 12px;border-radius:14px;margin:6px 0;max-width:80%}
-.user{background:#111;color:#fff;margin-left:auto}
-.bot{background:#f1f1f5}
+.cat{margin:12px 0}
+.bar{height:10px;background:#f2d2db;border-radius:8px;margin-top:6px;overflow:hidden}
+.fill{height:100%;background:#ff8fb3;border-radius:8px}
 
-input,select,button{width:100%;padding:12px;border-radius:12px;border:1px solid #eee;margin-top:6px}
-button{background:#111;color:#fff;border:none}
-
-.item{display:flex;justify-content:space-between;margin:6px 0}
-.item button{background:none;border:none}
-
-.mascot{position:fixed;bottom:90px;left:-80px;font-size:48px;transition:1s linear}
-.mascot.run{left:110%}
-.speech{position:fixed;bottom:150px;left:20px;background:#fff;padding:10px 14px;border-radius:14px;border:1px solid #eee;opacity:0;transition:.4s}
-.speech.show{opacity:1}
+.switch{
+display:flex;
+justify-content:center;
+margin:10px 0;
+}
+button{
+padding:8px 14px;
+border-radius:20px;
+border:none;
+background:#eee;
+}
+.active{background:#111;color:#fff}
 </style>
 </head>
 
 <body>
 
-<div id="mascot" class="mascot">🐻🏺</div>
-<div id="speech" class="speech">ดงดงอยู่ข้างเธอ</div>
-
 <div class="container">
-
-<div class="header">
-<div class="bear">🐻</div>
-<div>
-<div class="app">Don Note</div>
-<div style="font-size:12px;color:#888">DongDong Money Tracker</div>
-</div>
-</div>
 
 <div class="card">
 <h3>สรุป</h3>
+
 <div class="summary">
-<div class="sum exp">รายจ่าย<div id="exp">฿0</div></div>
-<div class="sum inc">รายรับ<div id="inc">฿0</div></div>
+<div class="sum exp">รายจ่าย<br><span id="exp">฿0</span></div>
+<div class="sum inc">รายรับ<br><span id="inc">฿0</span></div>
 </div>
+
+<div class="switch">
+<button id="btnExp" class="active" onclick="show('expense')">รายจ่าย</button>
+<button id="btnInc" onclick="show('income')">รายรับ</button>
+</div>
+
 </div>
 
 <div class="card">
-<h3>💬 แชตบันทึก</h3>
-<div id="chat" class="chat"></div>
-<input id="chatInput" placeholder="เช่น กาแฟ 60">
-<button onclick="sendChat()">ส่ง</button>
-</div>
-
-<div class="card">
-<h3>📝 กรอกเอง</h3>
-<input id="desc" placeholder="รายการ">
-<input id="amount" type="number" placeholder="จำนวนเงิน">
-<select id="type">
-<option value="expense">รายจ่าย</option>
-<option value="income">รายรับ</option>
-</select>
-<button onclick="addManual()">บันทึก</button>
-</div>
-
-<div class="card">
-<h3>📋 รายการ</h3>
-<div id="list"></div>
-</div>
-
-<div class="card">
-<h3>📊 รายรับ/รายจ่าย</h3>
-<canvas id="pie"></canvas>
-</div>
-
-<div class="card">
-<h3>🎯 เป้าออม</h3>
-<input id="goalInput" type="number" placeholder="ตั้งเป้า">
-<button onclick="setGoal()">ตั้ง</button>
-<div id="goalText"></div>
+<h3 id="title">สรุปรายจ่าย</h3>
+<div id="cats"></div>
 </div>
 
 </div>
 
 <script>
 let data=JSON.parse(localStorage.getItem("donnote")||"[]");
-let goal=localStorage.getItem("goal")||0;
 
-const mascot=document.getElementById('mascot');
-const speech=document.getElementById('speech');
-
-function run(){mascot.classList.remove('run');void mascot.offsetWidth;mascot.classList.add('run');}
-function talk(){
-speech.textContent=["ดงดงเชียร์อยู่ 🐻","เก่งมากเลย","ออมต่อไป!"][Math.floor(Math.random()*3)];
-speech.classList.add('show');
-setTimeout(()=>speech.classList.remove('show'),2000);
+function sum(type){
+return data.filter(d=>d.type==type).reduce((s,d)=>s+d.amount,0);
 }
 
-function save(){localStorage.setItem("donnote",JSON.stringify(data));update();render();}
+exp.innerText="฿"+sum("expense");
+inc.innerText="฿"+sum("income");
 
-function add(desc,amount,type){
-data.push({desc,amount:+amount,type});
-save();run();talk();
-}
+function show(type){
 
-function addManual(){add(desc.value,amount.value,type.value);desc.value="";amount.value="";}
+btnExp.classList.toggle("active",type=="expense");
+btnInc.classList.toggle("active",type=="income");
 
-function sendChat(){
-const txt=chatInput.value;if(!txt)return;
-addMsg(txt,"user");
+title.innerText= type=="expense"?"สรุปรายจ่าย":"สรุปรายรับ";
 
-let amount=(txt.match(/\d+/)||[0])[0];
-let incomeWords=["เงินเดือน","โบนัส","ขาย","รับ","โอนเข้า"];
-let type=incomeWords.some(w=>txt.includes(w))?"income":"expense";
+let filtered=data.filter(d=>d.type==type);
 
-add(txt,amount,type);
-addMsg("บันทึกแล้ว 🐻","bot");
-chatInput.value="";
-}
+let byCat={};
 
-function addMsg(t,c){chat.innerHTML+=`<div class="msg ${c}">${t}</div>`;chat.scrollTop=9999;}
-
-function render(){
-list.innerHTML=data.map((i,index)=>`
-<div class="item">
-<span>${i.desc}</span>
-<span>
-<span style="color:${i.type==='income'?'#2fbfa5':'#ff5c8a'}">
-${i.type==='income'?'+':'-'}฿${i.amount}
-</span>
-<button onclick="removeItem(${index})">❌</button>
-</span>
-</div>`).join('');
-}
-
-function removeItem(i){data.splice(i,1);save();}
-
-function setGoal(){goal=goalInput.value;localStorage.setItem("goal",goal);goalText.innerText="เป้า: ฿"+goal;}
-
-function update(){
-let inc=0,exp=0;
-data.forEach(d=>d.type=="income"?inc+=d.amount:exp+=d.amount);
-incEl.innerText="฿"+inc;
-expEl.innerText="฿"+exp;
-pie.data.datasets[0].data=[inc,exp];
-pie.update();
-}
-
-goalText.innerText=goal?("เป้า: ฿"+goal):"ยังไม่ได้ตั้ง";
-
-const incEl=document.getElementById("inc");
-const expEl=document.getElementById("exp");
-
-const pie=new Chart(document.getElementById('pie'),{
-type:'doughnut',
-data:{labels:["รายรับ","รายจ่าย"],datasets:[{data:[0,0],backgroundColor:["#7fd6c2","#ff8fb3"]}]}
+filtered.forEach(d=>{
+byCat[d.category]=(byCat[d.category]||0)+d.amount;
 });
 
-update();
-render();
+let total=sum(type);
+
+cats.innerHTML=Object.entries(byCat).map(([cat,val])=>`
+<div class="cat">
+<div style="display:flex;justify-content:space-between">
+<span>${cat}</span>
+<span>฿${val}</span>
+</div>
+<div class="bar">
+<div class="fill" style="width:${total?val/total*100:0}%"></div>
+</div>
+</div>
+`).join('');
+}
+
+show("expense");
 </script>
 
 </body>
