@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#ffffff">
-<title>ดงดง Universe</title>
+<title>돈노트 ⭐</title>
 <style>
 :root {
   --pink:       #FF4785;
@@ -397,7 +397,7 @@ body{padding-bottom:var(--nav-h);}
 <!-- HEADER -->
 <div class="header">
   <div class="header-bear" id="headerBear">🐻</div>
-  <div class="header-title">ดงดง Universe</div>
+  <div class="header-title">돈노트 ⭐</div>
   <div class="header-right" id="headerRight"></div>
 </div>
 
@@ -426,7 +426,7 @@ body{padding-bottom:var(--nav-h);}
 
   <div class="sum-card">
     <div class="sum-card-header">
-      <div class="dong-badge">ดงดง<br>ฟรี</div>
+      <div class="dong-badge">돈노트<br>ฟรี</div>
       <div class="sum-card-title exp-title" id="sumCardTitle">สรุปรายจ่าย</div>
       <div style="width:44px;"></div>
     </div>
@@ -436,7 +436,7 @@ body{padding-bottom:var(--nav-h);}
     </button>
     <button class="invite-banner">
       ชวนเพื่อนมาเป็น
-      <span class="invite-badge">ดงดงโปร</span>
+      <span class="invite-badge">돈노트 Pro</span>
       รับฟรี 1 เดือน
     </button>
   </div>
@@ -531,8 +531,8 @@ body{padding-bottom:var(--nav-h);}
 <div class="panel" id="panel-settings">
   <div style="text-align:center;padding:20px 0 16px;">
     <div id="settingsBear" style="font-size:3.5rem;cursor:pointer;" onclick="runDong()">🐻</div>
-    <div style="font-size:1rem;font-weight:700;margin-top:6px;">ดงดง Universe</div>
-    <div style="font-size:.75rem;color:var(--sub);margin-top:2px;">v2.0 · ติดตามการเงินแบบน่ารัก</div>
+    <div style="font-size:1rem;font-weight:700;margin-top:6px;">돈노트 ⭐</div>
+    <div style="font-size:.75rem;color:var(--sub);margin-top:2px;">v2.0 · โน้ตเงินสไตล์เกาหลี</div>
   </div>
   <div class="settings-card">
     <div class="sc-title">AI</div>
@@ -803,9 +803,9 @@ function addEntry(){
 // ══════ PARSE CHAT ══════
 function parseChat(){
   const text=document.getElementById('chatIn').value.trim();
-  if(!text){showToast('พิมพ์รายการก่อนนะ 🐻');return;}
+  if(!text){showToast('พิมพ์รายการก่อนนะ ⭐');return;}
   const amt=parseFloat((text.match(/[\d,]+(\.\d+)?/)||[])[0]?.replace(',',''));
-  if(!amt){showToast('ดงดงหาจำนวนเงินไม่เจอ 🐻');return;}
+  if(!amt){showToast('돈노트 หาจำนวนเงินไม่เจอ ⭐');return;}
   const t=text.toLowerCase();
   let catId='other',type='expense';
   if(/ชา|กาแฟ|ชานม|ไข่มุก|ชาเย็น/.test(t)) catId='drink';
@@ -936,7 +936,7 @@ function initDong(){
   document.getElementById('headerBear').textContent=emoji;
   document.getElementById('settingsBear').textContent=emoji;
   document.getElementById('dong-run').onclick=()=>{
-    const msgs=['ดงดง: อย่าลืมบันทึกรายการด้วยนะ! 🐻','ดงดง: วันนี้ประหยัดเก่งมาก 💰','ดงดง: รักนายที่สุดเลย 🐻💕'];
+    const msgs=['돈노트: อย่าลืมบันทึกรายการด้วยนะ! ⭐','돈노트: วันนี้ประหยัดเก่งมาก 💰','돈노트: รักนายที่สุดเลย ⭐💕'];
     showToast(msgs[Math.floor(Math.random()*msgs.length)]);
   };
 }
