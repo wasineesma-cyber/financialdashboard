@@ -3,63 +3,133 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta charset="UTF-8" />
-<title>ดงดง Universe</title>
+<title>ดงดง Universe - Scan Edition</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body{
-  margin:0;
-  font-family:-apple-system;
-  background:#f6f7fb;
+:root {
+  --primary: #FFB3BA; /* สีชมพูพาสเทล */
+  --secondary: #BAE1FF; /* สีฟ้าพาสเทล */
+  --accent: #FFFFBA; /* สีเหลืองพาสเทล */
+  --bg: #f6f7fb;
+  --text: #5a5a5a;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Kanit", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding-bottom: 80px;
 }
 
 /* HEADER */
-.header{
-  background:white;
-  padding:16px;
-  font-weight:700;
-  font-size:20px;
-  display:flex;
-  gap:10px;
-  align-items:center;
+.header {
+  background: white;
+  padding: 16px;
+  font-weight: 700;
+  font-size: 20px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  border-bottom: 2px solid var(--primary);
 }
 
-/* CHAT */
-.chatbox{
-  background:white;
-  margin:12px;
-  padding:14px;
-  border-radius:16px;
+/* SUMMARY CARD - โทนสว่างน่ารัก */
+.summary-card {
+  background: white;
+  margin: 12px;
+  padding: 20px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(255, 179, 186, 0.3);
 }
-input{
-  width:100%;
-  padding:12px;
-  border-radius:12px;
-  border:1px solid #ddd;
+.total-label { font-size: 0.8rem; color: #888; }
+.total-bal { font-size: 2.2rem; font-weight: 800; color: #ff85a2; margin: 5px 0; }
+.sub-summary { display: flex; justify-content: space-around; margin-top: 15px; font-size: 0.9rem; }
+
+/* CHAT & BUTTONS */
+.card {
+  background: white;
+  margin: 12px;
+  padding: 16px;
+  border-radius: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
+input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  box-sizing: border-box;
+  margin-top: 10px;
+  outline: none;
+  background: #fafafa;
+}
+
+.scan-btn {
+  background: var(--secondary);
+  border: none;
+  padding: 12px;
+  border-radius: 12px;
+  width: 100%;
+  margin-top: 10px;
+  font-weight: bold;
+  color: #4a90e2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
 }
 
 /* LIST */
-.card{
-  background:white;
-  margin:12px;
-  padding:14px;
-  border-radius:16px;
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f9f9f9;
 }
 
 /* DONGDONG */
-#dong{
-  position:fixed;
-  bottom:90px;
-  left:-80px;
-  font-size:56px;
-  animation:run 12s linear infinite;
-  cursor:pointer;
+#dong {
+  position: fixed;
+  bottom: 90px;
+  left: -80px;
+  font-size: 56px;
+  animation: run 12s linear infinite;
+  cursor: pointer;
+  z-index: 100;
 }
-@keyframes run{
-  from{left:-80px}
-  to{left:110%}
+@keyframes run { from{left:-80px} to{left:110%} }
+
+/* SCAN ANIMATION OVERLAY */
+.scanner-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  color: white;
 }
+.scan-line {
+  width: 80%;
+  height: 2px;
+  background: var(--primary);
+  box-shadow: 0 0 15px var(--primary);
+  position: absolute;
+  animation: scanning 2s ease-in-out infinite;
+}
+@keyframes scanning {
+  0% { top: 30%; }
+  50% { top: 70%; }
+  100% { top: 30%; }
+}
+.hidden { display: none; }
 </style>
 </head>
 
@@ -67,96 +137,118 @@ input{
 
 <div class="header">🐻 ดงดง Universe</div>
 
-<!-- CHAT -->
-<div class="chatbox">
-  💬 พิมพ์รายการ เช่น "ชาไข่มุก 65"
-  <input id="chat" placeholder="พิมพ์แล้วกด Enter"/>
+<div class="summary-card">
+  <div class="total-label">ยอดคงเหลือของวันนี้</div>
+  <div class="total-bal" id="total-bal">฿0</div>
+  <div class="sub-summary">
+    <div style="color: #4caf50;">รายรับ<br><b id="inc">0</b></div>
+    <div style="color: #ff5252;">รายจ่าย<br><b id="exp">0</b></div>
+  </div>
 </div>
 
-<!-- SUMMARY -->
 <div class="card">
-  รายรับ: <span id="inc">0</span> บาท<br>
-  รายจ่าย: <span id="exp">0</span> บาท
+  <b>💬 คุยกับดงดง</b>
+  <input id="chat" placeholder="พิมพ์รายการ เช่น 'ข้าวเช้า 50'"/>
+  
+  <button class="scan-btn" onclick="triggerScan()">
+    📷 แสกนบิล / ใบเสร็จ
+  </button>
+  <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="startScanningAnimation()">
 </div>
 
-<!-- LIST -->
 <div class="card">
-  <b>รายการ</b>
-  <div id="list"></div>
+  <b>📜 รายการล่าสุด</b>
+  <div id="list" style="margin-top:10px;"></div>
 </div>
 
-<!-- DONGDONG -->
+<div id="scanOverlay" class="scanner-overlay hidden">
+  <div style="border: 2px solid white; width: 250px; height: 350px; position: relative; border-radius: 15px;">
+    <div class="scan-line"></div>
+  </div>
+  <p style="margin-top: 20px;">กำลังอ่านยอดเงินจากบิล... 🐻🔍</p>
+</div>
+
 <div id="dong">🐻</div>
 
 <script>
-const data=[]
-const chat=document.getElementById("chat")
+let data = JSON.parse(localStorage.getItem('dongdong_v9_data') || '[]');
+const chat = document.getElementById("chat");
 
-/* ===== AUTO CATEGORY ===== */
-function detectCategory(text){
-  text=text.toLowerCase()
-
-  if(text.includes("ชา")||text.includes("กาแฟ")||text.includes("ข้าว"))
-    return ["อาหาร","expense"]
-
-  if(text.includes("grab")||text.includes("taxi")||text.includes("รถ"))
-    return ["เดินทาง","expense"]
-
-  if(text.includes("เงินเดือน")||text.includes("ขาย"))
-    return ["รายรับ","income"]
-
-  return ["อื่นๆ","expense"]
+function triggerScan() {
+  document.getElementById('fileInput').click();
 }
 
-/* ===== CHAT INPUT ===== */
-chat.addEventListener("keypress",e=>{
-  if(e.key==="Enter"){
-    const msg=chat.value
-    const amount=Number(msg.match(/\d+/))
-    if(!amount) return
+function startScanningAnimation() {
+  const overlay = document.getElementById('scanOverlay');
+  overlay.classList.remove('hidden');
 
-    const [cat,type]=detectCategory(msg)
+  // จำลองการใช้ AI อ่านยอดเงิน (ในแอปจริงต้องส่งรูปไป API)
+  setTimeout(() => {
+    overlay.classList.add('hidden');
+    // สุ่มยอดเงินเพื่อเป็นตัวอย่าง (ในแอปจริงจะดึงจากรูป)
+    const mockAmount = Math.floor(Math.random() * 450) + 50;
+    const confirmAdd = confirm(`ดงดงอ่านยอดเงินได้ ฿${mockAmount} \nต้องการบันทึกเป็นรายจ่ายใช่ไหมครับ?`);
+    
+    if(confirmAdd) {
+      addEntry("แสกนบิล", mockAmount, "expense", "อื่นๆ ✨");
+    }
+  }, 3000);
+}
 
-    data.push({msg,amount,type,cat})
-    chat.value=""
+chat.addEventListener("keypress", e => {
+  if(e.key === "Enter") {
+    const msg = chat.value;
+    const amount = Number(msg.match(/\d+/));
+    if(!amount) return;
 
-    render()
+    const [cat, type] = detectCategory(msg);
+    addEntry(msg, amount, type, cat);
+    chat.value = "";
   }
-})
+});
 
-function render(){
-  let inc=0,exp=0
-  list.innerHTML=""
-
-  data.forEach(d=>{
-    const div=document.createElement("div")
-    div.textContent=`${d.cat} — ${d.msg} (${d.amount})`
-    list.appendChild(div)
-
-    if(d.type==="income") inc+=d.amount
-    else exp+=d.amount
-  })
-
-  incEl.textContent=inc
-  expEl.textContent=exp
+function detectCategory(text) {
+  text = text.toLowerCase();
+  if(text.includes("ชา")||text.includes("ข้าว")||text.includes("กิน")) return ["อาหาร 🍱","expense"];
+  if(text.includes("รถ")||text.includes("bts")) return ["เดินทาง ⛽","expense"];
+  if(text.includes("เงินเดือน")||text.includes("ขาย")) return ["รายรับ 💰","income"];
+  return ["อื่นๆ ✨","expense"];
 }
 
-const incEl=document.getElementById("inc")
-const expEl=document.getElementById("exp")
-const list=document.getElementById("list")
-
-/* ===== DONGDONG TIME OUTFIT ===== */
-const dong=document.getElementById("dong")
-const hour=new Date().getHours()
-
-if(hour<12) dong.textContent="🐻‍❄️"
-else if(hour<18) dong.textContent="🐻"
-else dong.textContent="🐻‍🌙"
-
-/* ===== DONGDONG TALK ===== */
-dong.onclick=()=>{
-  alert("ดงดง: วันนี้เก็บเงินเก่งมั้ย 🐻💰")
+function addEntry(msg, amount, type, cat) {
+  data.push({ id: Date.now(), msg, amount, type, cat, date: new Date().toLocaleDateString() });
+  localStorage.setItem('dongdong_v9_data', JSON.stringify(data));
+  render();
 }
+
+function render() {
+  let inc = 0, exp = 0;
+  const listEl = document.getElementById("list");
+  listEl.innerHTML = "";
+
+  data.slice().reverse().forEach(d => {
+    const div = document.createElement("div");
+    div.className = "item-row";
+    div.innerHTML = `
+      <div><strong>${d.msg}</strong><br><small style="color:#aaa">${d.cat}</small></div>
+      <div style="color:${d.type==='income'?'#4caf50':'#ff5252'}">฿${d.amount.toLocaleString()}</div>
+    `;
+    listEl.appendChild(div);
+    if(d.type === "income") inc += d.amount; else exp += d.amount;
+  });
+
+  document.getElementById("inc").textContent = inc.toLocaleString();
+  document.getElementById("exp").textContent = exp.toLocaleString();
+  document.getElementById("total-bal").textContent = `฿${(inc - exp).toLocaleString()}`;
+}
+
+const dong = document.getElementById("dong");
+const hour = new Date().getHours();
+if(hour < 12) dong.textContent = "🐻‍❄️";
+else if(hour < 18) dong.textContent = "🐻";
+else dong.textContent = "🐻‍🌙";
+
+render();
 </script>
 
 </body>
