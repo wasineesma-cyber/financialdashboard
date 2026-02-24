@@ -3,11 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Summary</title>
+<title>Don Note</title>
 
 <style>
 body{margin:0;font-family:'Kanit',sans-serif;background:#f7f7fb;color:#333}
-.container{max-width:480px;margin:auto;padding:16px}
+.container{max-width:480px;margin:auto;padding:16px;padding-bottom:90px}
+
+.page{display:none}
+.page.active{display:block}
 
 .card{background:#fff;border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
 
@@ -16,92 +19,117 @@ body{margin:0;font-family:'Kanit',sans-serif;background:#f7f7fb;color:#333}
 .exp{background:#ffeef3;color:#ff5c8a}
 .inc{background:#e9fbf7;color:#2fbfa5}
 
-.cat{margin:12px 0}
-.bar{height:10px;background:#f2d2db;border-radius:8px;margin-top:6px;overflow:hidden}
-.fill{height:100%;background:#ff8fb3;border-radius:8px}
-
-.switch{
+/* Bottom Nav */
+.nav{
+position:fixed;bottom:0;left:0;right:0;
+background:#fff;
 display:flex;
-justify-content:center;
-margin:10px 0;
+justify-content:space-around;
+padding:8px 0;
+box-shadow:0 -2px 10px rgba(0,0,0,.05)
 }
-button{
-padding:8px 14px;
-border-radius:20px;
-border:none;
-background:#eee;
+.nav div{font-size:12px;text-align:center;color:#888}
+.nav .active{color:#ff5c8a}
+
+/* Mascot */
+.mascot{
+position:fixed;
+bottom:70px;
+right:16px;
+font-size:48px;
+animation:bounce 2s infinite;
 }
-.active{background:#111;color:#fff}
+@keyframes bounce{
+0%,100%{transform:translateY(0)}
+50%{transform:translateY(-8px)}
+}
 </style>
 </head>
 
 <body>
 
+<div class="mascot">🐻🏺</div>
+
 <div class="container">
 
+<!-- 🏠 SUMMARY -->
+<div id="home" class="page active">
 <div class="card">
 <h3>สรุป</h3>
-
 <div class="summary">
 <div class="sum exp">รายจ่าย<br><span id="exp">฿0</span></div>
 <div class="sum inc">รายรับ<br><span id="inc">฿0</span></div>
 </div>
-
-<div class="switch">
-<button id="btnExp" class="active" onclick="show('expense')">รายจ่าย</button>
-<button id="btnInc" onclick="show('income')">รายรับ</button>
+</div>
 </div>
 
-</div>
-
+<!-- 📊 ANALYTICS -->
+<div id="analytics" class="page">
 <div class="card">
-<h3 id="title">สรุปรายจ่าย</h3>
-<div id="cats"></div>
+<h3>วิเคราะห์</h3>
+<p>กราฟและสถิติจะอยู่ตรงนี้</p>
+</div>
 </div>
 
+<!-- ⏰ GOAL -->
+<div id="goal" class="page">
+<div class="card">
+<h3>เป้าการออม</h3>
+<input id="goalInput" type="number" placeholder="ตั้งเป้า">
+<button onclick="setGoal()">ตั้งเป้า</button>
+<div id="goalText"></div>
+</div>
+</div>
+
+<!-- 📋 LIST -->
+<div id="listPage" class="page">
+<div class="card">
+<h3>รายการ</h3>
+<div id="list"></div>
+</div>
+</div>
+
+<!-- ⚙️ SETTINGS -->
+<div id="settings" class="page">
+<div class="card">
+<h3>ตั้งค่า</h3>
+<p>ธีม / โปรไฟล์ / อื่น ๆ</p>
+</div>
+</div>
+
+</div>
+
+<!-- 🌸 Bottom Nav -->
+<div class="nav">
+<div class="active" onclick="show('home',this)">🏠<br>สรุป</div>
+<div onclick="show('analytics',this)">📊<br>วิเคราะห์</div>
+<div onclick="show('goal',this)">⏰<br>เป้า</div>
+<div onclick="show('listPage',this)">📋<br>รายการ</div>
+<div onclick="show('settings',this)">⚙️<br>ตั้งค่า</div>
 </div>
 
 <script>
 let data=JSON.parse(localStorage.getItem("donnote")||"[]");
 
-function sum(type){
-return data.filter(d=>d.type==type).reduce((s,d)=>s+d.amount,0);
+function show(page,el){
+document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+document.getElementById(page).classList.add('active');
+
+document.querySelectorAll('.nav div').forEach(n=>n.classList.remove('active'));
+el.classList.add('active');
 }
 
-exp.innerText="฿"+sum("expense");
-inc.innerText="฿"+sum("income");
-
-function show(type){
-
-btnExp.classList.toggle("active",type=="expense");
-btnInc.classList.toggle("active",type=="income");
-
-title.innerText= type=="expense"?"สรุปรายจ่าย":"สรุปรายรับ";
-
-let filtered=data.filter(d=>d.type==type);
-
-let byCat={};
-
-filtered.forEach(d=>{
-byCat[d.category]=(byCat[d.category]||0)+d.amount;
-});
-
-let total=sum(type);
-
-cats.innerHTML=Object.entries(byCat).map(([cat,val])=>`
-<div class="cat">
-<div style="display:flex;justify-content:space-between">
-<span>${cat}</span>
-<span>฿${val}</span>
-</div>
-<div class="bar">
-<div class="fill" style="width:${total?val/total*100:0}%"></div>
-</div>
-</div>
-`).join('');
+function update(){
+let inc=0,exp=0;
+data.forEach(d=>d.type=="income"?inc+=d.amount:exp+=d.amount);
+expEl.innerText="฿"+exp;
+incEl.innerText="฿"+inc;
 }
 
-show("expense");
+const expEl=document.getElementById("exp");
+const incEl=document.getElementById("inc");
+
+update();
 </script>
 
 </body>
