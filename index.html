@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>น้องเสือช่วยจด v6.8</title>
+<title>น้องเสือช่วยจด v6.9 - Light & Fast</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <style>
 :root {
     --bg: #fffcf9; --card: rgba(255, 255, 255, 0.98); --text: #2d3436;
@@ -22,7 +21,7 @@ body { font-family: 'Inter', 'Kanit', sans-serif; background: var(--bg); color: 
 .tab.active { background: var(--accent); color: white; border-color: var(--accent); }
 .btn { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 14px; cursor: pointer; font-weight: bold; transition: 0.2s; }
 input, select, textarea { width: 100%; padding: 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 12px; box-sizing: border-box; outline: none; }
-.chat-box { height: 180px; overflow-y: auto; padding: 10px; border-bottom: 1px solid var(--border); margin-bottom: 10px; display: flex; flex-direction: column; gap: 10px; }
+.chat-box { height: 200px; overflow-y: auto; padding: 10px; border-bottom: 1px solid var(--border); margin-bottom: 10px; display: flex; flex-direction: column; gap: 10px; }
 .msg { padding: 10px 16px; border-radius: 18px; font-size: 0.9rem; max-width: 85%; }
 .user { background: var(--accent); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
 .system { background: var(--border); align-self: flex-start; border-bottom-left-radius: 2px; }
@@ -56,11 +55,9 @@ input, select, textarea { width: 100%; padding: 14px; border-radius: 14px; borde
         <div id="panelChat">
             <div id="chatBox" class="chat-box"></div>
             <div style="display:flex; gap:8px;">
-                <input type="text" id="chatInput" placeholder="พิมพ์รายการ..." onkeypress="if(event.key==='Enter') processChat()">
-                <button class="btn" onclick="processChat()">ส่ง</button>
+                <input type="text" id="chatInput" placeholder="พิมพ์ เช่น ซื้อราดหน้า 60" onkeypress="if(event.key==='Enter') processChat()">
+                <button class="btn" style="width:80px" onclick="processChat()">ส่ง</button>
             </div>
-            <button class="btn" style="width:100%; margin-top:10px; background:#34495e;" onclick="document.getElementById('ocrInput').click()">📷 สแกนรูปภาพ</button>
-            <input type="file" id="ocrInput" class="hidden" accept="image/*" onchange="handleOcr(event)">
         </div>
 
         <div id="panelManual" class="hidden">
@@ -73,7 +70,7 @@ input, select, textarea { width: 100%; padding: 14px; border-radius: 14px; borde
             <select id="mCat">
                 <option value="อาหาร">🍱 อาหาร/เครื่องดื่ม</option>
                 <option value="เดลิเวอรี">🛵 เดลิเวอรี</option>
-                <option value="เดินทาง">⛽ เดินทาง</option>
+                <option value="เดินทาง">⛽ เดินทาง/น้ำมัน</option>
                 <option value="ช้อปปิ้ง">🛍️ ช้อปปิ้ง</option>
                 <option value="รายได้">💰 รายได้</option>
                 <option value="อื่นๆ">✨ อื่นๆ</option>
@@ -107,10 +104,10 @@ input, select, textarea { width: 100%; padding: 14px; border-radius: 14px; borde
 </div>
 
 <div id="settingModal" class="modal hidden">
-    <div class="card" style="width:90%; max-width:400px; max-height:85vh; overflow-y:auto; margin-top:20px;">
+    <div class="card" style="width:90%; max-width:400px; max-height:85vh; overflow-y:auto;">
         <span class="close-x" onclick="closeSettings()">&times;</span>
         <h3 style="margin-top:0;">⚙️ ตั้งค่าคำเดาหมวดหมู่</h3>
-        <p style="font-size:0.8rem; color:gray;">คั่นด้วยจุลภาค ( , ) เช่น: ราดหน้า,กะเพรา</p>
+        <p style="font-size:0.8rem; color:gray;">ใส่คำที่ใช้บ่อยคั่นด้วยคอมม่า ( , )</p>
         
         <label>🍱 อาหาร:</label>
         <textarea id="kwFood" rows="2"></textarea>
@@ -132,7 +129,7 @@ input, select, textarea { width: 100%; padding: 14px; border-radius: 14px; borde
 </div>
 
 <script>
-let tigerData = JSON.parse(localStorage.getItem('tiger_v6_8_entries') || '[]');
+let tigerData = JSON.parse(localStorage.getItem('tiger_v6_9_entries') || '[]');
 let keywords = JSON.parse(localStorage.getItem('tiger_keywords') || JSON.stringify({
     food: 'อาหาร,ข้าว,ราดหน้า,ชาไข่มุก,กาแฟ,น้ำ,ก๋วยเตี๋ยว,กิน,ขนม',
     deli: 'grab,lineman,foodpanda,เดลิ',
@@ -157,9 +154,7 @@ function openSettings() {
     document.getElementById('settingModal').classList.remove('hidden');
 }
 
-function closeSettings() {
-    document.getElementById('settingModal').classList.add('hidden');
-}
+function closeSettings() { document.getElementById('settingModal').classList.add('hidden'); }
 
 function saveSettings() {
     keywords.food = document.getElementById('kwFood').value;
@@ -168,7 +163,7 @@ function saveSettings() {
     keywords.income = document.getElementById('kwInc').value;
     localStorage.setItem('tiger_keywords', JSON.stringify(keywords));
     closeSettings();
-    alert("บันทึกคำเดาเรียบร้อยแล้วครับ!");
+    alert("บันทึกการตั้งค่าคำเดาแล้วครับ!");
 }
 
 function processChat() {
@@ -188,25 +183,13 @@ function processChat() {
 
     addEntry(text, parseFloat(amount), type, cat, "");
     addMsg(text, 'user');
-    addMsg(`บันทึก ${cat} ฿${amount} เรียบร้อยแล้วครับ`, 'system');
+    addMsg(`บันทึก ${cat} ฿${amount} เรียบร้อยครับ`, 'system');
     input.value = "";
-}
-
-async function handleOcr(e) {
-    const f = e.target.files[0]; if(!f) return;
-    addMsg("กำลังสแกนรูปภาพนะครับ...", "system");
-    try {
-        const res = await Tesseract.recognize(f, 'tha+eng');
-        const prices = res.data.text.match(/\d+(\.\d{2})?/g);
-        const bestPrice = prices ? Math.max(...prices.map(Number)) : "";
-        document.getElementById('chatInput').value = `จากรูป ${bestPrice}`;
-        addMsg("สแกนเสร็จแล้วครับ ตรวจสอบราคาในช่องแชตได้เลย", "system");
-    } catch(err) { alert("อ่านรูปภาพไม่ได้ครับ"); }
 }
 
 function addEntry(desc, amount, type, category, note) {
     tigerData.push({ id: Date.now(), desc, amount, type, category, note, date: new Date().toISOString().slice(0, 10) });
-    localStorage.setItem('tiger_v6_8_entries', JSON.stringify(tigerData));
+    localStorage.setItem('tiger_v6_9_entries', JSON.stringify(tigerData));
     render();
 }
 
@@ -239,7 +222,7 @@ function render() {
 function deleteItem(id) {
     if(confirm('ลบรายการนี้ใช่ไหมครับ?')) {
         tigerData = tigerData.filter(e => e.id !== id);
-        localStorage.setItem('tiger_v6_8_entries', JSON.stringify(tigerData));
+        localStorage.setItem('tiger_v6_9_entries', JSON.stringify(tigerData));
         render();
     }
 }
@@ -281,14 +264,14 @@ function importData(ev) {
     const r = new FileReader();
     r.onload = (e) => {
         tigerData = JSON.parse(e.target.result);
-        localStorage.setItem('tiger_v6_8_entries', JSON.stringify(tigerData));
-        render(); alert("ดึงข้อมูลสำเร็จแล้วครับ!");
+        localStorage.setItem('tiger_v6_9_entries', JSON.stringify(tigerData));
+        render(); alert("นำข้อมูลกลับมาให้แล้วครับ!");
     };
     r.readAsText(f);
 }
 
 render();
-addMsg("น้องเสือมาแล้วครับ! วันนี้มีรายการอะไรให้ช่วยจดไหมครับ?", "system");
+addMsg("น้องเสือกลับมาแล้วครับ! พิมพ์คุยได้ทันทีเลยนะครับ", "system");
 </script>
 </body>
 </html>
