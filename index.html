@@ -8,8 +8,6 @@
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" href="icon.png">
 <meta name="theme-color" content="#000000">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="เหมียวบัญชี">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -18,7 +16,6 @@
   --bg:#121212;
   --card:#1e1e1e;
   --text:#e5e7eb;
-  --sub:#9ca3af;
   --border:#2a2a2a;
   --accent:#6366f1;
 }
@@ -56,7 +53,7 @@ input,select{
   color:#fff;
   width:100%;
 }
-.summary{display:grid;gap:12px;margin-bottom:20px}
+.summary{display:grid;gap:12px}
 .amount{font-size:1.3rem;font-weight:600}
 .income{color:#22c55e}
 .expense{color:#ef4444}
@@ -90,11 +87,6 @@ input,select{
 
 <div class="container">
 
-<div class="card">
-  <select id="accountSelect" onchange="switchAccount()"></select>
-  <button class="btn" onclick="addAccount()">+ เพิ่มบัญชี</button>
-</div>
-
 <div class="card summary">
   <div>รายรับเดือนนี้ <div id="totalIncome" class="amount income">฿0</div></div>
   <div>รายจ่ายเดือนนี้ <div id="totalExpense" class="amount expense">฿0</div></div>
@@ -111,30 +103,9 @@ input,select{
   <h3>แชตบันทึกรายการ</h3>
   <div id="chatBox" class="chat-box"></div>
   <div style="display:flex;gap:8px;">
-    <input type="text" id="chatInput" placeholder="เช่น ซื้อข้าว 80">
+    <input type="text" id="chatInput" placeholder="เช่น สั่งแกร๊บ 120">
     <button class="btn" onclick="sendChat()">ส่ง</button>
   </div>
-</div>
-
-<div class="card">
-  <h3>กรอกข้อมูลเอง</h3>
-  <div style="display:grid;gap:8px;">
-    <select id="manualType" onchange="updateManualCategories()">
-      <option value="expense">รายจ่าย</option>
-      <option value="income">รายรับ</option>
-    </select>
-    <select id="manualCategory"></select>
-    <input type="number" id="manualAmount" placeholder="จำนวนเงิน">
-    <input type="text" id="manualDesc" placeholder="รายละเอียด">
-    <button class="btn" onclick="addManual()">บันทึก</button>
-  </div>
-</div>
-
-<div class="card">
-  <h3>จัดการข้อมูล</h3>
-  <button class="btn" onclick="exportData()">📦 Save Backup</button>
-  <button class="btn" onclick="importData()">📥 Restore Backup</button>
-  <input type="file" id="fileInput" style="display:none" accept=".json">
 </div>
 
 <div class="card">
@@ -155,127 +126,120 @@ input,select{
 </div>
 
 <script>
-let accounts=JSON.parse(localStorage.getItem('accounts')||'{"บัญชีหลัก":[]}');
-let currentAccount=localStorage.getItem('currentAccount')||'บัญชีหลัก';
-let barChart,pieChart;
 
-const incomeCategories=['เงินเดือน','ขายสินค้า','ฟรีแลนซ์','ของขวัญ','ดอกเบี้ย','อื่นๆ'];
-const expenseCategories=['อาหาร','เดินทาง','สาธารณูปโภค','ช้อปปิ้ง','สุขภาพ','บันเทิง','ค่าเช่า/ที่พัก','อื่นๆ'];
+let entries = JSON.parse(localStorage.getItem('meow_data') || '[]');
+let barChart, pieChart;
 
 function save(){
-  localStorage.setItem('accounts',JSON.stringify(accounts));
-  localStorage.setItem('currentAccount',currentAccount);
-}
-
-function renderAccounts(){
-  accountSelect.innerHTML=Object.keys(accounts)
-  .map(a=>`<option ${a===currentAccount?'selected':''}>${a}</option>`).join('');
-}
-
-function switchAccount(){
-  currentAccount=accountSelect.value;
-  save();render();
-}
-
-function addAccount(){
-  const name=prompt("ชื่อบัญชีใหม่");
-  if(!name)return;
-  accounts[name]=[];
-  currentAccount=name;
-  save();renderAccounts();render();
-}
-
-function updateManualCategories(){
-  const type=document.getElementById('manualType').value;
-  const list=type==='income'?incomeCategories:expenseCategories;
-  manualCategory.innerHTML=list.map(c=>`<option>${c}</option>`).join('');
-}
-
-function addManual(){
-  const type=manualType.value;
-  const amount=parseFloat(manualAmount.value);
-  const category=manualCategory.value;
-  const desc=manualDesc.value||category;
-  if(!amount)return alert('กรอกจำนวนเงินก่อน 🐱');
-  accounts[currentAccount].push({
-    id:Date.now(),type,amount,category,
-    date:new Date().toISOString().slice(0,10),desc
-  });
-  save();render();
-  manualAmount.value='';manualDesc.value='';
-}
-
-function deleteEntry(id){
-  accounts[currentAccount]=accounts[currentAccount].filter(e=>e.id!==id);
-  save();render();
+  localStorage.setItem('meow_data', JSON.stringify(entries));
 }
 
 function addMessage(text,type){
   const div=document.createElement('div');
   div.className='msg '+type;
-  div.innerHTML=type==='user'?`<b>คุณ:</b> ${text}`:`<b>ระบบ:</b> ${text}`;
+  div.innerHTML= type==='user'
+    ? `<b>คุณ:</b> ${text}`
+    : `<b>ระบบ:</b> ${text}`;
   chatBox.appendChild(div);
   chatBox.scrollTop=chatBox.scrollHeight;
 }
 
+/* ====== AI Keyword Engine ====== */
+
+function detectType(text){
+  const incomeWords=['รับ','ได้','เงินเข้า','ลูกค้าโอน','โอนเข้า','ขายได้'];
+  const expenseWords=['ซื้อ','จ่าย','สั่ง','ค่า','เติม','โอนให้','จ่ายค่า'];
+
+  if(incomeWords.some(w=>text.includes(w))) return 'income';
+  if(expenseWords.some(w=>text.includes(w))) return 'expense';
+
+  return null;
+}
+
+function detectCategory(text){
+  const t = text.toLowerCase();
+
+  const keywords = {
+    'อาหาร': [
+      'ข้าว','ก๋วยเตี๋ยว','ส้มตำ','หมูกระทะ','อาหาร',
+      'สั่งแกร๊บ','grab','foodpanda','สั่งอาหาร',
+      'น้ำ','กาแฟ','ชา','ชาไข่มุก','ชานม','คาเฟ่'
+    ],
+    'เดินทาง': [
+      'grabcar','แกร็บรถ','แท็กซี่','taxi',
+      'bts','mrt','รถเมล์','น้ำมัน','เติมน้ำมัน'
+    ],
+    'สาธารณูปโภค': [
+      'ค่าไฟ','ค่าน้ำ','ค่าเน็ต','wifi','อินเทอร์เน็ต'
+    ],
+    'ช้อปปิ้ง': [
+      'shopee','lazada','เสื้อ','รองเท้า','กระเป๋า','ซื้อของ'
+    ],
+    'สุขภาพ': [
+      'หมอ','ยา','คลินิก','โรงพยาบาล','วิตามิน'
+    ],
+    'บันเทิง': [
+      'หนัง','netflix','spotify','เกม'
+    ],
+    'ขายสินค้า': [
+      'ขายของ','ลูกค้าโอน','โอนค่าของ'
+    ],
+    'เงินเดือน': [
+      'เงินเดือน','salary'
+    ]
+  };
+
+  for(const category in keywords){
+    if(keywords[category].some(word=>t.includes(word))){
+      return category;
+    }
+  }
+
+  return 'อื่นๆ';
+}
+
+/* ====== Chat Function ====== */
+
 function sendChat(){
   const text=chatInput.value.trim();
-  if(!text)return;
+  if(!text) return;
+
   addMessage(text,'user');
 
-  const expenseWords=['จ่าย','ซื้อ','ค่า','เติม'];
-  const incomeWords=['รับ','ได้','เงินเข้า'];
-
-  let type=null;
-  if(expenseWords.some(w=>text.includes(w)))type='expense';
-  if(incomeWords.some(w=>text.includes(w)))type='income';
-
+  const type=detectType(text);
   const amountMatch=text.match(/\d+(\.\d+)?/);
   const amount=amountMatch?parseFloat(amountMatch[0]):null;
 
-  if(!type||!amount){
-    addMessage('พิมพ์เช่น: ซื้อข้าว 80','system');
+  if(!type || !amount){
+    addMessage('กรุณาพิมพ์ เช่น ซื้อข้าว 80 หรือ ลูกค้าโอน 3000','system');
     return;
   }
 
-  accounts[currentAccount].push({
-    id:Date.now(),type,amount,category:'อื่นๆ',
-    date:new Date().toISOString().slice(0,10),desc:text
+  const category=detectCategory(text);
+
+  entries.push({
+    id:Date.now(),
+    type,
+    amount,
+    category,
+    date:new Date().toISOString().slice(0,10),
+    desc:text
   });
 
-  save();render();
-  addMessage('บันทึกเรียบร้อย 🐱','system');
+  save();
+  render();
+  addMessage(`บันทึกแล้ว (${category})`,'system');
   chatInput.value='';
 }
 
-function exportData(){
-  const dataStr="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(accounts));
-  const dl=document.createElement('a');
-  dl.href=dataStr;
-  dl.download="meow-account-backup.json";
-  dl.click();
-}
-
-function importData(){
-  fileInput.click();
-}
-
-fileInput.addEventListener('change',function(e){
-  const reader=new FileReader();
-  reader.onload=function(evt){
-    accounts=JSON.parse(evt.target.result);
-    save();renderAccounts();render();
-  };
-  reader.readAsText(e.target.files[0]);
-});
+/* ====== Render ====== */
 
 function render(){
-  const data=accounts[currentAccount]||[];
   const todayStr=new Date().toISOString().slice(0,10);
   const monthStr=new Date().toISOString().slice(0,7);
 
-  const todayData=data.filter(e=>e.date===todayStr);
-  const monthData=data.filter(e=>e.date.startsWith(monthStr));
+  const todayData=entries.filter(e=>e.date===todayStr);
+  const monthData=entries.filter(e=>e.date.startsWith(monthStr));
 
   const todayIncome=todayData.filter(e=>e.type==='income').reduce((s,e)=>s+e.amount,0);
   const todayExpense=todayData.filter(e=>e.type==='expense').reduce((s,e)=>s+e.amount,0);
@@ -297,18 +261,19 @@ function render(){
         <span class="${e.type==='income'?'income':'expense'}">
         ${e.type==='income'?'+':'-'}฿${e.amount.toLocaleString()}
         </span>
-        <button onclick="deleteEntry(${e.id})" style="margin-left:8px;background:none;border:none;color:red;">ลบ</button>
       </div>
     </div>
   `).join('');
 
-  if(barChart)barChart.destroy();
-  barChart=new Chart(barChart,{
+  if(barChart) barChart.destroy();
+  barChart=new Chart(document.getElementById('barChart'),{
     type:'bar',
     data:{
       labels:['รายรับ','รายจ่าย'],
-      datasets:[{data:[monthIncome,monthExpense],
-      backgroundColor:['#22c55e','#ef4444']}]
+      datasets:[{
+        data:[monthIncome,monthExpense],
+        backgroundColor:['#22c55e','#ef4444']
+      }]
     }
   });
 
@@ -318,25 +283,25 @@ function render(){
     expenseByCategory[e.category]=(expenseByCategory[e.category]||0)+e.amount;
   });
 
-  if(pieChart)pieChart.destroy();
+  if(pieChart) pieChart.destroy();
   pieChart=new Chart(document.getElementById('pieChart'),{
     type:'doughnut',
     data:{
       labels:Object.keys(expenseByCategory),
       datasets:[{
         data:Object.values(expenseByCategory),
-        backgroundColor:['#6366f1','#f59e0b','#10b981','#ef4444','#3b82f6','#a855f7']
+        backgroundColor:[
+          '#6366f1','#f59e0b','#10b981',
+          '#ef4444','#3b82f6','#a855f7','#f472b6'
+        ]
       }]
     }
   });
 }
 
-renderAccounts();
-updateManualCategories();
 render();
+
 </script>
 
-</body>
-</html>
 </body>
 </html>
