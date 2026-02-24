@@ -3,304 +3,267 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>เหมียวบัญชี</title>
-
-<link rel="apple-touch-icon" href="icon.png">
-<link rel="icon" href="icon.png">
-<meta name="theme-color" content="#000000">
-
+<title>เหมียวบัญชี v2</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
-:root{
-  --bg:#121212;
-  --card:#1e1e1e;
-  --text:#e5e7eb;
-  --border:#2a2a2a;
-  --accent:#6366f1;
+:root {
+    --bg: #ffffff; --card: #f8fafc; --text: #1e293b;
+    --border: #e2e8f0; --accent: #6366f1; --income: #22c55e; --expense: #ef4444;
 }
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  background:var(--bg);
-  color:var(--text);
+[data-theme="dark"] {
+    --bg: #0f172a; --card: #1e293b; --text: #f8fafc;
+    --border: #334155; --accent: #818cf8;
 }
-header{
-  padding:20px;
-  border-bottom:1px solid var(--border);
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg); color: var(--text);
+    transition: all 0.3s ease; margin: 0; padding-bottom: 50px;
 }
-.container{max-width:900px;margin:auto;padding:20px}
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:16px;
-  margin-bottom:16px;
+header {
+    padding: 20px; text-align: center; background: var(--card);
+    border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100;
 }
-.btn{
-  padding:8px 12px;
-  background:var(--accent);
-  color:#fff;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
+.container { max-width: 600px; margin: auto; padding: 15px; }
+.card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 16px; margin-bottom: 16px;
 }
-input,select{
-  padding:10px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:#000;
-  color:#fff;
-  width:100%;
+.btn-group { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.btn {
+    padding: 8px 16px; border: none; border-radius: 8px;
+    cursor: pointer; background: var(--accent); color: white; font-size: 0.9rem;
 }
-.summary{display:grid;gap:12px}
-.amount{font-size:1.3rem;font-weight:600}
-.income{color:#22c55e}
-.expense{color:#ef4444}
-.balance{color:#3b82f6}
-.tx-item{
-  display:flex;
-  justify-content:space-between;
-  padding:8px 0;
-  border-bottom:1px solid var(--border);
+.btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+.btn-danger { background: #fee2e2; color: #ef4444; padding: 4px 8px; font-size: 0.7rem; }
+
+input {
+    padding: 12px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--bg); color: var(--text); width: 100%;
 }
-.chat-box{
-  height:220px;
-  overflow-y:auto;
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:10px;
-  margin-bottom:10px;
-  background:#000;
+
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tx-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
 }
-.msg{margin-bottom:8px}
-.user{text-align:right}
-.system{color:#9ca3af}
+.chat-box {
+    height: 180px; overflow-y: auto; background: var(--bg);
+    border-radius: 8px; padding: 10px; margin-bottom: 10px; border: 1px solid var(--border);
+}
+.msg { margin-bottom: 8px; padding: 6px 12px; border-radius: 12px; font-size: 0.9rem; width: fit-content; }
+.user { background: var(--accent); color: white; margin-left: auto; }
+.system { background: var(--border); color: var(--text); }
+
+.icon-logo { width: 50px; height: 50px; fill: var(--accent); margin-bottom: 5px; }
 </style>
 </head>
-
-<body>
+<body data-theme="light">
 
 <header>
-  <h2>🐱 เหมียวบัญชี</h2>
+    <svg class="icon-logo" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm4 0h-2V7h2v10z"/></svg>
+    <h2>เหมียวบัญชี</h2>
+    <div class="btn-group" style="justify-content: center; margin-top: 10px;">
+        <button class="btn btn-outline" onclick="toggleTheme()">สลับโหมด มืด/สว่าง</button>
+    </div>
 </header>
 
 <div class="container">
+    <div class="card">
+        <h3>จัดการข้อมูล</h3>
+        <div class="btn-group">
+            <button class="btn" onclick="exportData()">Backup (ส่งออก)</button>
+            <button class="btn btn-outline" onclick="document.getElementById('importFile').click()">Restore (นำเข้า)</button>
+            <input type="file" id="importFile" style="display:none" onchange="importData(event)">
+        </div>
+    </div>
 
-<div class="card summary">
-  <div>รายรับเดือนนี้ <div id="totalIncome" class="amount income">฿0</div></div>
-  <div>รายจ่ายเดือนนี้ <div id="totalExpense" class="amount expense">฿0</div></div>
-  <div>คงเหลือ <div id="totalBalance" class="amount balance">฿0</div></div>
-</div>
+    <div class="card summary-grid">
+        <div style="text-align:center">
+            <small>รายรับเดือนนี้</small>
+            <div id="totalIncome" style="color:var(--income); font-weight:bold; font-size:1.2rem">฿0</div>
+        </div>
+        <div style="text-align:center">
+            <small>รายจ่ายเดือนนี้</small>
+            <div id="totalExpense" style="color:var(--expense); font-weight:bold; font-size:1.2rem">฿0</div>
+        </div>
+    </div>
 
-<div class="card">
-  <h3>สรุปวันนี้</h3>
-  <div>รายรับวันนี้: <span id="todayIncome" class="income">฿0</span></div>
-  <div>รายจ่ายวันนี้: <span id="todayExpense" class="expense">฿0</span></div>
-</div>
+    <div class="card">
+        <div id="chatBox" class="chat-box"></div>
+        <div style="display:flex; gap:8px;">
+            <input type="text" id="chatInput" list="suggestions" placeholder="เช่น ซื้อกาแฟ 60" onkeypress="if(event.key==='Enter') sendChat()">
+            <datalist id="suggestions">
+                <option value="ซื้อข้าว">
+                <option value="ค่าน้ำมัน">
+                <option value="เงินเดือนออก">
+                <option value="ค่ากาแฟ">
+                <option value="โอนค่าของ">
+                <option value="สั่ง Grab">
+            </datalist>
+            <button class="btn" onclick="sendChat()">ส่ง</button>
+        </div>
+    </div>
 
-<div class="card">
-  <h3>แชตบันทึกรายการ</h3>
-  <div id="chatBox" class="chat-box"></div>
-  <div style="display:flex;gap:8px;">
-    <input type="text" id="chatInput" placeholder="เช่น สั่งแกร๊บ 120">
-    <button class="btn" onclick="sendChat()">ส่ง</button>
-  </div>
-</div>
+    <div class="card">
+        <h3>รายจ่ายแยกรายวัน (เดือนนี้)</h3>
+        <canvas id="dailyChart"></canvas>
+    </div>
 
-<div class="card">
-  <h3>ประวัติ</h3>
-  <div id="txList"></div>
-</div>
-
-<div class="card">
-  <h3>กราฟรายรับ/รายจ่าย</h3>
-  <canvas id="barChart"></canvas>
-</div>
-
-<div class="card">
-  <h3>สัดส่วนค่าใช้จ่ายรายเดือน</h3>
-  <canvas id="pieChart"></canvas>
-</div>
-
+    <div class="card">
+        <h3>ประวัติเดือนนี้</h3>
+        <div id="txList"></div>
+    </div>
 </div>
 
 <script>
-
 let entries = JSON.parse(localStorage.getItem('meow_data') || '[]');
-let barChart, pieChart;
+let dailyChart;
 
-function save(){
-  localStorage.setItem('meow_data', JSON.stringify(entries));
+// --- ฟีเจอร์พื้นฐาน ---
+function toggleTheme() {
+    const body = document.body;
+    const current = body.getAttribute('data-theme');
+    body.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
 }
 
-function addMessage(text,type){
-  const div=document.createElement('div');
-  div.className='msg '+type;
-  div.innerHTML= type==='user'
-    ? `<b>คุณ:</b> ${text}`
-    : `<b>ระบบ:</b> ${text}`;
-  chatBox.appendChild(div);
-  chatBox.scrollTop=chatBox.scrollHeight;
+function save() {
+    localStorage.setItem('meow_data', JSON.stringify(entries));
 }
 
-/* ====== AI Keyword Engine ====== */
-
-function detectType(text){
-  const incomeWords=['รับ','ได้','เงินเข้า','ลูกค้าโอน','โอนเข้า','ขายได้'];
-  const expenseWords=['ซื้อ','จ่าย','สั่ง','ค่า','เติม','โอนให้','จ่ายค่า'];
-
-  if(incomeWords.some(w=>text.includes(w))) return 'income';
-  if(expenseWords.some(w=>text.includes(w))) return 'expense';
-
-  return null;
+function addMessage(text, type) {
+    const div = document.createElement('div');
+    div.className = `msg ${type}`;
+    div.innerText = text;
+    const box = document.getElementById('chatBox');
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
 }
 
-function detectCategory(text){
-  const t = text.toLowerCase();
+// --- วิเคราะห์ข้อมูล ---
+function sendChat() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if(!text) return;
 
-  const keywords = {
-    'อาหาร': [
-      'ข้าว','ก๋วยเตี๋ยว','ส้มตำ','หมูกระทะ','อาหาร',
-      'สั่งแกร๊บ','grab','foodpanda','สั่งอาหาร',
-      'น้ำ','กาแฟ','ชา','ชาไข่มุก','ชานม','คาเฟ่'
-    ],
-    'เดินทาง': [
-      'grabcar','แกร็บรถ','แท็กซี่','taxi',
-      'bts','mrt','รถเมล์','น้ำมัน','เติมน้ำมัน'
-    ],
-    'สาธารณูปโภค': [
-      'ค่าไฟ','ค่าน้ำ','ค่าเน็ต','wifi','อินเทอร์เน็ต'
-    ],
-    'ช้อปปิ้ง': [
-      'shopee','lazada','เสื้อ','รองเท้า','กระเป๋า','ซื้อของ'
-    ],
-    'สุขภาพ': [
-      'หมอ','ยา','คลินิก','โรงพยาบาล','วิตามิน'
-    ],
-    'บันเทิง': [
-      'หนัง','netflix','spotify','เกม'
-    ],
-    'ขายสินค้า': [
-      'ขายของ','ลูกค้าโอน','โอนค่าของ'
-    ],
-    'เงินเดือน': [
-      'เงินเดือน','salary'
-    ]
-  };
-
-  for(const category in keywords){
-    if(keywords[category].some(word=>t.includes(word))){
-      return category;
+    addMessage(text, 'user');
+    const amount = (text.match(/\d+(\.\d+)?/) || [null])[0];
+    
+    if(!amount) {
+        addMessage("เมี๊ยวไม่เห็นตัวเลขเลย ลองพิมพ์ใหม่นะ", "system");
+        return;
     }
-  }
 
-  return 'อื่นๆ';
+    const isIncome = ['รับ','ได้','เงินเข้า','เดือนออก'].some(w => text.includes(w));
+    
+    const newEntry = {
+        id: Date.now(),
+        desc: text,
+        amount: parseFloat(amount),
+        type: isIncome ? 'income' : 'expense',
+        date: new Date().toISOString().slice(0, 10)
+    };
+
+    entries.push(newEntry);
+    save();
+    render();
+    addMessage("จดให้แล้วเมี๊ยว!", "system");
+    input.value = "";
 }
 
-/* ====== Chat Function ====== */
-
-function sendChat(){
-  const text=chatInput.value.trim();
-  if(!text) return;
-
-  addMessage(text,'user');
-
-  const type=detectType(text);
-  const amountMatch=text.match(/\d+(\.\d+)?/);
-  const amount=amountMatch?parseFloat(amountMatch[0]):null;
-
-  if(!type || !amount){
-    addMessage('กรุณาพิมพ์ เช่น ซื้อข้าว 80 หรือ ลูกค้าโอน 3000','system');
-    return;
-  }
-
-  const category=detectCategory(text);
-
-  entries.push({
-    id:Date.now(),
-    type,
-    amount,
-    category,
-    date:new Date().toISOString().slice(0,10),
-    desc:text
-  });
-
-  save();
-  render();
-  addMessage(`บันทึกแล้ว (${category})`,'system');
-  chatInput.value='';
-}
-
-/* ====== Render ====== */
-
-function render(){
-  const todayStr=new Date().toISOString().slice(0,10);
-  const monthStr=new Date().toISOString().slice(0,7);
-
-  const todayData=entries.filter(e=>e.date===todayStr);
-  const monthData=entries.filter(e=>e.date.startsWith(monthStr));
-
-  const todayIncome=todayData.filter(e=>e.type==='income').reduce((s,e)=>s+e.amount,0);
-  const todayExpense=todayData.filter(e=>e.type==='expense').reduce((s,e)=>s+e.amount,0);
-  const monthIncome=monthData.filter(e=>e.type==='income').reduce((s,e)=>s+e.amount,0);
-  const monthExpense=monthData.filter(e=>e.type==='expense').reduce((s,e)=>s+e.amount,0);
-
-  totalIncome.textContent='฿'+monthIncome.toLocaleString();
-  totalExpense.textContent='฿'+monthExpense.toLocaleString();
-  totalBalance.textContent='฿'+(monthIncome-monthExpense).toLocaleString();
-  todayIncomeSpan = document.getElementById('todayIncome');
-  todayExpenseSpan = document.getElementById('todayExpense');
-  todayIncomeSpan.textContent='฿'+todayIncome.toLocaleString();
-  todayExpenseSpan.textContent='฿'+todayExpense.toLocaleString();
-
-  txList.innerHTML=monthData.map(e=>`
-    <div class="tx-item">
-      <div>${e.desc}<br><small>${e.category} • ${e.date}</small></div>
-      <div>
-        <span class="${e.type==='income'?'income':'expense'}">
-        ${e.type==='income'?'+':'-'}฿${e.amount.toLocaleString()}
-        </span>
-      </div>
-    </div>
-  `).join('');
-
-  if(barChart) barChart.destroy();
-  barChart=new Chart(document.getElementById('barChart'),{
-    type:'bar',
-    data:{
-      labels:['รายรับ','รายจ่าย'],
-      datasets:[{
-        data:[monthIncome,monthExpense],
-        backgroundColor:['#22c55e','#ef4444']
-      }]
+function deleteEntry(id) {
+    if(confirm('ลบรายการนี้ใช่ไหม?')) {
+        entries = entries.filter(e => e.id !== id);
+        save();
+        render();
     }
-  });
-
-  const expenseByCategory={};
-  monthData.filter(e=>e.type==='expense')
-  .forEach(e=>{
-    expenseByCategory[e.category]=(expenseByCategory[e.category]||0)+e.amount;
-  });
-
-  if(pieChart) pieChart.destroy();
-  pieChart=new Chart(document.getElementById('pieChart'),{
-    type:'doughnut',
-    data:{
-      labels:Object.keys(expenseByCategory),
-      datasets:[{
-        data:Object.values(expenseByCategory),
-        backgroundColor:[
-          '#6366f1','#f59e0b','#10b981',
-          '#ef4444','#3b82f6','#a855f7','#f472b6'
-        ]
-      }]
-    }
-  });
 }
 
+// --- Backup & Restore ---
+function exportData() {
+    const blob = new Blob([JSON.stringify(entries)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'meow_backup.json';
+    a.click();
+}
+
+function importData(event) {
+    const file = event.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            if(Array.isArray(data)) {
+                entries = data;
+                save();
+                render();
+                alert('คืนค่าข้อมูลสำเร็จ!');
+            }
+        } catch(err) { alert('ไฟล์ไม่ถูกต้อง'); }
+    };
+    reader.readAsText(file);
+}
+
+// --- แสดงผล ---
+function render() {
+    const monthStr = new Date().toISOString().slice(0, 7);
+    const monthData = entries.filter(e => e.date.startsWith(monthStr));
+    
+    // สรุปยอด
+    const income = monthData.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
+    const expense = monthData.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
+    document.getElementById('totalIncome').innerText = `฿${income.toLocaleString()}`;
+    document.getElementById('totalExpense').innerText = `฿${expense.toLocaleString()}`;
+
+    // รายการประวัติ
+    document.getElementById('txList').innerHTML = monthData.slice().reverse().map(e => `
+        <div class="tx-item">
+            <div>${e.desc} <br><small>${e.date}</small></div>
+            <div style="text-align:right">
+                <span style="color:var(--${e.type})">${e.type==='income'?'+':'-'}฿${e.amount}</span><br>
+                <button class="btn-danger" onclick="deleteEntry(${e.id})">ลบ</button>
+            </div>
+        </div>
+    `).join('');
+
+    // กราฟรายวัน
+    updateChart(monthData);
+}
+
+function updateChart(data) {
+    const days = {};
+    data.filter(e => e.type === 'expense').forEach(e => {
+        const day = e.date.split('-')[2];
+        days[day] = (days[day] || 0) + e.amount;
+    });
+
+    if(dailyChart) dailyChart.destroy();
+    const ctx = document.getElementById('dailyChart').getContext('2d');
+    dailyChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Object.keys(days).sort(),
+            datasets: [{
+                label: 'รายจ่ายรายวัน',
+                data: Object.values(days),
+                borderColor: '#6366f1',
+                tension: 0.3,
+                fill: true,
+                backgroundColor: 'rgba(99, 102, 241, 0.1)'
+            }]
+        },
+        options: {
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+}
+
+// เริ่มต้นแอป
 render();
-
+addMessage("สวัสดี! เหมียวพร้อมช่วยจดแล้วค่ะ", "system");
 </script>
 
 </body>
