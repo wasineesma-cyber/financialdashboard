@@ -3,21 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Don Note — Money Tracker</title>
+<title>Don Note</title>
 
 <style>
 :root{
-  --bg:#f7f7f9;
+  --bg:#fbfbfd;
   --card:#ffffff;
-  --text:#3a3a3a;
+  --text:#2f2f2f;
+  --border:#ededf3;
 
-  --primary:#ffb7d5;      /* ชมพูเกาหลี */
-  --primary-soft:#ffe5f1;
-
-  --income:#7fd6c2;       /* มิ้นต์ */
-  --expense:#ff9aa2;      /* ชมพูอ่อน */
-
-  --border:#ececf2;
+  --primary:#111;
+  --income:#4fd1b5;
+  --expense:#ff8fa3;
 }
 
 body{
@@ -31,75 +28,42 @@ body{
   max-width:480px;
   margin:auto;
   padding:16px;
+  padding-bottom:90px;
 }
 
-/* Header */
+/* header */
 .header{
   text-align:center;
-  padding:20px 0 10px;
+  padding:20px 0 8px;
 }
 
 .header h1{
   margin:0;
   font-size:26px;
-  font-weight:700;
 }
 
-.header p{
-  margin:4px 0 0;
-  font-size:12px;
-  color:#888;
-}
-
-/* Card */
+/* card */
 .card{
   background:var(--card);
-  border-radius:20px;
+  border-radius:18px;
   padding:18px;
   margin-bottom:14px;
   border:1px solid var(--border);
-  box-shadow:0 6px 20px rgba(0,0,0,0.04);
 }
 
-/* Summary */
+/* balance */
 .balance{
-  font-size:32px;
+  font-size:34px;
   font-weight:700;
-  margin:6px 0 10px;
+  margin:6px 0;
 }
 
 .row{
   display:flex;
   justify-content:space-between;
-  font-size:14px;
 }
 
-.income{color:var(--income); font-weight:600;}
-.expense{color:var(--expense); font-weight:600;}
-
-/* Button */
-.btn{
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:14px;
-  background:var(--primary);
-  font-size:16px;
-  font-weight:600;
-  cursor:pointer;
-}
-
-/* Input */
-input{
-  width:100%;
-  padding:14px;
-  border-radius:14px;
-  border:1px solid var(--border);
-  margin-bottom:10px;
-  font-size:15px;
-}
-
-/* Bottom nav */
+/* nav */
 .nav{
   position:fixed;
   bottom:0;
@@ -109,44 +73,113 @@ input{
   border-top:1px solid var(--border);
   display:flex;
   justify-content:space-around;
-  padding:8px 0;
+  padding:10px 0;
   font-size:12px;
+}
+
+.nav div{
+  text-align:center;
+  cursor:pointer;
+}
+
+/* pages */
+.page{display:none;}
+.page.active{display:block;}
+
+/* mascot */
+.mascot{
+  position:fixed;
+  bottom:80px;
+  left:-80px;
+  font-size:42px;
+  transition:1s linear;
+  z-index:999;
+}
+.mascot.run{
+  left:110%;
 }
 </style>
 </head>
 
 <body>
 
+<div class="mascot" id="mascot">🐰</div>
+
 <div class="container">
 
-  <div class="header">
-    <h1>Don Note</h1>
-    <p>simple money tracker</p>
-  </div>
+<div class="header">
+<h1>Don Note</h1>
+</div>
 
+<!-- SUMMARY -->
+<div id="summary" class="page active">
   <div class="card">
     <div>ยอดเงินคงเหลือ</div>
-    <div class="balance">฿0</div>
+    <div class="balance">฿12,450</div>
     <div class="row">
-      <span class="income">รายรับ ฿0</span>
-      <span class="expense">รายจ่าย ฿0</span>
+      <span style="color:var(--income)">รายรับ ฿20,000</span>
+      <span style="color:var(--expense)">รายจ่าย ฿7,550</span>
     </div>
   </div>
+</div>
 
+<!-- ANALYSIS -->
+<div id="analysis" class="page">
   <div class="card">
-    <input placeholder="รายการ เช่น ค่ากาแฟ 60">
-    <button class="btn">บันทึก</button>
+    📊 กราฟการใช้เงิน
   </div>
+</div>
+
+<!-- CATEGORY -->
+<div id="category" class="page">
+  <div class="card">
+    🍱 อาหาร<br>
+    🚗 เดินทาง<br>
+    🛍️ ช้อปปิ้ง<br>
+    🧾 บิล<br>
+    🎮 ความบันเทิง<br>
+    💊 สุขภาพ<br>
+    🎁 อื่นๆ
+  </div>
+</div>
+
+<!-- LIST -->
+<div id="list" class="page">
+  <div class="card">
+    ☕ กาแฟ — ฿60<br>
+    🍜 ข้าว — ฿80
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div id="settings" class="page">
+  <div class="card">
+    ⚙️ ตั้งค่าแอพ
+  </div>
+</div>
 
 </div>
 
+<!-- NAV -->
 <div class="nav">
-  <div>🏠<br>สรุป</div>
-  <div>📊<br>วิเคราะห์</div>
-  <div>🗂️<br>หมวด</div>
-  <div>📋<br>รายการ</div>
-  <div>⚙️<br>ตั้งค่า</div>
+  <div onclick="go('summary')">🏠<br>สรุป</div>
+  <div onclick="go('analysis')">📊<br>วิเคราะห์</div>
+  <div onclick="go('category')">🗂️<br>หมวด</div>
+  <div onclick="go('list')">📋<br>รายการ</div>
+  <div onclick="go('settings')">⚙️<br>ตั้งค่า</div>
 </div>
+
+<script>
+function go(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(page).classList.add('active');
+
+  const m=document.getElementById('mascot');
+  m.classList.remove('run');
+  void m.offsetWidth;
+  m.classList.add('run');
+}
+</script>
 
 </body>
 </html>
