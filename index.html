@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>เหมียวบัญชี</title>
 
-<!-- ICON -->
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" href="icon.png">
 <meta name="theme-color" content="#000000">
@@ -33,7 +32,6 @@ header{
   padding:20px;
   display:flex;
   justify-content:space-between;
-  align-items:center;
   border-bottom:1px solid var(--border);
 }
 .container{max-width:900px;margin:auto;padding:20px}
@@ -72,7 +70,7 @@ input,select{
   border-bottom:1px solid var(--border);
 }
 .chat-box{
-  height:260px;
+  height:220px;
   overflow-y:auto;
   border:1px solid var(--border);
   border-radius:12px;
@@ -117,15 +115,25 @@ input,select{
 <div class="card">
   <h3>กรอกข้อมูลเอง</h3>
   <div style="display:grid;gap:8px;">
-    <select id="manualType">
+    <select id="manualType" onchange="updateManualCategories()">
       <option value="expense">รายจ่าย</option>
       <option value="income">รายรับ</option>
     </select>
+
+    <select id="manualCategory"></select>
+
     <input type="number" id="manualAmount" placeholder="จำนวนเงิน">
-    <input type="text" id="manualCategory" placeholder="หมวด">
     <input type="text" id="manualDesc" placeholder="รายละเอียด">
+
     <button class="btn" onclick="addManual()">บันทึก</button>
   </div>
+</div>
+
+<div class="card">
+  <h3>จัดการข้อมูล</h3>
+  <button class="btn" onclick="exportData()">📦 Save Backup</button>
+  <button class="btn" onclick="importData()">📥 Restore Backup</button>
+  <input type="file" id="fileInput" style="display:none" accept=".json">
 </div>
 
 <div class="card">
@@ -144,6 +152,9 @@ input,select{
 let accounts=JSON.parse(localStorage.getItem('accounts')||'{"บัญชีหลัก":[]}');
 let currentAccount=localStorage.getItem('currentAccount')||'บัญชีหลัก';
 let barChart;
+
+const incomeCategories=['เงินเดือน','ขายสินค้า','ฟรีแลนซ์','ของขวัญ','ดอกเบี้ย','อื่นๆ'];
+const expenseCategories=['อาหาร','เดินทาง','สาธารณูปโภค','ช้อปปิ้ง','สุขภาพ','บันเทิง','ค่าเช่า/ที่พัก','อื่นๆ'];
 
 function save(){
   localStorage.setItem('accounts',JSON.stringify(accounts));
@@ -171,6 +182,33 @@ function addAccount(){
   render();
 }
 
+function updateManualCategories(){
+  const type=document.getElementById('manualType').value;
+  const select=document.getElementById('manualCategory');
+  const list=type==='income'?incomeCategories:expenseCategories;
+  select.innerHTML=list.map(c=>`<option>${c}</option>`).join('');
+}
+
+function addManual(){
+  const type=document.getElementById('manualType').value;
+  const amount=parseFloat(document.getElementById('manualAmount').value);
+  const category=document.getElementById('manualCategory').value;
+  const desc=document.getElementById('manualDesc').value||category;
+  if(!amount)return alert('กรอกจำนวนเงินก่อน 🐱');
+  accounts[currentAccount].push({
+    id:Date.now(),type,amount,category,
+    date:new Date().toISOString().slice(0,10),desc
+  });
+  save();render();
+  document.getElementById('manualAmount').value='';
+  document.getElementById('manualDesc').value='';
+}
+
+function deleteEntry(id){
+  accounts[currentAccount]=accounts[currentAccount].filter(e=>e.id!==id);
+  save();render();
+}
+
 function addMessage(text,type){
   const box=document.getElementById('chatBox');
   const div=document.createElement('div');
@@ -180,90 +218,50 @@ function addMessage(text,type){
   box.scrollTop=box.scrollHeight;
 }
 
-function detectCategory(text){
-  const map={
-    'อาหาร':['ข้าว','กาแฟ','ชานม','ของกิน'],
-    'เดินทาง':['น้ำมัน','รถ','grab','แท็กซี่'],
-    'สาธารณูปโภค':['ค่าไฟ','ค่าน้ำ','ค่าเน็ต'],
-    'ช้อปปิ้ง':['เสื้อ','รองเท้า','กระเป๋า'],
-    'สุขภาพ':['หมอ','ยา'],
-    'เงินเดือน':['เงินเดือน']
-  };
-  for(const cat in map){
-    if(map[cat].some(w=>text.includes(w))) return cat;
-  }
-  return 'อื่นๆ';
-}
-
 function sendChat(){
   const input=document.getElementById('chatInput');
   const text=input.value.trim();
   if(!text)return;
-
   addMessage(text,'user');
-
   const expenseWords=['จ่าย','ซื้อ','ค่า','เติม'];
   const incomeWords=['รับ','ได้','เงินเข้า'];
-
   let type=null;
-  if(expenseWords.some(w=>text.includes(w))) type='expense';
-  if(incomeWords.some(w=>text.includes(w))) type='income';
-
+  if(expenseWords.some(w=>text.includes(w)))type='expense';
+  if(incomeWords.some(w=>text.includes(w)))type='income';
   const amountMatch=text.match(/\d+(\.\d+)?/);
   const amount=amountMatch?parseFloat(amountMatch[0]):null;
-
-  if(!type||!amount){
-    addMessage('พิมพ์เช่น: ซื้อข้าว 80','system');
-    input.value='';
-    return;
-  }
-
-  const category=detectCategory(text);
-
-  const entry={
-    id:Date.now(),
-    type,amount,category,
-    date:new Date().toISOString().slice(0,10),
-    desc:text
-  };
-
-  accounts[currentAccount].push(entry);
-  save();
-  render();
-
-  addMessage(`บันทึก ${type==='income'?'รายรับ':'รายจ่าย'} ${amount.toLocaleString()} บาท หมวด ${category}`,'system');
+  if(!type||!amount){addMessage('พิมพ์เช่น: ซื้อข้าว 80','system');return;}
+  accounts[currentAccount].push({
+    id:Date.now(),type,amount,category:'อื่นๆ',
+    date:new Date().toISOString().slice(0,10),desc:text
+  });
+  save();render();
+  addMessage('บันทึกเรียบร้อย 🐱','system');
   input.value='';
 }
 
-function addManual(){
-  const type=document.getElementById('manualType').value;
-  const amount=parseFloat(document.getElementById('manualAmount').value);
-  const category=document.getElementById('manualCategory').value||'อื่นๆ';
-  const desc=document.getElementById('manualDesc').value||category;
+function exportData(){
+  const dataStr="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(accounts));
+  const dl=document.createElement('a');
+  dl.setAttribute("href",dataStr);
+  dl.setAttribute("download","meow-account-backup.json");
+  dl.click();
+}
 
-  if(!amount){ alert('กรอกจำนวนเงินก่อน'); return; }
+function importData(){
+  document.getElementById('fileInput').click();
+}
 
-  const entry={
-    id:Date.now(),
-    type,amount,category,
-    date:new Date().toISOString().slice(0,10),
-    desc
+document.getElementById('fileInput').addEventListener('change',function(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(evt){
+    accounts=JSON.parse(evt.target.result);
+    save();renderAccounts();render();
   };
-
-  accounts[currentAccount].push(entry);
-  save();
-  render();
-
-  document.getElementById('manualAmount').value='';
-  document.getElementById('manualCategory').value='';
-  document.getElementById('manualDesc').value='';
-}
-
-function deleteEntry(id){
-  accounts[currentAccount]=accounts[currentAccount].filter(e=>e.id!==id);
-  save();
-  render();
-}
+  reader.readAsText(file);
+});
 
 function render(){
   const data=accounts[currentAccount]||[];
@@ -271,11 +269,9 @@ function render(){
   const month=data.filter(e=>e.date.startsWith(ym));
   const income=month.filter(e=>e.type==='income').reduce((s,e)=>s+e.amount,0);
   const expense=month.filter(e=>e.type==='expense').reduce((s,e)=>s+e.amount,0);
-
   totalIncome.textContent='฿'+income.toLocaleString();
   totalExpense.textContent='฿'+expense.toLocaleString();
   totalBalance.textContent='฿'+(income-expense).toLocaleString();
-
   txList.innerHTML=month.map(e=>`
     <div class="tx-item">
       <div>${e.desc}<br><small>${e.category} • ${e.date}</small></div>
@@ -287,21 +283,18 @@ function render(){
       </div>
     </div>
   `).join('');
-
   if(barChart)barChart.destroy();
   barChart=new Chart(document.getElementById('barChart'),{
     type:'bar',
-    data:{
-      labels:['รายรับ','รายจ่าย'],
-      datasets:[{
-        data:[income,expense],
-        backgroundColor:['#22c55e','#ef4444']
-      }]
+    data:{labels:['รายรับ','รายจ่าย'],
+      datasets:[{data:[income,expense],
+      backgroundColor:['#22c55e','#ef4444']}]
     }
   });
 }
 
 renderAccounts();
+updateManualCategories();
 render();
 </script>
 
