@@ -2,202 +2,142 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DongDong Universe</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#ff5c8a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>돈노트 Don Note ⭐</title>
 
 <style>
 body{
-margin:0;
-font-family:sans-serif;
-background:#fafafa;
+  margin:0;
+  font-family:-apple-system, sans-serif;
+  background:#fafafa;
+  text-align:center;
 }
 
 /* HEADER */
 .header{
-padding:20px;
-text-align:center;
-font-size:22px;
-font-weight:700;
+  background:#fff;
+  padding:14px;
+  font-weight:800;
+  font-size:18px;
+  border-bottom:1px solid #eee;
 }
 
-/* SUMMARY */
+/* DONG RUN */
+#dong{
+  position:fixed;
+  bottom:20px;
+  left:-80px;
+  font-size:48px;
+  animation:run 12s linear infinite;
+}
+@keyframes run{
+  from{left:-80px}
+  to{left:110%}
+}
+
+/* CARD */
 .card{
-background:#fff;
-margin:15px;
-padding:18px;
-border-radius:18px;
-box-shadow:0 4px 12px rgba(0,0,0,.08)
+  background:#fff;
+  margin:18px;
+  padding:18px;
+  border-radius:20px;
+  box-shadow:0 6px 20px rgba(0,0,0,.06);
 }
 
-/* FLOAT ADD */
-.add{
-position:fixed;
-bottom:90px;
-right:20px;
-width:60px;height:60px;
-border-radius:50%;
-background:#ff5c8a;
-color:#fff;
-font-size:36px;
-display:flex;
-align-items:center;
-justify-content:center;
-box-shadow:0 6px 16px rgba(0,0,0,.2)
-}
-
-/* CHAT */
-.chatbox{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-background:#fff;
-padding:10px;
-box-shadow:0 -4px 10px rgba(0,0,0,.1)
-}
-
+/* CHAT BOX */
 input{
-width:70%;
-padding:12px;
-border-radius:12px;
-border:1px solid #ddd;
+  width:70%;
+  padding:12px;
+  border-radius:14px;
+  border:1px solid #eee;
+  font-size:16px;
 }
 
 button{
-padding:12px 16px;
-border:none;
-border-radius:12px;
-background:#ff5c8a;
-color:#fff;
+  padding:12px 18px;
+  border:none;
+  background:#ff5c8a;
+  color:#fff;
+  border-radius:14px;
+  font-weight:700;
+  cursor:pointer;
 }
 
-/* 🐻 DONG */
-#dong{
-position:fixed;
-bottom:150px;
-left:-80px;
-font-size:50px;
-transition:1s;
+.balance{
+  font-size:38px;
+  font-weight:900;
+  margin:10px 0;
+}
+
+.small{
+  color:#888;
+  font-size:13px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">🐻 ดงดง Universe</div>
+<div class="header">🐻 돈노트 Don Note</div>
 
 <div class="card">
-รายรับ: <span id="income">0</span> บาท<br>
-รายจ่าย: <span id="expense">0</span> บาท
+  <div class="small">เหลือเก็บ</div>
+  <div class="balance" id="bal">฿0</div>
+</div>
+
+<div class="card">
+  <div style="margin-bottom:8px;font-weight:700">
+    ⚡ พิมพ์ เช่น "ชาไข่มุก 65"
+  </div>
+
+  <input id="chat" placeholder="กินข้าว 80">
+  <button onclick="add()">บันทึก</button>
 </div>
 
 <div id="dong">🐻</div>
 
-<div class="add" onclick="openForm()">+</div>
-
-<!-- CHAT -->
-<div class="chatbox">
-<input id="chat" placeholder="พิมพ์ เช่น กาแฟ 60">
-<button onclick="chatAdd()">ส่ง</button>
-</div>
-
 <script>
-let data = JSON.parse(localStorage.getItem("dongData")||"[]")
-let coins = 0
-let level = 1
+let money = JSON.parse(localStorage.getItem("money")||"0");
 
-function save(){
-localStorage.setItem("dongData",JSON.stringify(data))
-updateUI()
+function update(){
+  document.getElementById("bal").textContent =
+    "฿" + money.toLocaleString("th-TH");
+}
+update();
+
+function add(){
+  const t = document.getElementById("chat").value;
+  const amt = parseFloat((t.match(/\\d+/)||[])[0]);
+
+  if(!amt){ alert("ใส่จำนวนเงินก่อน 🐻"); return; }
+
+  if(/รับ|เงินเดือน|ขาย/.test(t)){
+    money += amt;
+    speak("ได้เงินแล้ว ดีใจจัง");
+  }else{
+    money -= amt;
+    speak("ใช้เงินอีกแล้วนะ");
+  }
+
+  localStorage.setItem("money", money);
+  document.getElementById("chat").value="";
+  update();
 }
 
-function updateUI(){
-let inc=0,exp=0
-data.forEach(i=>{
-if(i.type==="income") inc+=i.amount
-else exp+=i.amount
-})
-income.textContent=inc
-expense.textContent=exp
+/* 🐻 ดงดงพูดได้ */
+function speak(text){
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "th-TH";
+  speechSynthesis.speak(u);
 }
 
-updateUI()
-
-/* 🧠 AUTO CATEGORY */
-function autoType(text){
-const incomeWords=["เงินเดือน","ขาย","โอนเข้า"]
-const expenseWords=["กาแฟ","ชา","grab","ข้าว","ค่า"]
-
-for(let w of incomeWords) if(text.includes(w)) return "income"
-for(let w of expenseWords) if(text.includes(w)) return "expense"
-
-return "expense"
-}
-
-/* 💬 CHAT ADD */
-function chatAdd(){
-let t=chat.value
-let num=parseInt(t.match(/\d+/))
-if(!num) return
-
-let type=autoType(t)
-
-data.push({amount:num,type})
-chat.value=""
-save()
-dongReact(type,num)
-}
-
-/* 🐻 REACTION */
-function dongReact(type,amt){
-moveDong()
-
-if(type==="income"){
-coins+=Math.floor(amt/50)
-speak("เก็บเงินเก่งมาก")
-}else{
-speak("ใช้เงินอีกแล้ว")
-}
-
-if(coins>=level*10){
-level++
-speak("เลเวลอัพ")
-}
-}
-
-/* 🐻 RUN ACROSS */
-function moveDong(){
-dong.style.left="110%"
-setTimeout(()=>dong.style.left="-80px",1200)
-}
-
-/* 🔊 VOICE */
-function speak(t){
-let m=new SpeechSynthesisUtterance(t)
-m.lang="th-TH"
-speechSynthesis.speak(m)
-}
-
-/* 🕒 CHANGE OUTFIT */
-function outfit(){
-let h=new Date().getHours()
-if(h<12) dong.textContent="🐻☀️"
-else if(h<18) dong.textContent="🐻🎒"
-else dong.textContent="🐻🌙"
-}
-setInterval(outfit,60000)
-outfit()
-
-/* ➕ FORM */
-function openForm(){
-let t=prompt("รายการ + จำนวน")
-if(!t) return
-let num=parseInt(t.match(/\d+/))
-let type=autoType(t)
-data.push({amount:num,type})
-save()
-dongReact(type,num)
-}
+/* เปลี่ยนหมีตามเวลา */
+const h = new Date().getHours();
+if(h<6) dong.textContent="🐻‍❄️";
+else if(h<12) dong.textContent="🐻‍❄️";
+else dong.textContent="🐻";
 </script>
 
 </body>
