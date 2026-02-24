@@ -11,10 +11,6 @@
   --card:#ffffff;
   --text:#2f2f2f;
   --border:#ededf3;
-
-  --primary:#111;
-  --income:#4fd1b5;
-  --expense:#ff8fa3;
 }
 
 body{
@@ -34,12 +30,7 @@ body{
 /* header */
 .header{
   text-align:center;
-  padding:20px 0 8px;
-}
-
-.header h1{
-  margin:0;
-  font-size:26px;
+  padding:20px 0;
 }
 
 /* card */
@@ -51,17 +42,9 @@ body{
   border:1px solid var(--border);
 }
 
-/* balance */
-.balance{
-  font-size:34px;
-  font-weight:700;
-  margin:6px 0;
-}
-
-.row{
-  display:flex;
-  justify-content:space-between;
-}
+/* pages */
+.page{display:none;}
+.page.active{display:block;}
 
 /* nav */
 .nav{
@@ -77,33 +60,53 @@ body{
   font-size:12px;
 }
 
-.nav div{
-  text-align:center;
-  cursor:pointer;
-}
-
-/* pages */
-.page{display:none;}
-.page.active{display:block;}
-
-/* mascot */
+/* 🐻 mascot */
 .mascot{
   position:fixed;
-  bottom:80px;
-  left:-80px;
-  font-size:42px;
+  bottom:85px;
+  left:-90px;
+  font-size:50px;
   transition:1s linear;
   z-index:999;
 }
+
+/* run */
 .mascot.run{
   left:110%;
 }
+
+/* jump */
+@keyframes jump{
+  0%{transform:translateY(0)}
+  50%{transform:translateY(-25px)}
+  100%{transform:translateY(0)}
+}
+.mascot.jump{
+  animation:jump .6s ease;
+}
+
+/* speech bubble */
+.speech{
+  position:fixed;
+  bottom:140px;
+  left:20px;
+  background:#fff;
+  padding:10px 14px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  font-size:13px;
+  opacity:0;
+  transition:.4s;
+}
+
+.speech.show{opacity:1;}
 </style>
 </head>
 
 <body>
 
-<div class="mascot" id="mascot">🐰</div>
+<div class="mascot" id="mascot">🐻</div>
+<div class="speech" id="speech">สู้ ๆ นะ!</div>
 
 <div class="container">
 
@@ -111,56 +114,28 @@ body{
 <h1>Don Note</h1>
 </div>
 
-<!-- SUMMARY -->
 <div id="summary" class="page active">
-  <div class="card">
-    <div>ยอดเงินคงเหลือ</div>
-    <div class="balance">฿12,450</div>
-    <div class="row">
-      <span style="color:var(--income)">รายรับ ฿20,000</span>
-      <span style="color:var(--expense)">รายจ่าย ฿7,550</span>
-    </div>
-  </div>
+  <div class="card">🏠 หน้าสรุป</div>
 </div>
 
-<!-- ANALYSIS -->
 <div id="analysis" class="page">
-  <div class="card">
-    📊 กราฟการใช้เงิน
-  </div>
+  <div class="card">📊 วิเคราะห์</div>
 </div>
 
-<!-- CATEGORY -->
 <div id="category" class="page">
-  <div class="card">
-    🍱 อาหาร<br>
-    🚗 เดินทาง<br>
-    🛍️ ช้อปปิ้ง<br>
-    🧾 บิล<br>
-    🎮 ความบันเทิง<br>
-    💊 สุขภาพ<br>
-    🎁 อื่นๆ
-  </div>
+  <div class="card">🗂️ หมวด</div>
 </div>
 
-<!-- LIST -->
 <div id="list" class="page">
-  <div class="card">
-    ☕ กาแฟ — ฿60<br>
-    🍜 ข้าว — ฿80
-  </div>
+  <div class="card">📋 รายการ</div>
 </div>
 
-<!-- SETTINGS -->
 <div id="settings" class="page">
-  <div class="card">
-    ⚙️ ตั้งค่าแอพ
-  </div>
+  <div class="card">⚙️ ตั้งค่า</div>
 </div>
 
 </div>
 
-<!-- NAV -->
 <div class="nav">
   <div onclick="go('summary')">🏠<br>สรุป</div>
   <div onclick="go('analysis')">📊<br>วิเคราะห์</div>
@@ -170,14 +145,42 @@ body{
 </div>
 
 <script>
+const mascot=document.getElementById('mascot');
+const speech=document.getElementById('speech');
+
+const phrases=[
+"เก็บเงินเก่งมาก 🐻",
+"สู้ ๆ นะ 🤍",
+"อย่าลืมจดรายจ่าย",
+"วันนี้ใช้เงินไปเท่าไรน้า",
+"เราจะรวยไปด้วยกัน!"
+];
+
+function randomSpeech(){
+  speech.textContent=phrases[Math.floor(Math.random()*phrases.length)];
+  speech.classList.add('show');
+  setTimeout(()=>speech.classList.remove('show'),2500);
+}
+
+/* เปลี่ยนชุดตามเวลา */
+function setOutfit(){
+  const h=new Date().getHours();
+  if(h<12) mascot.textContent="🐻🧣";
+  else if(h<18) mascot.textContent="🐻🏺";
+  else mascot.textContent="🐻🌙";
+}
+setOutfit();
+
+/* เปลี่ยนหน้า */
 function go(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById(page).classList.add('active');
 
-  const m=document.getElementById('mascot');
-  m.classList.remove('run');
-  void m.offsetWidth;
-  m.classList.add('run');
+  mascot.classList.remove('run','jump');
+  void mascot.offsetWidth;
+  mascot.classList.add('run','jump');
+
+  randomSpeech();
 }
 </script>
 
