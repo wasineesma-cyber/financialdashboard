@@ -171,20 +171,29 @@ function parseTextToEntry(text) {
   };
 }
 
-// ---------------- FIREBASE ADMIN INIT ----------------
-function initAdmin() {
+// ---------------- FIREBASE ADMIN function initAdmin() {
   if (admin.apps.length) return;
 
-  const svc = process.env.FIREBASE_SERVICE_ACCOUNT;
-  if (!svc) throw new Error("Missing FIREBASE_SERVICE_ACCOUNT");
+  const projectId = process.env.FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  let privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
-  // ต้องเป็น JSON ถูกต้องทั้งก้อน
-  const serviceAccount = JSON.parse(svc);
+  if (!projectId || !clientEmail || !privateKey) {
+    throw new Error("Missing Firebase credentials");
+  }
+
+  // 👇 สำคัญมาก
+  privateKey = privateKey.replace(/\\n/g, "\n");
 
   admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+    credential: admin.credential.cert({
+      projectId,
+      clientEmail,
+      privateKey,
+    }),
   });
 }
+
 
 // ---------------- SAVE TO FIRESTORE (dongNote/{userId}) ----------------
 async function saveEntryToFirestore({ userId, entry }) {
