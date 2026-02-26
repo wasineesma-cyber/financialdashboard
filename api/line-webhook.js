@@ -113,18 +113,36 @@ function makeFlexReceipt({ catName, catIcon, amount, liffUrl }) {
 }
 
 // แยกคำจากข้อความ
+// ฟังก์ชันแยกคำและเดาหมวดหมู่ (เวอร์ชันปรับปรุงให้ฉลาดขึ้น)
 function parseTextToEntry(text) {
+  // ดึงตัวเลขออกจากข้อความ
   const rawAmt = (text.match(/[\d,]+(\.\d+)?/) || [])[0];
   const amount = parseFloat((rawAmt || "").replace(/,/g, "")) || 0;
-  if (!amount) return null;
+  
+  if (!amount || isNaN(amount)) return null;
 
-  let catId = "food", catName = "อาหาร", catIcon = "🍜", type = "expense";
+  let catId = "other", catName = "อื่นๆ", catIcon = "📦", type = "expense";
   const t = text.toLowerCase();
   
-  if (/เงินเดือน|salary|รายรับ/i.test(t)) { type = "income"; catId = "salary"; catName = "รายรับ"; catIcon = "💼"; }
-  else if (/กาแฟ|ชา|น้ำ|coffee/i.test(t)) { catId = "drink"; catName = "เครื่องดื่ม"; catIcon = "🧋"; }
-  else if (/grab|เดลิเวอรี|ส่งอาหาร/i.test(t)) { catId = "deliver"; catName = "เดลิเวอรี"; catIcon = "🛵"; }
-  else if (/เดินทาง|รถ|mrt|bts/i.test(t)) { catId = "travel"; catName = "เดินทาง"; catIcon = "🚌"; }
+  // Logic การเดาหมวดหมู่ให้ตรงกับ EXP_CATS และ INC_CATS ในแอป
+  if (/เงินเดือน|salary|โบนัส|รายได้|ค่าจ้าง/i.test(t)) { 
+    type = "income"; catId = "salary"; catName = "เงินเดือน"; catIcon = "💼"; 
+  } 
+  else if (/ข้าว|อาหาร|กิน|ทาน|มื้อ|ก๋วยเตี๋ยว|shabu|บุฟเฟ่/i.test(t)) {
+    catId = "food"; catName = "อาหาร"; catIcon = "🍜";
+  } 
+  else if (/กาแฟ|ชา|น้ำ|ชานม|ไข่มุก|coffee|cafe|ดื่ม/i.test(t)) {
+    catId = "drink"; catName = "เครื่องดื่ม"; catIcon = "🧋";
+  } 
+  else if (/grab|lineman|foodpanda|เดลิเวอรี|delivery/i.test(t)) {
+    catId = "deliver"; catName = "เดลิเวอรี"; catIcon = "🛵";
+  } 
+  else if (/เดินทาง|รถ|mrt|bts|แท็กซี่|taxi|น้ำมัน|รถเมล์/i.test(t)) {
+    catId = "travel"; catName = "เดินทาง"; catIcon = "🚌";
+  }
+  else if (/ซื้อ|ช้อป|🛍️|shopee|lazada|เสื้อผ้า/i.test(t)) {
+    catId = "shop"; catName = "ชอปปิ้ง"; catIcon = "🛍️";
+  }
 
   return {
     id: Date.now(),
@@ -135,9 +153,10 @@ function parseTextToEntry(text) {
     catIcon,
     note: text,
     date: new Date().toISOString().slice(0, 10),
-    source: "line-webhook"
+    source: "line-webhook" // ระบุแหล่งที่มาเพื่อให้แอปแยกแยะได้
   };
 }
+
 
 // Handler หลัก
 export default async function handler(req, res) {
