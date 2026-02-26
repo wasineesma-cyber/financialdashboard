@@ -3,9 +3,10 @@ import crypto from "crypto";
 import admin from "firebase-admin";
 
 export const config = {
-  api: { bodyParser: false },
+  api: { bodyParser: false }, // ต้องปิดเพื่ออ่าน raw body
 };
 
+// ---------- อ่าน raw body ----------
 function getRawBody(req) {
   return new Promise((resolve, reject) => {
     let data = "";
@@ -15,6 +16,7 @@ function getRawBody(req) {
   });
 }
 
+// ---------- verify signature ----------
 function verifySignature(rawBody, signature, channelSecret) {
   const hash = crypto
     .createHmac("SHA256", channelSecret)
@@ -23,6 +25,7 @@ function verifySignature(rawBody, signature, channelSecret) {
   return hash === signature;
 }
 
+// ---------- reply to LINE ----------
 async function replyMessage(replyToken, messages) {
   const accessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
   if (!accessToken) throw new Error("Missing LINE_CHANNEL_ACCESS_TOKEN");
@@ -42,6 +45,7 @@ async function replyMessage(replyToken, messages) {
   }
 }
 
+// ---------- flex card ----------
 function makeFlexReceipt({ catName, catIcon, amount, liffUrl }) {
   const cleanLiff = liffUrl?.split("&entryId=")[0] || liffUrl;
 
@@ -75,23 +79,15 @@ function makeFlexReceipt({ catName, catIcon, amount, liffUrl }) {
         layout: "vertical",
         spacing: "sm",
         contents: [
-          {
-            type: "button",
-            style: "primary",
-            color: "#FF4785",
-            action: { type: "uri", label: "ดูรายการนี้", uri: liffUrl },
-          },
-          {
-            type: "button",
-            style: "secondary",
-            action: { type: "uri", label: "เปิดหน้าแอพ", uri: cleanLiff },
-          },
+          { type: "button", style: "primary", color: "#FF4785", action: { type: "uri", label: "ดูรายการนี้", uri: liffUrl } },
+          { type: "button", style: "secondary", action: { type: "uri", label: "เปิดหน้าแอพ", uri: cleanLiff } },
         ],
       },
     },
   };
 }
 
+// ---------- parse text ----------
 function parseTextToEntry(text) {
   const rawAmt = (text.match(/[\d,]+(\.\d+)?/) || [])[0];
   const amount = parseFloat((rawAmt || "").replace(/,/g, "")) || 0;
@@ -100,19 +96,23 @@ function parseTextToEntry(text) {
   let catId = "food", catName = "อาหาร", catIcon = "🍜", type = "expense";
 
   if (/เงินเดือน|salary|รายรับ|ได้มา|รับเงิน|โอนเข้า/i.test(text)) {
-    type = "income"; catId = "salary"; catName = "รายรับ"; catIcon = "💼";
+    type = "income"; catId = "salary"; catName = "เงินเดือน"; catIcon = "💼";
   }
   if (/กาแฟ|ชา|ไข่มุก|ชานม|น้ำ|coffee|matcha|cocoa/i.test(text)) {
     type = "expense"; catId = "drink"; catName = "เครื่องดื่ม"; catIcon = "🧋";
   }
-  if (/grab|foodpanda|lineman|เดลิเวอรี/i.test(text)) {
+  if (/grab|foodpanda|lineman|shopeefood|เดลิเวอรี|ส่งอาหาร/i.test(text)) {
     type = "expense"; catId = "deliver"; catName = "เดลิเวอรี"; catIcon = "🛵";
   }
-  if (/เดินทาง|รถ|แท็กซี่|bts|mrt|น้ำมัน/i.test(text)) {
+  if (/เดินทาง|รถ|แท็กซี่|bts|mrt|น้ำมัน|ทางด่วน/i.test(text)) {
     type = "expense"; catId = "travel"; catName = "เดินทาง"; catIcon = "🚌";
   }
 
+  // สำคัญ: ใส่ id ไว้ใช้ deep link + ให้แอพหาเจอ
+  const id = Date.now();
+
   return {
+    id,
     type,
     amount,
     catId,
@@ -124,35 +124,55 @@ function parseTextToEntry(text) {
   };
 }
 
+// ---------- firebase admin init ----------
 function initAdmin() {
   if (admin.apps.length) return;
 
+  // ใช้แบบ JSON ทั้งก้อน
+  const svc = process.env.FIREBASE_SERVICE_ACCOUNT;
+  if (svc) {
+    const serviceAccount = JSON.parse(svc);
+    admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+    return;
+  }
+
+  // หรือใช้แบบแยก 3 ค่า
   const projectId = process.env.FIREBASE_PROJECT_ID;
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
   let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+  if (privateKey) privateKey = privateKey.replace(/\\n/g, "\n");
 
   if (!projectId || !clientEmail || !privateKey) {
-    throw new Error("Missing FIREBASE_PROJECT_ID / FIREBASE_CLIENT_EMAIL / FIREBASE_PRIVATE_KEY");
+    throw new Error("Missing Firebase Admin credentials (service account or split keys).");
   }
-
-  // จุดสำคัญ: แปลง \n (ตัวอักษร) ให้เป็น newline จริง
-  privateKey = privateKey.replace(/\\n/g, "\n");
 
   admin.initializeApp({
     credential: admin.credential.cert({ projectId, clientEmail, privateKey }),
   });
 }
 
-async function saveEntryToFirestore({ userId, entry }) {
+// ---------- save entry to SAME place as your app ----------
+async function appendEntryToDonNoteDoc({ userId, entry }) {
   initAdmin();
   const db = admin.firestore();
-  const ref = await db.collection("users").doc(userId).collection("entries").add(entry);
-  return ref.id;
+  const { FieldValue } = admin.firestore;
+
+  // แอพคุณใช้: dongNote/{userId} มี entries เป็น array
+  // เรา append เข้า array เดิม โดยไม่ทับ
+  await db.collection("dongNote").doc(userId).set(
+    {
+      entries: FieldValue.arrayUnion(entry),
+      updatedAt: new Date().toISOString(),
+    },
+    { merge: true }
+  );
+
+  return entry.id; // ใช้เป็น entryId ใน deep link ได้เลย
 }
 
+// ---------- main handler ----------
 export default async function handler(req, res) {
   try {
-    // ให้ GET ทดสอบใน browser ได้
     if (req.method !== "POST") return res.status(200).send("OK");
 
     const rawBody = await getRawBody(req);
@@ -161,10 +181,7 @@ export default async function handler(req, res) {
     const secret = process.env.LINE_CHANNEL_SECRET;
     if (!secret) return res.status(500).send("Missing LINE_CHANNEL_SECRET");
     if (!signature) return res.status(400).send("Missing signature");
-
-    if (!verifySignature(rawBody, signature, secret)) {
-      return res.status(401).send("Unauthorized");
-    }
+    if (!verifySignature(rawBody, signature, secret)) return res.status(401).send("Unauthorized");
 
     const body = JSON.parse(rawBody);
     const ev = body?.events?.[0];
@@ -184,7 +201,8 @@ export default async function handler(req, res) {
       return res.status(200).send("OK");
     }
 
-    const entryId = await saveEntryToFirestore({ userId, entry });
+    // ✅ บันทึกเข้าที่เดียวกับแอพ
+    const entryId = await appendEntryToDonNoteDoc({ userId, entry });
 
     const LIFF_ID = process.env.LIFF_ID;
     if (!LIFF_ID) throw new Error("Missing LIFF_ID");
@@ -202,7 +220,7 @@ export default async function handler(req, res) {
     return res.status(200).send("OK");
   } catch (e) {
     console.error("line-webhook error:", e);
-    // ตอบ 200 กัน LINE retry รัวๆ
+    // ตอบ 200 เพื่อไม่ให้ LINE ยิงซ้ำรัวๆ
     return res.status(200).send("OK");
   }
 }
