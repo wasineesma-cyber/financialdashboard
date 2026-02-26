@@ -172,6 +172,7 @@ function parseTextToEntry(text) {
 }
 
 // ---------------- FIREBASE ADMIN function initAdmin() {
+function initAdmin() {
   if (admin.apps.length) return;
 
   const projectId = process.env.FIREBASE_PROJECT_ID;
