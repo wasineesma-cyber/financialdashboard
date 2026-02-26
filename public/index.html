@@ -252,9 +252,8 @@ body{padding-bottom:var(--nav-h);}
 <div id="dong-run">🐼</div>
 <div class="toast" id="toast"></div>
 
-
 <script>
-// 1. ตั้งค่าพื้นฐาน (ห้ามลบ)
+// 1. ตั้งค่าพื้นฐาน
 const firebaseConfig = {
   apiKey: "AIzaSyAxEfomFx8g_Du_tdFjU1ji1-Hofno-sv8",
   authDomain: "don-note-f2bcd.firebaseapp.com",
@@ -272,7 +271,7 @@ db.settings({ ignoreUndefinedProperties: true });
 const LIFF_ID = '2009250866-MmcKPhwq';
 let userId = null, lineProfile = null, hasLinePic = false;
 
-// 2. ข้อมูลหมวดหมู่ (ตัวสร้าง UI ปุ่มต่างๆ)
+// 2. ข้อมูลหมวดหมู่
 const EXP_CATS = [
   {id:'food', icon:'🍜', name:'อาหาร'}, {id:'drink', icon:'🧋', name:'กาแฟ'},
   {id:'deliver', icon:'🛵', name:'เดลิเวอรี'}, {id:'travel', icon:'🚌', name:'เดินทาง'},
@@ -331,7 +330,7 @@ function useFallbackUserId() {
   init();
 }
 
-// 5. ฟังก์ชันเริ่มต้นแอป (วาด UI ครั้งแรก)
+// 5. ฟังก์ชันเริ่มต้นแอป
 function init() {
   document.getElementById('filterMonth').value = new Date().toISOString().slice(0, 7);
   renderCatGrid2(); renderAll(); renderBudgetList();
@@ -339,7 +338,7 @@ function init() {
   setTimeout(() => document.getElementById('splash').classList.add('hide'), 1000);
 }
 
-// 6. ฟังก์ชันวาด UI หมวดหมู่ (สำคัญมาก: ถ้าเอาออก UI จะหาย)
+// 6. ฟังก์ชันวาด UI
 function renderCatGrid2() {
   const cats = addType === 'expense' ? EXP_CATS : INC_CATS;
   const grid = document.getElementById('catGrid2');
@@ -349,7 +348,6 @@ function renderCatGrid2() {
       <div class="cc2-icon">${c.icon}</div><div class="cc2-name">${c.name}</div>
     </div>`).join('');
 }
-
 function selCat2(id) { selCatId = id; renderCatGrid2(); }
 
 // 7. ฟังก์ชันซิงค์ Cloud
@@ -375,13 +373,14 @@ async function loadFromCloud() {
   } catch(e) { console.error(e); }
 }
 
-// 8. ฟังก์ชันอื่นๆ (ใส่ให้ครบห้ามตัด)
+// 8. ฟังก์ชันประมวลผล (เติมให้ครบ)
 function goPanel(id) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   const key = id.replace('panel-', '');
-  document.getElementById('nav-' + key)?.classList.add('active');
+  const btn = document.getElementById('nav-' + key);
+  if(btn) btn.classList.add('active');
   if (id === 'panel-history') renderHistory();
 }
 
@@ -391,20 +390,104 @@ function renderAll() {
   const inc = cur.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
   const exp = cur.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
   const bal = inc - exp;
-  if(document.getElementById('balAmount')) document.getElementById('balAmount').textContent = '฿' + bal.toLocaleString();
-  if(document.getElementById('ieIncAmt')) document.getElementById('ieIncAmt').textContent = '฿' + inc.toLocaleString();
-  if(document.getElementById('ieExpAmt')) document.getElementById('ieExpAmt').textContent = '฿' + exp.toLocaleString();
+  document.getElementById('balAmount').textContent = '฿' + bal.toLocaleString();
+  document.getElementById('ieIncAmt').textContent = '฿' + inc.toLocaleString();
+  document.getElementById('ieExpAmt').textContent = '฿' + exp.toLocaleString();
   renderCatRows(); renderPieChart();
 }
 
-// ... (คงฟังก์ชัน renderCatRows, renderPieChart, renderHistory, addEntry ไว้เหมือนเดิม) ...
-// หมายเหตุ: เพื่อประหยัดพื้นที่ ผมละส่วนที่เหลือไว้ แต่ในไฟล์จริงของคุณ "ห้ามลบ" ฟังก์ชันที่เหลือนะครับ
+function renderCatRows() {
+  const ym = new Date().toISOString().slice(0, 7);
+  const md = entries.filter(e => e.date.startsWith(ym) && e.type === sumTab);
+  const catMap = {};
+  md.forEach(e => { catMap[e.catId] = (catMap[e.catId] || 0) + e.amount; });
+  const cats = sumTab === 'expense' ? EXP_CATS : INC_CATS;
+  document.getElementById('catRows').innerHTML = cats.map(c => {
+    const amt = catMap[c.id] || 0;
+    const bgt = budgets[c.id] || 0;
+    const pct = bgt > 0 ? Math.min(100, (amt / bgt) * 100) : 0;
+    return `
+      <div class="cat-row">
+        <div class="cat-row-top"><span class="cat-row-name">${c.name}</span><span class="cat-row-amt">฿${amt.toLocaleString()} / ${bgt > 0 ? '฿' + bgt.toLocaleString() : '-'}</span></div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${pct}%; background:${sumTab === 'expense' ? 'var(--pink)' : (INC_COLORS[c.id] || 'var(--teal)')};"></div>
+        </div>
+      </div>`;
+  }).join('');
+}
 
+function addEntry() {
+  const amt = parseFloat(document.getElementById('inputAmt').value);
+  if (!amt || amt <= 0) return showToast('ใส่ยอดเงินก่อนนะ 🐼');
+  const cat = [...EXP_CATS, ...INC_CATS].find(c => c.id === selCatId);
+  entries.push({ id: Date.now(), type: addType, amount: amt, catId: cat.id, catIcon: cat.icon, catName: cat.name, note: document.getElementById('noteField').value || cat.name, date: new Date().toISOString().slice(0, 10) });
+  save(); renderAll(); goPanel('panel-home');
+  document.getElementById('inputAmt').value = ''; document.getElementById('noteField').value = '';
+  showToast('บันทึกเรียบร้อยแล้ว ✨');
+}
+
+function parseChat() {
+  const text = document.getElementById('chatIn').value.trim();
+  const amt = parseFloat((text.match(/\d+/) || [])[0]);
+  if (!amt) return showToast('ลืมใส่ยอดเงินหรือเปล่า? 🐼');
+  let type = text.includes('รับ') ? 'income' : 'expense';
+  const cat = (type === 'expense' ? EXP_CATS : INC_CATS)[0];
+  entries.push({ id: Date.now(), type, amount: amt, catId: cat.id, catIcon: cat.icon, catName: cat.name, note: text, date: new Date().toISOString().slice(0, 10) });
+  save(); renderAll(); document.getElementById('chatIn').value = '';
+  showToast('โน้ตให้แล้วนะ! 🐼✨');
+}
+
+function renderHistory() {
+  const ym = document.getElementById('filterMonth').value;
+  const list = entries.filter(e => e.date.startsWith(ym)).reverse();
+  document.getElementById('txList2').innerHTML = list.length ? list.map(e => `
+    <div class="tx2 ${e.type}">
+      <div class="tx2-icon">${e.catIcon}</div>
+      <div class="tx2-info"><div class="tx2-desc">${e.note}</div><div class="tx2-meta">${e.catName} · ${e.date}</div></div>
+      <div class="tx2-amt">${e.type === 'income' ? '+' : '-'}฿${e.amount.toLocaleString()}</div>
+      <button class="tx2-del" onclick="delEntry(${e.id})">🗑️</button>
+    </div>`).join('') : '<div style="text-align:center;padding:40px;color:var(--sub);">ยังไม่มีรายการจ้า 🐼</div>';
+}
+
+function renderPieChart() {
+  const canvas = document.getElementById('pieChart');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const ym = new Date().toISOString().slice(0, 7);
+  const cur = entries.filter(e => e.date.startsWith(ym));
+  const inc = cur.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
+  const exp = cur.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
+  const total = inc + exp;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if(total === 0) return;
+  let start = -Math.PI / 2;
+  const drawSlice = (amt, color) => {
+    const slice = (amt / total) * Math.PI * 2;
+    ctx.beginPath(); ctx.moveTo(90, 90); ctx.arc(90, 90, 80, start, start + slice);
+    ctx.fillStyle = color; ctx.fill(); start += slice;
+  };
+  drawSlice(exp, '#FF4785'); drawSlice(inc, '#00C9A7');
+  ctx.beginPath(); ctx.arc(90, 90, 55, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill();
+}
+
+function delEntry(id) { if(confirm('ลบรายการนี้ไหม?')) { entries = entries.filter(e => e.id !== id); save(); renderAll(); renderHistory(); } }
+function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
+function initDong() { }
+function runDong() { showToast('สู้ๆ นะ วันนี้ประหยัดเก่งมาก! 🐼'); }
+function save() { localStorage.setItem('dong_entries', JSON.stringify(entries)); saveToCloud(); }
+function setAddType(t) { addType = t; renderCatGrid2(); }
+function switchSumTab(t) { sumTab = t; renderAll(); }
+function setAmt(v) { document.getElementById('inputAmt').value = v; }
+function dismissInstall() { document.getElementById('installBanner').style.display = 'none'; }
+function cyclePeriod() { showToast('เปลี่ยนรอบงบได้เร็วๆ นี้! 🐼'); }
+
+// ══════ START ══════
 initLiff();
 </script>
+
+
 </body>
 </html>
-
 
 
 
