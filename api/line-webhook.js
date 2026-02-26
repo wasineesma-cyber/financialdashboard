@@ -3,10 +3,9 @@ import crypto from "crypto";
 import admin from "firebase-admin";
 
 export const config = {
-  api: { bodyParser: false }, // ต้องปิดเพื่ออ่าน raw body สำหรับ verify signature
+  api: { bodyParser: false },
 };
 
-// ---------- helpers: raw body ----------
 function getRawBody(req) {
   return new Promise((resolve, reject) => {
     let data = "";
@@ -16,7 +15,6 @@ function getRawBody(req) {
   });
 }
 
-// ---------- LINE signature verify ----------
 function verifySignature(rawBody, signature, channelSecret) {
   const hash = crypto
     .createHmac("SHA256", channelSecret)
@@ -25,7 +23,6 @@ function verifySignature(rawBody, signature, channelSecret) {
   return hash === signature;
 }
 
-// ---------- LINE reply ----------
 async function replyMessage(replyToken, messages) {
   const accessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
   if (!accessToken) throw new Error("Missing LINE_CHANNEL_ACCESS_TOKEN");
@@ -45,7 +42,6 @@ async function replyMessage(replyToken, messages) {
   }
 }
 
-// ---------- flex card ----------
 function makeFlexReceipt({ catName, catIcon, amount, liffUrl }) {
   const cleanLiff = liffUrl?.split("&entryId=")[0] || liffUrl;
 
@@ -67,30 +63,11 @@ function makeFlexReceipt({ catName, catIcon, amount, liffUrl }) {
             spacing: "sm",
             contents: [
               { type: "text", text: catIcon || "💾", size: "xl", flex: 0 },
-              {
-                type: "text",
-                text: catName || "รายการ",
-                size: "md",
-                flex: 4,
-                wrap: true,
-              },
-              {
-                type: "text",
-                text: `฿${amount}`,
-                size: "md",
-                weight: "bold",
-                align: "end",
-                flex: 2,
-              },
+              { type: "text", text: catName || "รายการ", size: "md", flex: 4, wrap: true },
+              { type: "text", text: `฿${amount}`, size: "md", weight: "bold", align: "end", flex: 2 },
             ],
           },
-          {
-            type: "text",
-            text: "กดเพื่อไปดูในแอพ Don Note",
-            size: "sm",
-            color: "#8E8E93",
-            wrap: true,
-          },
+          { type: "text", text: "กดเพื่อไปดูในแอพ Don Note", size: "sm", color: "#8E8E93", wrap: true },
         ],
       },
       footer: {
@@ -115,44 +92,24 @@ function makeFlexReceipt({ catName, catIcon, amount, liffUrl }) {
   };
 }
 
-// ---------- parse text -> entry ----------
 function parseTextToEntry(text) {
   const rawAmt = (text.match(/[\d,]+(\.\d+)?/) || [])[0];
   const amount = parseFloat((rawAmt || "").replace(/,/g, "")) || 0;
   if (!amount) return null;
 
-  let catId = "food",
-    catName = "อาหาร",
-    catIcon = "🍜",
-    type = "expense";
+  let catId = "food", catName = "อาหาร", catIcon = "🍜", type = "expense";
 
   if (/เงินเดือน|salary|รายรับ|ได้มา|รับเงิน|โอนเข้า/i.test(text)) {
-    type = "income";
-    catId = "salary";
-    catName = "รายรับ";
-    catIcon = "💼";
+    type = "income"; catId = "salary"; catName = "รายรับ"; catIcon = "💼";
   }
-
   if (/กาแฟ|ชา|ไข่มุก|ชานม|น้ำ|coffee|matcha|cocoa/i.test(text)) {
-    type = "expense";
-    catId = "drink";
-    catName = "เครื่องดื่ม";
-    catIcon = "🧋";
+    type = "expense"; catId = "drink"; catName = "เครื่องดื่ม"; catIcon = "🧋";
   }
-
-  // ✅ ให้ตรงกับหน้าเว็บของคุณ: deliver (ไม่ใช่ delivery)
-  if (/grab|foodpanda|lineman|shopeefood|เดลิเวอรี|ส่งอาหาร/i.test(text)) {
-    type = "expense";
-    catId = "deliver";
-    catName = "เดลิเวอรี";
-    catIcon = "🛵";
+  if (/grab|foodpanda|lineman|เดลิเวอรี/i.test(text)) {
+    type = "expense"; catId = "deliver"; catName = "เดลิเวอรี"; catIcon = "🛵";
   }
-
-  if (/เดินทาง|รถ|แท็กซี่|bts|mrt|น้ำมัน|ทางด่วน/i.test(text)) {
-    type = "expense";
-    catId = "travel";
-    catName = "เดินทาง";
-    catIcon = "🚌";
+  if (/เดินทาง|รถ|แท็กซี่|bts|mrt|น้ำมัน/i.test(text)) {
+    type = "expense"; catId = "travel"; catName = "เดินทาง"; catIcon = "🚌";
   }
 
   return {
@@ -167,7 +124,6 @@ function parseTextToEntry(text) {
   };
 }
 
-// ---------- firebase admin init (SPLIT ENV) ----------
 function initAdmin() {
   if (admin.apps.length) return;
 
@@ -175,38 +131,28 @@ function initAdmin() {
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
   let privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
-  // เวลาวางใน Vercel มักเป็น \n ต้องแปลงกลับเป็นขึ้นบรรทัดจริง
-  if (privateKey) privateKey = privateKey.replace(/\\n/g, "\n");
-
   if (!projectId || !clientEmail || !privateKey) {
-    throw new Error(
-      "Missing Firebase Admin env. Need FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY"
-    );
+    throw new Error("Missing FIREBASE_PROJECT_ID / FIREBASE_CLIENT_EMAIL / FIREBASE_PRIVATE_KEY");
   }
+
+  // จุดสำคัญ: แปลง \n (ตัวอักษร) ให้เป็น newline จริง
+  privateKey = privateKey.replace(/\\n/g, "\n");
 
   admin.initializeApp({
     credential: admin.credential.cert({ projectId, clientEmail, privateKey }),
   });
 }
 
-// ---------- save entry to firestore ----------
 async function saveEntryToFirestore({ userId, entry }) {
   initAdmin();
   const db = admin.firestore();
-
-  const ref = await db
-    .collection("users")
-    .doc(userId)
-    .collection("entries")
-    .add(entry);
-
+  const ref = await db.collection("users").doc(userId).collection("entries").add(entry);
   return ref.id;
 }
 
-// ---------- main handler ----------
 export default async function handler(req, res) {
   try {
-    // ให้ GET/อื่นๆ ตอบ OK เฉยๆ (กัน Safari test / LINE verify บางจังหวะ)
+    // ให้ GET ทดสอบใน browser ได้
     if (req.method !== "POST") return res.status(200).send("OK");
 
     const rawBody = await getRawBody(req);
@@ -220,14 +166,7 @@ export default async function handler(req, res) {
       return res.status(401).send("Unauthorized");
     }
 
-    let body;
-    try {
-      body = JSON.parse(rawBody);
-    } catch (e) {
-      console.error("JSON parse error:", e);
-      return res.status(200).send("OK");
-    }
-
+    const body = JSON.parse(rawBody);
     const ev = body?.events?.[0];
     if (!ev) return res.status(200).send("OK");
 
@@ -241,24 +180,17 @@ export default async function handler(req, res) {
 
     const entry = parseTextToEntry(text);
     if (!entry) {
-      await replyMessage(replyToken, [
-        { type: "text", text: "พิมพ์แบบนี้ได้เลย เช่น “อาหาร 50” หรือ “ชาไข่มุก 65” 🙂" },
-      ]);
+      await replyMessage(replyToken, [{ type: "text", text: "พิมพ์แบบนี้ได้เลย เช่น “อาหาร 50” หรือ “ชาไข่มุก 65” 🙂" }]);
       return res.status(200).send("OK");
     }
 
-    // บันทึกลง Firestore
     const entryId = await saveEntryToFirestore({ userId, entry });
 
-    // LIFF deep link
     const LIFF_ID = process.env.LIFF_ID;
     if (!LIFF_ID) throw new Error("Missing LIFF_ID");
 
-    const liffUrl = `https://liff.line.me/${LIFF_ID}?page=history&entryId=${encodeURIComponent(
-      entryId
-    )}`;
+    const liffUrl = `https://liff.line.me/${LIFF_ID}?page=history&entryId=${encodeURIComponent(entryId)}`;
 
-    // ส่งการ์ด
     const flex = makeFlexReceipt({
       catName: entry.catName,
       catIcon: entry.catIcon,
@@ -270,7 +202,7 @@ export default async function handler(req, res) {
     return res.status(200).send("OK");
   } catch (e) {
     console.error("line-webhook error:", e);
-    // สำคัญ: ตอบ 200 เพื่อไม่ให้ LINE retry รัวๆ
+    // ตอบ 200 กัน LINE retry รัวๆ
     return res.status(200).send("OK");
   }
 }
