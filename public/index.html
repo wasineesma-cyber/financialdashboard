@@ -649,12 +649,18 @@ function renderPieChart(inc, exp) {
 }
 
 function saveData() {
-  localStorage.setItem('dong_entries', JSON.stringify(entries));
-  localStorage.setItem('dong_budgets', JSON.stringify(budgets));
-  if(userId) {
-    db.collection('users').doc(userId).set({ entries, budgets, lastUpdate: new Date() });
-  }
+    localStorage.setItem('dong_entries', JSON.stringify(entries));
+    localStorage.setItem('dong_budgets', JSON.stringify(budgets));
+    if(userId && userId !== 'local_user') {
+        // แก้จาก 'users' เป็น 'dongNote'
+        db.collection('dongNote').doc(userId).set({ 
+            entries, 
+            budgets, 
+            lastUpdate: firebase.firestore.FieldValue.serverTimestamp() 
+        }, { merge: true }).catch(e => console.error("Sync Error", e));
+    }
 }
+
 
 function showToast(m) {
   const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show');
