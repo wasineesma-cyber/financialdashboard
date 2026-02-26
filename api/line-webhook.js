@@ -113,11 +113,7 @@ function makeFlexReceipt({ catName, catIcon, amount, liffUrl, liffHomeUrl }) {
             action: { type: "uri", label: "ดูรายการนี้", uri: liffUrl },
           },
           {
-            type: "button",
-            style: "secondary",
-            action: { type: "uri", label: "เปิดหน้าแอพ", uri: liffHomeUrl },
-          },
-        ],
+           
       },
     },
   };
