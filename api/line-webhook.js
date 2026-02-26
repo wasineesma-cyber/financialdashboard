@@ -79,7 +79,7 @@ async function replyMessage(replyToken, messages) {
 
 
 function makeFlexReceipt({ catName, catIcon, amount, liffUrl }) {
-  const liffUrl = `https://liff.line.me/${process.env.LIFF_ID}#history`; // ใช้ # แทน ?;
+const liffUrl = `https://liff.line.me/${process.env.LIFF_ID}#history`; 
   return {
     type: "flex",
     altText: `บันทึกแล้ว: ${catName} ฿${amount}`,
@@ -116,6 +116,8 @@ function makeFlexReceipt({ catName, catIcon, amount, liffUrl }) {
     },
   };
 }
+
+
 
 // แยกคำจากข้อความ
 // ฟังก์ชันแยกคำและเดาหมวดหมู่ (เวอร์ชันปรับปรุงให้ฉลาดขึ้น)
