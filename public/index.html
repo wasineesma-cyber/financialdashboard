@@ -33,297 +33,96 @@
   --border:     #E5E5EA;
   --nav-h:      60px;
 }
-
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Text','Segoe UI',sans-serif;}
 body{padding-bottom:var(--nav-h);}
-
-/* ── HEADER ── */
-.header{
-  background:var(--white);
-  padding:12px 18px;
-  padding-top:calc(12px + env(safe-area-inset-top));
-  display:flex;align-items:center;justify-content:center;
-  position:relative;
-}
+.header{background:var(--white);padding:12px 18px;padding-top:calc(12px + env(safe-area-inset-top));display:flex;align-items:center;justify-content:center;position:relative;}
 .header-title{font-size:1rem;font-weight:700;color:var(--text);}
-.header-bear{
-  position:absolute;left:16px;
-  font-size:1.3rem;cursor:pointer;
-}
-.header-right{position:absolute;right:16px;font-size:.8rem;color:var(--sub);}
-
-/* ── BOTTOM NAV ── */
-.bottom-nav{
-  position:fixed;bottom:0;left:0;right:0;
-  height:var(--nav-h);
-  background:var(--white);
-  border-top:1px solid var(--border);
-  display:grid;grid-template-columns:repeat(5,1fr);
-  padding-bottom:env(safe-area-inset-bottom);
-  z-index:100;
-}
-.nav-btn{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:3px;background:none;border:none;cursor:pointer;
-  color:var(--sub);font-size:.58rem;font-weight:600;letter-spacing:.02em;
-  transition:color .2s;
-}
-.nav-btn .ni{font-size:1.3rem;}
+.header-bear{position:absolute;left:16px;font-size:1.3rem;cursor:pointer;}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);background:var(--white);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom);z-index:100;}
+.nav-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;cursor:pointer;color:var(--sub);font-size:.58rem;font-weight:600;letter-spacing:.02em;}
 .nav-btn.active{color:var(--pink);}
-
-/* ── PANELS ── */
 .panel{display:none;max-width:480px;margin:0 auto;padding:14px 14px;}
 .panel.active{display:block;}
-
-.period-pill{
-  display:flex;align-items:center;justify-content:center;
-  gap:6px;margin:0 auto 14px;
-  background:var(--white);border:1px solid var(--border);
-  border-radius:20px;padding:8px 18px;
-  font-size:.85rem;font-weight:600;color:var(--text);
-  width:fit-content;cursor:pointer;
-}
-.period-pill .pi-arrow{color:var(--sub);font-size:.7rem;}
-
 .balance-wrap{text-align:center;margin-bottom:14px;}
-.balance-label{font-size:.72rem;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:.06em;}
 .balance-amount{font-size:2.6rem;font-weight:900;margin:4px 0 8px;color:#1C1C1E;}
-.balance-amount.positive{color:#34C759;}
-.balance-amount.negative{color:var(--pink);}
-.period-btn{
-  display:inline-flex;align-items:center;gap:5px;
-  border:1px solid var(--border);border-radius:20px;
-  padding:6px 14px;font-size:.78rem;font-weight:600;color:var(--text);
-  background:var(--white);cursor:pointer;
-}
-
 .ie-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
-.ie-card{
-  padding:14px 14px;border-radius:16px;border:2px solid var(--border);
-  background:var(--white);cursor:pointer;transition:border-color .2s;
-}
-.ie-card.exp-card{background:var(--pink-light);}
-.ie-card.inc-card{background:var(--teal-light);}
+.ie-card{padding:14px;border-radius:16px;border:2px solid var(--border);background:var(--white);cursor:pointer;}
 .ie-card.active.exp-card{border-color:var(--pink);}
 .ie-card.active.inc-card{border-color:var(--teal);}
-.ie-card .iec-label{font-size:.72rem;font-weight:700;margin-bottom:5px;}
-.ie-card.exp-card .iec-label{color:var(--pink);}
-.ie-card.inc-card .iec-label{color:var(--teal);}
-.ie-card .iec-amount{font-size:1.25rem;font-weight:900;}
-.ie-card.exp-card .iec-amount{color:var(--pink);}
-.ie-card.inc-card .iec-amount{color:var(--teal);}
-
-.sum-card{
-  background:var(--white);border-radius:20px;
-  padding:18px 16px;
-  box-shadow:0 1px 6px rgba(0,0,0,.07);
-}
-.sum-card-header{
-  display:flex;align-items:center;gap:10px;
-  margin-bottom:18px;
-}
-.dong-badge{
-  width:44px;height:44px;flex-shrink:0;
-  background:radial-gradient(circle,#fff8e7,#fff0d0);
-  border:2px solid #F0C040;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:.55rem;font-weight:800;color:#C07800;text-align:center;
-  line-height:1.2;letter-spacing:.01em;
-  box-shadow:0 2px 6px rgba(192,120,0,.2);
-}
-.sum-card-title{
-  flex:1;text-align:center;
-  font-size:1.05rem;font-weight:800;
-}
-.sum-card-title.exp-title{color:var(--pink);}
-.sum-card-title.inc-title{color:var(--teal);}
-
+.sum-card{background:var(--white);border-radius:20px;padding:18px 16px;box-shadow:0 1px 6px rgba(0,0,0,.07);}
 .cat-row{margin-bottom:14px;}
-.cat-row-top{
-  display:flex;justify-content:space-between;align-items:baseline;
-  margin-bottom:5px;
-}
-.cat-row-name{font-size:.92rem;font-weight:600;color:var(--text);}
-.cat-row-amt{font-size:.82rem;color:var(--sub);}
-.bar-track{height:5px;border-radius:4px;overflow:hidden;}
-.bar-track.exp-track{background:var(--pink-track);}
-.bar-track.inc-track{background:var(--teal-track);}
+.bar-track{height:5px;border-radius:4px;overflow:hidden;background:#eee;}
 .bar-fill{height:100%;border-radius:4px;transition:width .9s ease;}
-.bar-fill.exp-fill{background:var(--pink);}
-
-.btn-manage{
-  width:100%;padding:13px;margin-top:10px;
-  background:var(--white);border:1px solid var(--border);
-  border-radius:12px;font-size:.88rem;font-weight:600;
-  color:var(--text);cursor:pointer;transition:background .2s;
-  display:flex;align-items:center;justify-content:center;gap:6px;
-}
-.btn-manage:hover{background:var(--bg);}
-
-.invite-banner{
-  width:100%;padding:14px;margin-top:10px;
-  background:linear-gradient(135deg,var(--pink),#FF7BB5);
-  border:none;border-radius:14px;font-size:.88rem;font-weight:800;
-  color:#fff;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;gap:8px;
-}
-.invite-badge{
-  background:#FFD700;color:#8B6914;font-size:.62rem;font-weight:900;
-  padding:3px 8px;border-radius:12px;white-space:nowrap;
-}
-
-.add-header{text-align:center;font-size:1rem;font-weight:700;padding:4px 0 14px;}
-.type-tabs{
-  display:grid;grid-template-columns:1fr 1fr;gap:0;
-  background:var(--bg);border-radius:12px;padding:3px;
-  margin-bottom:16px;
-}
-.type-tab{
-  padding:10px;border:none;border-radius:10px;
-  font-size:.88rem;font-weight:700;cursor:pointer;
-  background:transparent;color:var(--sub);transition:all .2s;
-}
-.type-tab.active.exp{background:var(--white);color:var(--pink);box-shadow:0 1px 4px rgba(0,0,0,.1);}
-.type-tab.active.inc{background:var(--white);color:var(--teal);box-shadow:0 1px 4px rgba(0,0,0,.1);}
-
-.amount-box{
-  background:var(--bg);border-radius:16px;padding:16px 18px;
-  margin-bottom:14px;display:flex;align-items:center;gap:8px;
-}
-.amount-box .curr{font-size:1.4rem;font-weight:800;color:var(--sub);}
-.amount-box input{
-  flex:1;border:none;background:transparent;outline:none;
-  font-size:2rem;font-weight:900;color:var(--text);font-family:inherit;
-}
-
-.quick-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;}
-.q-chip{
-  padding:7px 16px;border-radius:20px;
-  border:1px solid var(--border);background:var(--white);
-  font-size:.82rem;font-weight:600;color:var(--text);cursor:pointer;
-  transition:all .2s;
-}
-.q-chip:hover,.q-chip.sel{background:var(--pink);border-color:var(--pink);color:#fff;}
-.q-chip.sel.inc-chip{background:var(--teal);border-color:var(--teal);}
-
-.form-label{font-size:.7rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+.type-tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--bg);border-radius:12px;padding:3px;margin-bottom:16px;}
+.type-tab{padding:10px;border:none;border-radius:10px;font-size:.88rem;font-weight:700;cursor:pointer;background:transparent;color:var(--sub);}
+.type-tab.active.exp{background:var(--white);color:var(--pink);}
+.type-tab.active.inc{background:var(--white);color:var(--teal);}
+.amount-box{background:var(--bg);border-radius:16px;padding:16px 18px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.amount-box input{flex:1;border:none;background:transparent;outline:none;font-size:2rem;font-weight:900;color:var(--text);}
 .cat-grid2{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
-.cat-chip2{
-  padding:10px 4px;border-radius:14px;border:2px solid var(--border);
-  background:var(--white);cursor:pointer;text-align:center;
-  transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:3px;
-}
-.cat-chip2.sel.exp-sel{border-color:var(--pink);background:var(--pink-light);}
-.cat-chip2.sel.inc-sel{border-color:var(--teal);background:var(--teal-light);}
-
-.note-field{
-  width:100%;padding:12px 14px;
-  border:1px solid var(--border);border-radius:12px;
-  font-size:.9rem;font-family:inherit;outline:none;
-  background:var(--white);color:var(--text);margin-bottom:14px;
-}
-.btn-add{
-  width:100%;padding:14px;border:none;border-radius:14px;
-  font-size:1rem;font-weight:800;color:#fff;cursor:pointer;
-}
-.btn-add.exp-btn{background:var(--pink);}
-.btn-add.inc-btn{background:var(--teal);}
-
-/* ... STYLE อื่นๆ คงเดิมตามต้นฉบับเพื่อความเสถียร ... */
+.note-field{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:12px;font-size:.9rem;outline:none;background:var(--white);margin-bottom:14px;}
+.btn-add{width:100%;padding:14px;border:none;border-radius:14px;font-size:1rem;font-weight:800;color:#fff;cursor:pointer;}
+.tx2{background:var(--white);border-radius:14px;padding:13px 14px;display:flex;align-items:center;gap:11px;box-shadow:0 1px 4px rgba(0,0,0,.05);margin-bottom:8px;}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center;z-index:500;}
 .overlay.hidden{display:none;}
 .sheet{background:var(--white);border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:20px 20px 28px;}
-.sheet-handle{width:40px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 16px;}
-.sheet-title{font-size:1rem;font-weight:700;margin-bottom:16px;}
-.sheet-input{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:12px;font-size:1rem;outline:none;margin-bottom:12px;background:var(--bg);}
-.sheet-btns{display:flex;gap:10px;}
-.sheet-btns button{flex:1;padding:12px;border:none;border-radius:12px;font-size:.9rem;font-weight:700;cursor:pointer;}
-.btn-sheet-save{background:var(--pink);color:#fff;}
-.btn-sheet-save.inc-save{background:var(--teal);}
-.btn-sheet-cancel{background:var(--bg);color:var(--sub);}
-
-.tx-list2{display:flex;flex-direction:column;gap:8px;}
-.tx2{background:var(--white);border-radius:14px;padding:13px 14px;display:flex;align-items:center;gap:11px;box-shadow:0 1px 4px rgba(0,0,0,.05);}
-.tx2-icon{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
-.tx2.expense .tx2-icon{background:var(--pink-light);}
-.tx2.income  .tx2-icon{background:var(--teal-light);}
-.tx2-info{flex:1;min-width:0;}
-.tx2-desc{font-size:.88rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.tx2-meta{font-size:.7rem;color:var(--sub);margin-top:2px;}
-.tx2-amt{font-size:.92rem;font-weight:800;flex-shrink:0;}
-.tx2.expense .tx2-amt{color:var(--pink);}
-.tx2.income  .tx2-amt{color:var(--teal);}
-.tx2-del{background:none;border:none;cursor:pointer;color:#DDD;font-size:.9rem;padding:4px;}
-
-.toast{position:fixed;bottom:calc(var(--nav-h)+16px);left:50%;transform:translateX(-50%) translateY(16px);background:#1C1C1E;color:#fff;padding:10px 20px;border-radius:20px;font-size:.85rem;opacity:0;transition:all .3s;z-index:600;pointer-events:none;}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-#dong-run{position:fixed;bottom:calc(var(--nav-h)+8px);left:-70px;font-size:2rem;animation:dong-run 16s linear infinite;z-index:40;}
-@keyframes dong-run{from{left:-70px}to{left:110%}}
-
-#splash{position:fixed;inset:0;z-index:9999;background:#FF4785;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .5s ease;}
+.toast{position:fixed;bottom:calc(var(--nav-h)+16px);left:50%;transform:translateX(-50%);background:#1C1C1E;color:#fff;padding:10px 20px;border-radius:20px;font-size:.85rem;opacity:0;transition:all .3s;z-index:600;}
+.toast.show{opacity:1;}
+#splash{position:fixed;inset:0;z-index:9999;background:#FF4785;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s;}
 #splash.hide{opacity:0;pointer-events:none;}
-
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center;z-index:600;}
-.modal-overlay.hidden{display:none;}
-.modal-sheet{background:var(--white);border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:20px 20px 28px;}
-.gs-code{background:#F5F5F5;border-radius:10px;padding:10px 12px;font-size:.7rem;font-family:monospace;overflow-x:auto;white-space:pre;margin-bottom:12px;border:1px solid var(--border);}
-
-.pie-section{background:var(--white);border-radius:20px;padding:16px;margin-bottom:14px;text-align:center;}
-.pie-tab{flex:1;padding:8px;border:none;border-radius:8px;font-size:.82rem;font-weight:700;cursor:pointer;background:transparent;color:var(--sub);}
-.pie-tab.active{background:var(--white);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.1);}
+.hidden { display: none !important; }
 </style>
 </head>
 
 <body>
 
-<div id="lineLogin" class="hidden">
-  <div class="ll-bear">🐼</div>
-  <div class="ll-title">돈โน트 Don Note ⭐</div>
-  <button class="btn-line-login" onclick="liff.login()" style="background:#06C755; color:#fff; padding:15px; border-radius:12px; border:none; cursor:pointer;">เข้าสู่ระบบด้วย LINE</button>
-</div>
-
 <div id="splash">
   <div class="splash-bear" style="font-size:72px;">🐼</div>
-  <div class="splash-title" style="color:#fff; font-weight:800;">돈โน트 Don Note</div>
+  <div class="splash-title" style="color:#fff; font-weight:800; font-size:1.5rem; margin-top:10px;">돈โนท Don Note</div>
+</div>
+
+<div id="lineLogin" class="hidden" style="position:fixed; inset:0; background:var(--bg); z-index:1000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+  <div style="font-size:5rem;">🐼</div>
+  <div style="font-weight:900; color:var(--pink); margin:10px 0 20px; font-size:1.4rem;">돈โนท Don Note ⭐</div>
+  <button onclick="liff.login()" style="background:#06C755; color:#fff; padding:16px 32px; border-radius:16px; border:none; font-weight:800; cursor:pointer;">เข้าสู่ระบบด้วย LINE</button>
 </div>
 
 <div class="header">
-  <div class="header-bear" id="headerBear">🐼</div>
-  <div class="header-title">돈โน트 Don Note ⭐</div>
+  <div class="header-bear" id="headerBear" onclick="runDong()">🐼</div>
+  <div class="header-title">돈โนท Don Note ⭐</div>
 </div>
 
 <div class="panel active" id="panel-home">
   <div class="balance-wrap">
-    <div class="balance-label">เหลือเก็บ</div>
+    <div style="font-size:.72rem; color:var(--sub); font-weight:600;">เหลือเก็บ</div>
     <div class="balance-amount" id="balAmount">฿0</div>
-    <button class="period-btn" onclick="cyclePeriod()"><span id="periodLabel">รอบงบนี้</span> <span>⇄</span></button>
+    <button class="period-btn" onclick="showToast('ฟีเจอร์กำลังมาเร็วๆ นี้!')"><span id="periodLabel">รอบงบนี้</span> <span>⇄</span></button>
   </div>
   
   <div style="text-align:center; font-size:2.5rem; margin-bottom:15px;" onclick="runDong()">🐼</div>
 
-  <div class="chat-box" style="background:#fff; padding:15px; border-radius:16px; margin-bottom:15px;">
+  <div class="chat-box" style="background:#fff; padding:15px; border-radius:16px; margin-bottom:15px; box-shadow:0 1px 4px rgba(0,0,0,0.05);">
     <div style="display:flex; gap:8px;">
-      <input class="note-field" id="chatIn" placeholder="กินข้าว 80" style="margin:0; flex:1;" inputmode="text">
-      <button onclick="parseChat()" style="padding:0 15px; background:var(--pink); color:#fff; border:none; border-radius:12px;">➤</button>
+      <input class="note-field" id="chatIn" placeholder="พิมพ์ด่วน เช่น ข้าว 80" style="margin:0; flex:1;">
+      <button onclick="parseChat()" style="padding:0 18px; background:var(--pink); color:#fff; border:none; border-radius:12px; cursor:pointer; font-weight:bold;">➤</button>
     </div>
   </div>
 
   <div class="ie-grid">
     <div class="ie-card exp-card active" id="ieExp" onclick="switchSumTab('expense')">
-      <div class="iec-label">รายจ่าย</div>
-      <div class="iec-amount" id="ieExpAmt">฿0.00</div>
+      <div style="color:var(--pink); font-size:.72rem; font-weight:700;">รายจ่าย</div>
+      <div style="font-size:1.25rem; font-weight:900; color:var(--pink);" id="ieExpAmt">฿0.00</div>
     </div>
     <div class="ie-card inc-card" id="ieInc" onclick="switchSumTab('income')">
-      <div class="iec-label">รายรับ</div>
-      <div class="iec-amount" id="ieIncAmt">฿0.00</div>
+      <div style="color:var(--teal); font-size:.72rem; font-weight:700;">รายรับ</div>
+      <div style="font-size:1.25rem; font-weight:900; color:var(--teal);" id="ieIncAmt">฿0.00</div>
     </div>
   </div>
 
   <div class="pie-section">
-    <canvas id="pieChart" width="180" height="180" style="margin:0 auto;"></canvas>
-    <div id="pieLegend" style="display:flex; justify-content:center; gap:10px; margin-top:10px; font-size:0.8rem;"></div>
+    <canvas id="pieChart" width="180" height="180" style="margin:0 auto; display:block;"></canvas>
+    <div id="pieLegend"></div>
   </div>
 
   <div class="sum-card">
@@ -343,46 +142,50 @@ body{padding-bottom:var(--nav-h);}
     <input type="number" id="inputAmt" placeholder="0" inputmode="decimal">
   </div>
   <div class="cat-grid2" id="catGrid2"></div>
-  <input class="note-field" id="noteField" placeholder="รายละเอียด">
+  <input class="note-field" id="noteField" placeholder="รายละเอียด (ไม่บังคับ)">
   <button class="btn-add exp-btn" id="btnAdd" onclick="addEntry()">บันทึก ✓</button>
 </div>
 
 <div class="panel" id="panel-budget">
-  <div class="budget-header" style="text-align:center; padding:10px;">จัดการงบ</div>
+  <div class="budget-header" style="text-align:center; padding:10px; font-weight:800;">จัดการงบรายหมวด</div>
   <div class="budget-list" id="budgetList"></div>
 </div>
 
 <div class="panel" id="panel-history">
   <div style="display:flex; gap:10px; margin-bottom:15px;">
-    <input type="month" id="filterMonth" onchange="renderHistory()" style="flex:1; padding:8px; border-radius:10px; border:1px solid #ddd;">
+    <input type="month" id="filterMonth" onchange="renderHistory()" style="flex:1; padding:10px; border-radius:12px; border:1px solid var(--border);">
   </div>
   <div class="tx-list2" id="txList2"></div>
 </div>
 
 <div class="panel" id="panel-settings">
   <div style="text-align:center; padding:20px;">
-    <img id="linePicDisplay" style="width:70px; height:70px; border-radius:50%; display:none; margin: 0 auto 10px; border: 3px solid var(--pink);">
-    <div id="lineNameDisplay" style="font-weight:700;">Don Note User</div>
+    <div id="profileFrame" style="position:relative; width:80px; height:80px; margin:0 auto 10px;">
+        <img id="linePicDisplay" style="width:100%; height:100%; border-radius:50%; display:none; border: 3px solid var(--pink); object-fit:cover;">
+        <div id="defaultPic" style="width:100%; height:100%; border-radius:50%; background:#ddd; display:flex; align-items:center; justify-content:center; font-size:2rem;">🐼</div>
+    </div>
+    <div id="lineNameDisplay" style="font-weight:700; font-size:1.1rem;">Don Note User</div>
   </div>
-  <div style="background:#fff; border-radius:16px; overflow:hidden;">
-    <div style="padding:15px; border-bottom:1px solid #eee;" onclick="openSheetModal()">📊 เชื่อม Google Sheet</div>
-    <div style="padding:15px; border-bottom:1px solid #eee;" onclick="syncToSheet()">🔄 ซิงค์ข้อมูลไป Sheet</div>
-    <div style="padding:15px; color:red;" onclick="clearData()">🗑️ ล้างข้อมูลทั้งหมด</div>
+  <div style="background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+    <div style="padding:15px; border-bottom:1px solid #eee; cursor:pointer;" onclick="openSheetModal()">📊 เชื่อม Google Sheet</div>
+    <div style="padding:15px; border-bottom:1px solid #eee; cursor:pointer;" onclick="syncToSheet()">🔄 ซิงค์ข้อมูลไป Sheet</div>
+    <div style="padding:15px; color:var(--pink); font-weight:bold; cursor:pointer;" onclick="clearData()">🗑️ ล้างข้อมูลทั้งหมด</div>
+    <div style="padding:15px; color:var(--sub); border-top:1px solid #eee; cursor:pointer;" onclick="liff.logout(); location.reload();">Logout</div>
   </div>
 </div>
 
 <nav class="bottom-nav">
-  <button class="nav-btn active" id="nav-home" onclick="goPanel('panel-home')"><span class="ni">🏠</span>สรุป</button>
-  <button class="nav-btn" id="nav-add" onclick="goPanel('panel-add')"><span class="ni">✏️</span>บันทึก</button>
-  <button class="nav-btn" id="nav-budget" onclick="goPanel('panel-budget')"><span class="ni">🥧</span>งบ</button>
-  <button class="nav-btn" id="nav-history" onclick="goPanel('panel-history')"><span class="ni">📋</span>รายการ</button>
-  <button class="nav-btn" id="nav-settings" onclick="goPanel('panel-settings')"><span class="ni">⚙️</span>ตั้งค่า</button>
+  <button class="nav-btn active" id="nav-home" onclick="goPanel('panel-home')"><span>🏠</span><br>สรุป</button>
+  <button class="nav-btn" id="nav-add" onclick="goPanel('panel-add')"><span>✏️</span><br>บันทึก</button>
+  <button class="nav-btn" id="nav-budget" onclick="goPanel('panel-budget')"><span>🥧</span><br>งบ</button>
+  <button class="nav-btn" id="nav-history" onclick="goPanel('panel-history')"><span>📋</span><br>รายการ</button>
+  <button class="nav-btn" id="nav-settings" onclick="goPanel('panel-settings')"><span>⚙️</span><br>ตั้งค่า</button>
 </nav>
 
 <div class="overlay hidden" id="budgetSheet">
   <div class="sheet">
-    <div class="sheet-title" id="sheetTitle">ตั้งงบ</div>
-    <input class="sheet-input" type="number" id="sheetInput">
+    <div class="sheet-title" id="sheetTitle" style="font-weight:bold;">ตั้งงบรายเดือน</div>
+    <input class="sheet-input" type="number" id="sheetInput" placeholder="ระบุจำนวนเงิน">
     <div class="sheet-btns">
       <button class="btn-sheet-cancel" onclick="closeSheet()">ยกเลิก</button>
       <button class="btn-sheet-save" id="btnSheetSave" onclick="saveBudget()">บันทึก</button>
@@ -392,21 +195,20 @@ body{padding-bottom:var(--nav-h);}
 
 <div class="modal-overlay hidden" id="gsModal">
   <div class="modal-sheet">
-    <h3>Google Sheet URL</h3>
-    <input class="sheet-input" id="gsUrlInput" placeholder="https://script.google.com/...">
-    <div class="gs-code" id="gsCodeBlock">...</div>
-    <div style="display:flex; gap:10px;">
-      <button onclick="closeSheetModal()" style="flex:1; padding:10px;">ปิด</button>
-      <button onclick="testAndSaveSheet()" style="flex:1; padding:10px; background:var(--teal); color:#fff; border:none; border-radius:10px;">บันทึก</button>
+    <h3 style="margin-bottom:10px;">Google Sheet Web App URL</h3>
+    <input class="sheet-input" id="gsUrlInput" placeholder="https://script.google.com/macros/s/...">
+    <div style="display:flex; gap:10px; margin-top:10px;">
+      <button onclick="closeSheetModal()" style="flex:1; padding:12px; border:none; border-radius:10px; cursor:pointer;">ปิด</button>
+      <button onclick="testAndSaveSheet()" style="flex:1; padding:12px; background:var(--teal); color:#fff; border:none; border-radius:10px; cursor:pointer; font-weight:bold;">บันทึก</button>
     </div>
   </div>
 </div>
 
-<div id="dong-run">🐼</div>
+<div id="dong-run" style="position:fixed; bottom:70px; left:-50px; font-size:2rem; z-index:99; transition: left 5s linear; pointer-events:none;">🐼</div>
 <div class="toast" id="toast"></div>
 
 <script>
-// 1. Firebase Configuration
+// --- CONFIG & INIT ---
 const firebaseConfig = {
   apiKey: "AIzaSyAxEfomFx8g_Du_tdFjU1ji1-Hofno-sv8",
   authDomain: "don-note-f2bcd.firebaseapp.com",
@@ -415,12 +217,11 @@ const firebaseConfig = {
   messagingSenderId: "906046825048",
   appId: "1:906046825048:web:a415a5bb1f653fcb18202d"
 };
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// 2. Constants & State
 const LIFF_ID = '2009230946-hp9vcPh3';
-let userId = 'local_user';
+let userId = localStorage.getItem('dong_user_id') || 'local_user';
 let lineProfile = null;
 let entries = JSON.parse(localStorage.getItem('dong_entries') || '[]');
 let budgets = JSON.parse(localStorage.getItem('dong_budgets') || '{}');
@@ -438,26 +239,27 @@ const INC_CATS = [
   {id:'salary', icon:'💼', name:'เงินเดือน'}, {id:'special', icon:'⭐', name:'งานพิเศษ'},
   {id:'other_i', icon:'💰', name:'อื่นๆ'}
 ];
-const TH_MS = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 
-// 3. Core Functions
+// --- APP CORE ---
 async function initLiff() {
   try {
     await liff.init({ liffId: LIFF_ID });
     if (liff.isLoggedIn()) {
       lineProfile = await liff.getProfile();
       userId = lineProfile.userId;
+      localStorage.setItem('dong_user_id', userId);
       updateProfileUI();
+      loadCloudData();
+    } else {
+      document.getElementById('lineLogin').classList.remove('hidden');
     }
-    initApp();
-  } catch (e) {
-    console.log("LIFF Error, using local mode");
-    initApp();
-  }
+  } catch (e) { console.error("LIFF Init Error", e); }
+  initApp();
 }
 
 function initApp() {
-  document.getElementById('filterMonth').value = new Date().toISOString().slice(0,7);
+  const now = new Date();
+  document.getElementById('filterMonth').value = now.toISOString().slice(0,7);
   renderAll();
   renderCatGrid2();
   setTimeout(() => document.getElementById('splash').classList.add('hide'), 1500);
@@ -466,31 +268,65 @@ function initApp() {
 function updateProfileUI() {
   if (lineProfile) {
     document.getElementById('lineNameDisplay').textContent = lineProfile.displayName;
-    const pic = document.getElementById('linePicDisplay');
-    if (lineProfile.pictureUrl) { pic.src = lineProfile.pictureUrl; pic.style.display = 'block'; }
+    if (lineProfile.pictureUrl) {
+      document.getElementById('linePicDisplay').src = lineProfile.pictureUrl;
+      document.getElementById('linePicDisplay').style.display = 'block';
+      document.getElementById('defaultPic').style.display = 'none';
+      document.getElementById('headerBear').innerHTML = `<img src="${lineProfile.pictureUrl}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">`;
+    }
+    document.getElementById('lineLogin').classList.add('hidden');
   }
 }
 
+// โหลดข้อมูลจาก dongNote ให้ตรงกับ Webhook
+async function loadCloudData() {
+    if (!userId || userId === 'local_user') return;
+    try {
+        const doc = await db.collection('dongNote').doc(userId).get();
+        if (doc.exists) {
+            const data = doc.data();
+            if (data.entries) {
+                entries = data.entries;
+                localStorage.setItem('dong_entries', JSON.stringify(entries));
+            }
+            if (data.budgets) {
+                budgets = data.budgets;
+                localStorage.setItem('dong_budgets', JSON.stringify(budgets));
+            }
+            renderAll();
+        }
+    } catch (e) { console.error("Cloud Load Error", e); }
+}
+
+function saveData() {
+    localStorage.setItem('dong_entries', JSON.stringify(entries));
+    localStorage.setItem('dong_budgets', JSON.stringify(budgets));
+    if(userId && userId !== 'local_user') {
+        db.collection('dongNote').doc(userId).set({ 
+            entries, budgets, 
+            lastUpdate: firebase.firestore.FieldValue.serverTimestamp() 
+        }, { merge: true });
+    }
+}
+
+// --- UI LOGIC ---
 function goPanel(id) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  const navId = 'nav-' + id.split('-')[1];
-  document.getElementById(navId)?.classList.add('active');
+  document.getElementById('nav-' + id.split('-')[1]).classList.add('active');
   if(id === 'panel-history') renderHistory();
   if(id === 'panel-budget') renderBudgetList();
 }
 
 function renderAll() {
   const ym = new Date().toISOString().slice(0,7);
-  const currentEntries = entries.filter(e => e.date.startsWith(ym));
+  const currentEntries = entries.filter(e => e.date && e.date.startsWith(ym));
   const exp = currentEntries.filter(e => e.type === 'expense').reduce((s,e) => s + e.amount, 0);
   const inc = currentEntries.filter(e => e.type === 'income').reduce((s,e) => s + e.amount, 0);
-  
   document.getElementById('balAmount').textContent = '฿' + (inc - exp).toLocaleString();
   document.getElementById('ieExpAmt').textContent = '฿' + exp.toLocaleString();
   document.getElementById('ieIncAmt').textContent = '฿' + inc.toLocaleString();
-  
   renderCatRows();
   renderPieChart(inc, exp);
 }
@@ -498,20 +334,13 @@ function renderAll() {
 function renderCatRows() {
   const ym = new Date().toISOString().slice(0,7);
   const cats = sumTab === 'expense' ? EXP_CATS : INC_CATS;
-  const filtered = entries.filter(e => e.date.startsWith(ym) && e.type === sumTab);
-  
+  const filtered = entries.filter(e => e.date && e.date.startsWith(ym) && e.type === sumTab);
   let html = '';
   cats.forEach(c => {
     const amt = filtered.filter(e => e.catId === c.id).reduce((s,e) => s + e.amount, 0);
     const bgt = budgets[c.id] || 0;
-    const pct = bgt > 0 ? Math.min(100, (amt/bgt)*100) : 0;
-    html += `
-      <div class="cat-row">
-        <div class="cat-row-top"><span>${c.name}</span> <span>฿${amt} / ${bgt || '-'}</span></div>
-        <div class="bar-track ${sumTab==='expense'?'exp-track':'inc-track'}">
-          <div class="bar-fill" style="width:${pct}%; background:${sumTab==='expense'?'#FF4785':'#00C9A7'}"></div>
-        </div>
-      </div>`;
+    const pct = bgt > 0 ? Math.min(100, (amt/bgt)*100) : (amt > 0 ? 100 : 0);
+    html += `<div class="cat-row"><div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:4px;"><span>${c.icon} ${c.name}</span> <span style="color:var(--sub);">฿${amt.toLocaleString()} / ${bgt ? bgt.toLocaleString() : '-'}</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:${sumTab==='expense'?'var(--pink)':'var(--teal)'}"></div></div></div>`;
   });
   document.getElementById('catRows').innerHTML = html;
 }
@@ -520,7 +349,8 @@ function setAddType(t) {
   addType = t;
   document.getElementById('tabExp').classList.toggle('active', t==='expense');
   document.getElementById('tabInc').classList.toggle('active', t==='income');
-  document.getElementById('btnAdd').className = 'btn-add ' + (t==='expense'?'exp-btn':'inc-btn');
+  document.getElementById('btnAdd').style.background = (t==='expense'?'var(--pink)':'var(--teal)');
+  selCatId = (t==='expense' ? 'food' : 'salary');
   renderCatGrid2();
 }
 
@@ -528,9 +358,9 @@ function renderCatGrid2() {
   const cats = addType === 'expense' ? EXP_CATS : INC_CATS;
   let html = '';
   cats.forEach(c => {
-    html += `<div class="cat-chip2 ${selCatId===c.id?'sel':''}" onclick="selCat('${c.id}')" 
-      style="border: 2px solid ${selCatId===c.id?(addType==='expense'?'#FF4785':'#00C9A7'):'#eee'}; padding:10px; border-radius:12px;">
-      <div>${c.icon}</div><div style="font-size:0.7rem;">${c.name}</div></div>`;
+    const isSelected = selCatId === c.id;
+    const color = addType === 'expense' ? 'var(--pink)' : 'var(--teal)';
+    html += `<div class="cat-chip2" onclick="selCat('${c.id}')" style="border: 2px solid ${isSelected ? color : '#eee'}; background:${isSelected ? (addType==='expense'?'#FFF0F5':'#E8FAF7') : '#fff'}; padding:10px; border-radius:12px; text-align:center; cursor:pointer;"><div style="font-size:1.5rem;">${c.icon}</div><div style="font-size:0.6rem; font-weight:bold; color:${isSelected ? color : 'var(--sub)'};">${c.name}</div></div>`;
   });
   document.getElementById('catGrid2').innerHTML = html;
 }
@@ -539,77 +369,56 @@ function selCat(id) { selCatId = id; renderCatGrid2(); }
 
 function addEntry() {
   const amt = parseFloat(document.getElementById('inputAmt').value);
-  if(!amt) return showToast("ใส่ตัวเลขก่อนนะ");
+  if(!amt || amt <= 0) return showToast("ใส่จำนวนเงินด้วยนะ");
   const note = document.getElementById('noteField').value;
   const cat = [...EXP_CATS, ...INC_CATS].find(c => c.id === selCatId);
-  
-  entries.push({
-    id: Date.now(),
-    type: addType,
-    amount: amt,
-    catId: selCatId,
-    catIcon: cat.icon,
-    catName: cat.name,
-    note: note || cat.name,
-    date: new Date().toISOString().slice(0,10)
-  });
-  
+  entries.push({ id: Date.now(), type: addType, amount: amt, catId: selCatId, catIcon: cat.icon, catName: cat.name, note: note || cat.name, date: new Date().toISOString().slice(0,10) });
   saveData();
   document.getElementById('inputAmt').value = '';
   document.getElementById('noteField').value = '';
   goPanel('panel-home');
   renderAll();
-  showToast("บันทึกแล้ว ⭐");
+  showToast("บันทึกสำเร็จ ⭐");
 }
 
 function parseChat() {
   const text = document.getElementById('chatIn').value;
   const amt = parseFloat((text.match(/\d+/) || [])[0]);
-  if(!amt) return;
-  
-  // Simple Parser Logic
-  let type = 'expense';
-  let catId = 'food';
+  if(!amt) return showToast("ลืมใส่จำนวนเงินหรือเปล่า?");
+  let type = 'expense', catId = 'other';
   if(text.includes('เงินเดือน')) { type='income'; catId='salary'; }
-  
-  const cat = [...EXP_CATS, ...INC_CATS].find(c => c.id === catId);
-  entries.push({
-    id: Date.now(), type, amount: amt, catId, catIcon: cat.icon, catName: cat.name, note: text, date: new Date().toISOString().slice(0,10)
-  });
+  const cat = [...EXP_CATS, ...INC_CATS].find(c => c.id === catId) || EXP_CATS[4];
+  entries.push({ id: Date.now(), type, amount: amt, catId: cat.id, catIcon: cat.icon, catName: cat.name, note: text, date: new Date().toISOString().slice(0,10) });
   saveData();
   document.getElementById('chatIn').value = '';
   renderAll();
-  showToast("บันทึกด่วนสำเร็จ!");
+  showToast("บันทึกด่วนแล้ว! ⚡");
 }
 
 function renderHistory() {
   const ym = document.getElementById('filterMonth').value;
-  const filtered = entries.filter(e => e.date.startsWith(ym)).sort((a,b) => b.id - a.id);
+  const filtered = entries.filter(e => e.date && e.date.startsWith(ym)).sort((a,b) => b.id - a.id);
   let html = '';
   filtered.forEach(e => {
-    html += `
-      <div class="tx2 ${e.type}">
-        <div class="tx2-icon">${e.catIcon}</div>
-        <div class="tx2-info"><div class="tx2-desc">${e.note}</div><div class="tx2-meta">${e.date}</div></div>
-        <div class="tx2-amt">฿${e.amount}</div>
-        <div onclick="delEntry(${e.id})">🗑️</div>
-      </div>`;
+    html += `<div class="tx2 ${e.type}"><div style="width:40px; height:40px; background:${e.type==='expense'?'#FFF0F5':'#E8FAF7'}; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">${e.catIcon}</div><div style="flex:1;"><div style="font-weight:bold; font-size:0.9rem;">${e.note}</div><div style="font-size:0.7rem; color:var(--sub);">${e.date}</div></div><div style="font-weight:900; color:${e.type==='expense'?'var(--pink)':'var(--teal)'};">฿${e.amount.toLocaleString()}</div><div onclick="delEntry(${e.id})" style="margin-left:10px; cursor:pointer; color:#ddd;">🗑️</div></div>`;
   });
-  document.getElementById('txList2').innerHTML = html || '<div style="text-align:center; padding:20px;">ไม่มีรายการ</div>';
+  document.getElementById('txList2').innerHTML = html || '<div style="text-align:center; padding:40px; color:var(--sub);">ไม่มีรายการ</div>';
 }
 
 function delEntry(id) {
-  entries = entries.filter(e => e.id !== id);
-  saveData();
-  renderHistory();
-  renderAll();
+  if(confirm("ลบรายการนี้ใช่หรือไม่?")) {
+    entries = entries.filter(e => e.id !== id);
+    saveData();
+    renderHistory();
+    renderAll();
+  }
 }
 
 function renderBudgetList() {
   let html = '';
   EXP_CATS.forEach(c => {
-    html += `<div style="background:#fff; padding:15px; margin-bottom:8px; border-radius:12px; display:flex; justify-content:space-between;" onclick="openBudgetSheet('${c.id}')">
-      <span>${c.icon} ${c.name}</span> <span>งบ: ${budgets[c.id] || 0} ></span></div>`;
+    const b = budgets[c.id] || 0;
+    html += `<div style="background:#fff; padding:15px; margin-bottom:8px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 1px 4px rgba(0,0,0,0.05);" onclick="openBudgetSheet('${c.id}')"><span style="font-weight:bold;">${c.icon} ${c.name}</span> <span style="color:var(--sub); font-size:0.9rem;">งบ: <b style="color:var(--text);">฿${b.toLocaleString()}</b> ❯</span></div>`;
   });
   document.getElementById('budgetList').innerHTML = html;
 }
@@ -626,6 +435,7 @@ function saveBudget() {
   saveData();
   closeSheet();
   renderBudgetList();
+  renderAll();
 }
 
 function renderPieChart(inc, exp) {
@@ -634,33 +444,18 @@ function renderPieChart(inc, exp) {
   ctx.clearRect(0,0,180,180);
   const total = inc + exp;
   if(total === 0) return;
-  
   let start = -Math.PI/2;
-  // Expense
-  ctx.beginPath(); ctx.moveTo(90,90); ctx.arc(90,90,80,start,start+(exp/total)*Math.PI*2);
-  ctx.fillStyle = '#FF4785'; ctx.fill();
-  start += (exp/total)*Math.PI*2;
-  // Income
-  ctx.beginPath(); ctx.moveTo(90,90); ctx.arc(90,90,80,start,start+(inc/total)*Math.PI*2);
-  ctx.fillStyle = '#00C9A7'; ctx.fill();
-  
-  // Center Hole
-  ctx.beginPath(); ctx.arc(90,90,50,0,Math.PI*2); ctx.fillStyle = '#fff'; ctx.fill();
+  if(exp > 0) {
+    ctx.beginPath(); ctx.moveTo(90,90); ctx.arc(90,90,80,start,start+(exp/total)*Math.PI*2);
+    ctx.fillStyle = '#FF4785'; ctx.fill();
+    start += (exp/total)*Math.PI*2;
+  }
+  if(inc > 0) {
+    ctx.beginPath(); ctx.moveTo(90,90); ctx.arc(90,90,80,start,start+(inc/total)*Math.PI*2);
+    ctx.fillStyle = '#00C9A7'; ctx.fill();
+  }
+  ctx.beginPath(); ctx.arc(90,90,55,0,Math.PI*2); ctx.fillStyle = '#fff'; ctx.fill();
 }
-
-function saveData() {
-    localStorage.setItem('dong_entries', JSON.stringify(entries));
-    localStorage.setItem('dong_budgets', JSON.stringify(budgets));
-    if(userId && userId !== 'local_user') {
-        // แก้จาก 'users' เป็น 'dongNote'
-        db.collection('dongNote').doc(userId).set({ 
-            entries, 
-            budgets, 
-            lastUpdate: firebase.firestore.FieldValue.serverTimestamp() 
-        }, { merge: true }).catch(e => console.error("Sync Error", e));
-    }
-}
-
 
 function showToast(m) {
   const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show');
@@ -669,27 +464,38 @@ function showToast(m) {
 
 function runDong() {
   const d = document.getElementById('dong-run');
-  d.style.animation = 'none';
-  setTimeout(() => d.style.animation = 'dong-run 5s linear', 10);
+  d.style.left = '110%';
+  setTimeout(() => { d.style.transition = 'none'; d.style.left = '-50px'; setTimeout(()=>d.style.transition = 'left 5s linear', 50); }, 5000);
 }
 
-function switchSumTab(t) { sumTab = t; renderAll(); }
+function switchSumTab(t) { 
+  sumTab = t; 
+  document.getElementById('ieExp').classList.toggle('active', t==='expense');
+  document.getElementById('ieInc').classList.toggle('active', t==='income');
+  renderAll(); 
+}
 
-// Google Sheet Support
 function openSheetModal() { document.getElementById('gsModal').classList.remove('hidden'); }
 function closeSheetModal() { document.getElementById('gsModal').classList.add('hidden'); }
+function testAndSaveSheet() {
+    const url = document.getElementById('gsUrlInput').value;
+    if(url.startsWith('https://script.google.com')) {
+        gsUrl = url; localStorage.setItem('dong_gs_url', url);
+        showToast("บันทึกสำเร็จ"); closeSheetModal();
+    } else { showToast("URL ไม่ถูกต้อง"); }
+}
+
 async function syncToSheet() {
   if(!gsUrl) return openSheetModal();
-  showToast("กำลังซิงค์...");
+  showToast("กำลังส่ง...");
   try {
     await fetch(gsUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify({action:'sync', entries}) });
-    showToast("ซิงค์ Google Sheet สำเร็จ!");
-  } catch(e) { showToast("ซิงค์ไม่สำเร็จ"); }
+    showToast("ส่งสำเร็จ!");
+  } catch(e) { showToast("ล้มเหลว"); }
 }
 
 function clearData() { if(confirm("ลบหมดเลยนะ?")) { entries=[]; budgets={}; saveData(); renderAll(); } }
 
-// Start
 initLiff();
 </script>
 </body>
