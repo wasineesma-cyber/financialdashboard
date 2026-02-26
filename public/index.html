@@ -317,10 +317,6 @@ function updateLineProfileUI() {
   if (hb && lineProfile.pictureUrl) {
     hb.innerHTML = `<img src="${lineProfile.pictureUrl}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid #FF4785;">`;
   }
-  const nameDisplay = document.getElementById('lineNameDisplay');
-  if (nameDisplay) nameDisplay.textContent = lineProfile.displayName;
-  const picEl = document.getElementById('linePicDisplay');
-  if (picEl && lineProfile.pictureUrl) { picEl.src = lineProfile.pictureUrl; picEl.style.display = 'block'; }
 }
 
 function useFallbackUserId() {
@@ -332,13 +328,25 @@ function useFallbackUserId() {
 
 // 5. ฟังก์ชันเริ่มต้นแอป
 function init() {
-  document.getElementById('filterMonth').value = new Date().toISOString().slice(0, 7);
-  renderCatGrid2(); renderAll(); renderBudgetList();
-  loadFromCloud().then(() => { renderAll(); renderBudgetList(); });
-  setTimeout(() => document.getElementById('splash').classList.add('hide'), 1000);
+  const filterMonthInput = document.getElementById('filterMonth');
+  if(filterMonthInput) filterMonthInput.value = new Date().toISOString().slice(0, 7);
+  
+  renderCatGrid2(); 
+  renderAll(); 
+  renderBudgetList();
+  
+  loadFromCloud().then(() => { 
+    renderAll(); 
+    renderBudgetList(); 
+  });
+  
+  setTimeout(() => {
+    const splash = document.getElementById('splash');
+    if(splash) splash.classList.add('hide');
+  }, 1000);
 }
 
-// 6. ฟังก์ชันวาด UI
+// 6. ฟังก์ชันจัดการหน้าจอ & ข้อมูล
 function renderCatGrid2() {
   const cats = addType === 'expense' ? EXP_CATS : INC_CATS;
   const grid = document.getElementById('catGrid2');
@@ -350,13 +358,30 @@ function renderCatGrid2() {
 }
 function selCat2(id) { selCatId = id; renderCatGrid2(); }
 
-// 7. ฟังก์ชันซิงค์ Cloud
+function renderBudgetList() {
+  const list = document.getElementById('budgetList');
+  if(!list) return;
+  const cats = budgetTab === 'expense' ? EXP_CATS : INC_CATS;
+  list.innerHTML = cats.map(c => `
+    <div class="budget-item" onclick="openSheet('${c.id}','${c.name}')">
+      <span class="bi-name">${c.name}</span>
+      <div class="bi-right">
+        <span class="bi-budget">${budgets[c.id] ? '฿'+budgets[c.id].toLocaleString() : 'ไม่มีงบ'}</span>
+        <span class="bi-arrow">›</span>
+      </div>
+    </div>`).join('');
+}
+
 async function saveToCloud() {
   if(!userId) return;
   try {
     await db.collection('dongNote').doc(userId).set({ entries, budgets, updatedAt: new Date().toISOString() });
-    if(document.getElementById('cloudStatusSub')) document.getElementById('cloudStatusSub').textContent = '✅ ซิงค์แล้ว';
-  } catch(e) { if(document.getElementById('cloudStatusSub')) document.getElementById('cloudStatusSub').textContent = '⚠️ ออฟไลน์'; }
+    const cloudStatus = document.getElementById('cloudStatusSub');
+    if(cloudStatus) cloudStatus.textContent = '✅ ซิงค์แล้ว';
+  } catch(e) { 
+    const cloudStatus = document.getElementById('cloudStatusSub');
+    if(cloudStatus) cloudStatus.textContent = '⚠️ ออฟไลน์'; 
+  }
 }
 
 async function loadFromCloud() {
@@ -373,11 +398,12 @@ async function loadFromCloud() {
   } catch(e) { console.error(e); }
 }
 
-// 8. ฟังก์ชันประมวลผล (เติมให้ครบ)
+// 7. UI Actions
 function goPanel(id) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  const panel = document.getElementById(id);
+  if(panel) panel.classList.add('active');
   const key = id.replace('panel-', '');
   const btn = document.getElementById('nav-' + key);
   if(btn) btn.classList.add('active');
@@ -390,9 +416,14 @@ function renderAll() {
   const inc = cur.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
   const exp = cur.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
   const bal = inc - exp;
-  document.getElementById('balAmount').textContent = '฿' + bal.toLocaleString();
-  document.getElementById('ieIncAmt').textContent = '฿' + inc.toLocaleString();
-  document.getElementById('ieExpAmt').textContent = '฿' + exp.toLocaleString();
+  
+  const balEl = document.getElementById('balAmount');
+  if(balEl) {
+    balEl.textContent = '฿' + bal.toLocaleString();
+    balEl.className = 'balance-amount ' + (bal < 0 ? 'negative' : 'positive');
+  }
+  if(document.getElementById('ieIncAmt')) document.getElementById('ieIncAmt').textContent = '฿' + inc.toLocaleString();
+  if(document.getElementById('ieExpAmt')) document.getElementById('ieExpAmt').textContent = '฿' + exp.toLocaleString();
   renderCatRows(); renderPieChart();
 }
 
@@ -402,45 +433,50 @@ function renderCatRows() {
   const catMap = {};
   md.forEach(e => { catMap[e.catId] = (catMap[e.catId] || 0) + e.amount; });
   const cats = sumTab === 'expense' ? EXP_CATS : INC_CATS;
-  document.getElementById('catRows').innerHTML = cats.map(c => {
+  const catRows = document.getElementById('catRows');
+  if(!catRows) return;
+  catRows.innerHTML = cats.map(c => {
     const amt = catMap[c.id] || 0;
     const bgt = budgets[c.id] || 0;
     const pct = bgt > 0 ? Math.min(100, (amt / bgt) * 100) : 0;
     return `
       <div class="cat-row">
         <div class="cat-row-top"><span class="cat-row-name">${c.name}</span><span class="cat-row-amt">฿${amt.toLocaleString()} / ${bgt > 0 ? '฿' + bgt.toLocaleString() : '-'}</span></div>
-        <div class="bar-track">
-          <div class="bar-fill" style="width:${pct}%; background:${sumTab === 'expense' ? 'var(--pink)' : (INC_COLORS[c.id] || 'var(--teal)')};"></div>
-        </div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:${sumTab === 'expense' ? 'var(--pink)' : (INC_COLORS[c.id] || 'var(--teal)')};"></div></div>
       </div>`;
   }).join('');
 }
 
 function addEntry() {
-  const amt = parseFloat(document.getElementById('inputAmt').value);
+  const amtInput = document.getElementById('inputAmt');
+  const amt = parseFloat(amtInput.value);
   if (!amt || amt <= 0) return showToast('ใส่ยอดเงินก่อนนะ 🐼');
   const cat = [...EXP_CATS, ...INC_CATS].find(c => c.id === selCatId);
   entries.push({ id: Date.now(), type: addType, amount: amt, catId: cat.id, catIcon: cat.icon, catName: cat.name, note: document.getElementById('noteField').value || cat.name, date: new Date().toISOString().slice(0, 10) });
   save(); renderAll(); goPanel('panel-home');
-  document.getElementById('inputAmt').value = ''; document.getElementById('noteField').value = '';
+  amtInput.value = ''; document.getElementById('noteField').value = '';
   showToast('บันทึกเรียบร้อยแล้ว ✨');
 }
 
 function parseChat() {
-  const text = document.getElementById('chatIn').value.trim();
-  const amt = parseFloat((text.match(/\d+/) || [])[0]);
+  const chatInput = document.getElementById('chatIn');
+  const text = chatInput.value.trim();
+  const amtMatch = text.match(/\d+/);
+  const amt = amtMatch ? parseFloat(amtMatch[0]) : 0;
   if (!amt) return showToast('ลืมใส่ยอดเงินหรือเปล่า? 🐼');
   let type = text.includes('รับ') ? 'income' : 'expense';
   const cat = (type === 'expense' ? EXP_CATS : INC_CATS)[0];
   entries.push({ id: Date.now(), type, amount: amt, catId: cat.id, catIcon: cat.icon, catName: cat.name, note: text, date: new Date().toISOString().slice(0, 10) });
-  save(); renderAll(); document.getElementById('chatIn').value = '';
+  save(); renderAll(); chatInput.value = '';
   showToast('โน้ตให้แล้วนะ! 🐼✨');
 }
 
 function renderHistory() {
   const ym = document.getElementById('filterMonth').value;
   const list = entries.filter(e => e.date.startsWith(ym)).reverse();
-  document.getElementById('txList2').innerHTML = list.length ? list.map(e => `
+  const txList = document.getElementById('txList2');
+  if(!txList) return;
+  txList.innerHTML = list.length ? list.map(e => `
     <div class="tx2 ${e.type}">
       <div class="tx2-icon">${e.catIcon}</div>
       <div class="tx2-info"><div class="tx2-desc">${e.note}</div><div class="tx2-meta">${e.catName} · ${e.date}</div></div>
@@ -471,19 +507,41 @@ function renderPieChart() {
 }
 
 function delEntry(id) { if(confirm('ลบรายการนี้ไหม?')) { entries = entries.filter(e => e.id !== id); save(); renderAll(); renderHistory(); } }
-function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
+function showToast(msg) { const t = document.getElementById('toast'); if(t) { t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); } }
 function initDong() { }
-function runDong() { showToast('สู้ๆ นะ วันนี้ประหยัดเก่งมาก! 🐼'); }
+function lineLogout() { liff.logout(); localStorage.removeItem('dong_local_uid'); location.reload(); }
 function save() { localStorage.setItem('dong_entries', JSON.stringify(entries)); saveToCloud(); }
 function setAddType(t) { addType = t; renderCatGrid2(); }
 function switchSumTab(t) { sumTab = t; renderAll(); }
 function setAmt(v) { document.getElementById('inputAmt').value = v; }
 function dismissInstall() { document.getElementById('installBanner').style.display = 'none'; }
 function cyclePeriod() { showToast('เปลี่ยนรอบงบได้เร็วๆ นี้! 🐼'); }
+function switchBudgetTab(t) { budgetTab = t; renderBudgetList(); }
+function clearData() { if(confirm('ลบข้อมูลทั้งหมด?')) { entries = []; budgets = {}; save(); renderAll(); showToast('ล้างข้อมูลแล้ว 🗑️'); } }
+function setPiePeriod(p) { piePeriod = p; renderPieChart(); }
+
+function openSheet(id, name) {
+  editCatId = id;
+  const title = document.getElementById('sheetTitle');
+  const input = document.getElementById('sheetInput');
+  const sheet = document.getElementById('budgetSheet');
+  if(title) title.textContent = 'ตั้งงบ "' + name + '"';
+  if(input) input.value = budgets[id] || '';
+  if(sheet) sheet.classList.remove('hidden');
+}
+function closeSheet() { const sheet = document.getElementById('budgetSheet'); if(sheet) sheet.classList.add('hidden'); }
+function saveBudget() {
+  const val = parseFloat(document.getElementById('sheetInput').value) || 0;
+  if(val > 0) budgets[editCatId] = val; else delete budgets[editCatId];
+  localStorage.setItem('dong_budgets', JSON.stringify(budgets));
+  saveToCloud(); closeSheet(); renderBudgetList(); renderAll();
+  showToast('บันทึกงบแล้ว ✅');
+}
 
 // ══════ START ══════
 initLiff();
 </script>
+
 
 
 </body>
