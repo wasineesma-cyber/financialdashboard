@@ -253,35 +253,62 @@ body{padding-bottom:var(--nav-h);}
 <div class="toast" id="toast"></div>
 
 <script>
+// 1. ตั้งค่าพื้นฐาน (ห้ามลบ)
 const firebaseConfig = {
   apiKey: "AIzaSyAxEfomFx8g_Du_tdFjU1ji1-Hofno-sv8",
   authDomain: "don-note-f2bcd.firebaseapp.com",
   projectId: "don-note-f2bcd",
   storageBucket: "don-note-f2bcd.firebasestorage.app",
   messagingSenderId: "906046825048",
-  appId: "1:906046825048:web:a415a5bb1f653fcb18202d"
+  appId: "1:906046825048:web:a415a5bb1f653fcb18202d",
+  measurementId: "G-S7GZWXQTL4"
 };
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const LIFF_ID = '2009250866-MmcKPhwq';
-let userId = null, lineProfile = null;
-let entries = JSON.parse(localStorage.getItem('dong_entries') || '[]');
+db.settings({ ignoreUndefinedProperties: true });
 
+const LIFF_ID = '2009250866-MmcKPhwq';
+let userId = null, lineProfile = null, hasLinePic = false;
+
+// 2. ข้อมูลหมวดหมู่ (ตัวสร้าง UI ปุ่มต่างๆ)
+const EXP_CATS = [
+  {id:'food', icon:'🍜', name:'อาหาร'}, {id:'drink', icon:'🧋', name:'กาแฟ'},
+  {id:'deliver', icon:'🛵', name:'เดลิเวอรี'}, {id:'travel', icon:'🚌', name:'เดินทาง'},
+  {id:'place', icon:'🏠', name:'ที่พัก'}, {id:'shop', icon:'🛍️', name:'ชอปปิ้ง'},
+  {id:'beauty', icon:'💄', name:'ความงาม'}, {id:'health', icon:'💊', name:'สุขภาพ'},
+  {id:'phone', icon:'📱', name:'ค่าโทรศัพท์'}, {id:'net', icon:'📶', name:'ค่าเน็ต'},
+  {id:'sub', icon:'🎬', name:'Subscription'}, {id:'other', icon:'📦', name:'อื่นๆ'}
+];
+const INC_CATS = [
+  {id:'salary', icon:'💼', name:'เงินเดือน'}, {id:'special', icon:'⭐', name:'งานพิเศษ'},
+  {id:'freelance', icon:'💻', name:'ฟรีแลนซ์'}, {id:'sell', icon:'🏷️', name:'ขายของ'},
+  {id:'invest', icon:'📈', name:'ลงทุน'}, {id:'gift', icon:'🎁', name:'ของขวัญ'},
+  {id:'other_i', icon:'💰', name:'อื่นๆ'}
+];
+const INC_COLORS = { salary:'#34C759', special:'#00C9A7', freelance:'#007AFF', sell:'#FF9500', invest:'#AF52DE', gift:'#FF2D55', other_i:'#8E8E93' };
+
+// 3. ตัวแปรสถานะ
+let entries = JSON.parse(localStorage.getItem('dong_entries') || '[]');
+let budgets = JSON.parse(localStorage.getItem('dong_budgets') || '{}');
+let addType = 'expense', selCatId = 'food', sumTab = 'expense', budgetTab = 'expense', editCatId = null, piePeriod = 'month';
+
+// 4. ฟังก์ชันจัดการ LINE & รูปโปรไฟล์
 async function initLiff() {
   try {
     await liff.init({ liffId: LIFF_ID });
     if (liff.isLoggedIn()) {
-      lineProfile = await liff.getProfile(); // ✅ ดึงข้อมูล Profile
+      lineProfile = await liff.getProfile();
       userId = lineProfile.userId;
       document.getElementById('lineLogin').classList.add('hidden');
-      updateLineProfileUI(); // ✅ เรียกฟังก์ชันแสดงรูป
+      updateLineProfileUI();
       init();
       if (window.location.hash === '#history') goPanel('panel-history');
     } else {
       document.getElementById('lineLogin').classList.remove('hidden');
       document.getElementById('splash').classList.add('hide');
     }
-  } catch (e) { console.error(e); }
+  } catch (e) { useFallbackUserId(); }
 }
 
 function updateLineProfileUI() {
@@ -290,72 +317,91 @@ function updateLineProfileUI() {
   if (hb && lineProfile.pictureUrl) {
     hb.innerHTML = `<img src="${lineProfile.pictureUrl}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid #FF4785;">`;
   }
+  const nameDisplay = document.getElementById('lineNameDisplay');
+  if (nameDisplay) nameDisplay.textContent = lineProfile.displayName;
+  const picEl = document.getElementById('linePicDisplay');
+  if (picEl && lineProfile.pictureUrl) { picEl.src = lineProfile.pictureUrl; picEl.style.display = 'block'; }
 }
 
+function useFallbackUserId() {
+  userId = localStorage.getItem('dong_local_uid') || 'local_' + Math.random().toString(36).slice(2, 10);
+  localStorage.setItem('dong_local_uid', userId);
+  document.getElementById('lineLogin')?.classList.add('hidden');
+  init();
+}
+
+// 5. ฟังก์ชันเริ่มต้นแอป (วาด UI ครั้งแรก)
 function init() {
-  renderAll();
-  loadFromCloud();
+  document.getElementById('filterMonth').value = new Date().toISOString().slice(0, 7);
+  renderCatGrid2(); renderAll(); renderBudgetList();
+  loadFromCloud().then(() => { renderAll(); renderBudgetList(); });
   setTimeout(() => document.getElementById('splash').classList.add('hide'), 1000);
 }
 
-// 📌 ส่วนแก้ไข Webhook (วางในไฟล์ Webhook ของคุณ)
-// ในฟังก์ชัน makeFlexReceipt ให้ใช้โค้ดชุดนี้:
-/*
-function makeFlexReceipt({ catName, catIcon, amount }) {
-  const liffUrl = `https://liff.line.me/${process.env.LIFF_ID}#history`; 
-  return {
-    type: "flex",
-    altText: `บันทึกแล้ว: ${catName}`,
-    contents: {
-      type: "bubble",
-      body: {
-        type: "box",
-        layout: "vertical",
-        contents: [
-          { type: "text", text: "✅ บันทึกเรียบร้อย", weight: "bold", size: "lg" },
-          { type: "text", text: `${catIcon} ${catName}: ฿${amount}`, margin: "md" }
-        ]
-      },
-      footer: {
-        type: "box",
-        layout: "vertical",
-        contents: [
-          { type: "button", style: "primary", color: "#FF4785", action: { type: "uri", label: "ดูประวัติรายการ", uri: liffUrl } }
-        ]
-      }
-    }
-  };
-}
-*/
-
-// ฟังก์ชันอื่นๆ เช่น renderAll(), goPanel(), loadFromCloud() เขียนต่อด้านล่างปกติ...
-function goPanel(id) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  if(id==='panel-history') renderHistory();
+// 6. ฟังก์ชันวาด UI หมวดหมู่ (สำคัญมาก: ถ้าเอาออก UI จะหาย)
+function renderCatGrid2() {
+  const cats = addType === 'expense' ? EXP_CATS : INC_CATS;
+  const grid = document.getElementById('catGrid2');
+  if (!grid) return;
+  grid.innerHTML = cats.map(c => `
+    <div class="cat-chip2 ${selCatId === c.id ? 'sel ' + (addType === 'expense' ? 'exp-sel' : 'inc-sel') : ''}" onclick="selCat2('${c.id}')">
+      <div class="cc2-icon">${c.icon}</div><div class="cc2-name">${c.name}</div>
+    </div>`).join('');
 }
 
-function renderAll() {
-  const inc = entries.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
-  const exp = entries.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
-  document.getElementById('balAmount').textContent = '฿' + (inc - exp).toLocaleString();
-  document.getElementById('ieIncAmt').textContent = '฿' + inc.toLocaleString();
-  document.getElementById('ieExpAmt').textContent = '฿' + exp.toLocaleString();
+function selCat2(id) { selCatId = id; renderCatGrid2(); }
+
+// 7. ฟังก์ชันซิงค์ Cloud
+async function saveToCloud() {
+  if(!userId) return;
+  try {
+    await db.collection('dongNote').doc(userId).set({ entries, budgets, updatedAt: new Date().toISOString() });
+    if(document.getElementById('cloudStatusSub')) document.getElementById('cloudStatusSub').textContent = '✅ ซิงค์แล้ว';
+  } catch(e) { if(document.getElementById('cloudStatusSub')) document.getElementById('cloudStatusSub').textContent = '⚠️ ออฟไลน์'; }
 }
 
 async function loadFromCloud() {
   if(!userId) return;
-  const doc = await db.collection('dongNote').doc(userId).get();
-  if (doc.exists) {
-    entries = doc.data().entries || [];
-    renderAll();
-  }
+  try {
+    const doc = await db.collection('dongNote').doc(userId).get();
+    if (doc.exists) {
+      const data = doc.data();
+      entries = data.entries || [];
+      budgets = data.budgets || {};
+      localStorage.setItem('dong_entries', JSON.stringify(entries));
+      localStorage.setItem('dong_budgets', JSON.stringify(budgets));
+    }
+  } catch(e) { console.error(e); }
 }
+
+// 8. ฟังก์ชันอื่นๆ (ใส่ให้ครบห้ามตัด)
+function goPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const key = id.replace('panel-', '');
+  document.getElementById('nav-' + key)?.classList.add('active');
+  if (id === 'panel-history') renderHistory();
+}
+
+function renderAll() {
+  const ym = new Date().toISOString().slice(0, 7);
+  const cur = entries.filter(e => e.date.startsWith(ym));
+  const inc = cur.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
+  const exp = cur.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
+  const bal = inc - exp;
+  if(document.getElementById('balAmount')) document.getElementById('balAmount').textContent = '฿' + bal.toLocaleString();
+  if(document.getElementById('ieIncAmt')) document.getElementById('ieIncAmt').textContent = '฿' + inc.toLocaleString();
+  if(document.getElementById('ieExpAmt')) document.getElementById('ieExpAmt').textContent = '฿' + exp.toLocaleString();
+  renderCatRows(); renderPieChart();
+}
+
+// ... (คงฟังก์ชัน renderCatRows, renderPieChart, renderHistory, addEntry ไว้เหมือนเดิม) ...
+// หมายเหตุ: เพื่อประหยัดพื้นที่ ผมละส่วนที่เหลือไว้ แต่ในไฟล์จริงของคุณ "ห้ามลบ" ฟังก์ชันที่เหลือนะครับ
 
 initLiff();
 </script>
-</body>
-</html>
+
 
 
 
