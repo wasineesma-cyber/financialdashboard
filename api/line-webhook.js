@@ -3,10 +3,10 @@ import crypto from "crypto";
 import admin from "firebase-admin";
 
 export const config = {
-  api: { bodyParser: false }, // ปิดเพื่ออ่าน raw body (LINE signature)
+  api: { bodyParser: false },
 };
 
-// ---------------- RAW BODY ----------------
+// ---------- อ่าน raw body ----------
 function getRawBody(req) {
   return new Promise((resolve, reject) => {
     let data = "";
@@ -16,7 +16,7 @@ function getRawBody(req) {
   });
 }
 
-// ---------------- SIGNATURE VERIFY ----------------
+// ---------- verify signature ----------
 function verifySignature(rawBody, signature, channelSecret) {
   const hash = crypto
     .createHmac("SHA256", channelSecret)
@@ -25,7 +25,7 @@ function verifySignature(rawBody, signature, channelSecret) {
   return hash === signature;
 }
 
-// ---------------- LINE REPLY ----------------
+// ---------- reply to LINE ----------
 async function replyMessage(replyToken, messages) {
   const accessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
   if (!accessToken) throw new Error("Missing LINE_CHANNEL_ACCESS_TOKEN");
@@ -45,7 +45,7 @@ async function replyMessage(replyToken, messages) {
   }
 }
 
-// ---------------- FLEX CARD ----------------
+// ---------- flex card ----------
 function makeFlexReceipt({ catName, catIcon, amount, liffUrl }) {
   const cleanLiff = liffUrl?.split("&entryId=")[0] || liffUrl;
 
@@ -67,30 +67,11 @@ function makeFlexReceipt({ catName, catIcon, amount, liffUrl }) {
             spacing: "sm",
             contents: [
               { type: "text", text: catIcon || "💾", size: "xl", flex: 0 },
-              {
-                type: "text",
-                text: catName || "รายการ",
-                size: "md",
-                flex: 4,
-                wrap: true,
-              },
-              {
-                type: "text",
-                text: `฿${amount}`,
-                size: "md",
-                weight: "bold",
-                align: "end",
-                flex: 2,
-              },
+              { type: "text", text: catName || "รายการ", size: "md", flex: 4, wrap: true },
+              { type: "text", text: `฿${amount}`, size: "md", weight: "bold", align: "end", flex: 2 },
             ],
           },
-          {
-            type: "text",
-            text: "กดเพื่อไปดูในแอพ Don Note",
-            size: "sm",
-            color: "#8E8E93",
-            wrap: true,
-          },
+          { type: "text", text: "กดเพื่อไปดูในแอพ Don Note", size: "sm", color: "#8E8E93", wrap: true },
         ],
       },
       footer: {
@@ -98,68 +79,37 @@ function makeFlexReceipt({ catName, catIcon, amount, liffUrl }) {
         layout: "vertical",
         spacing: "sm",
         contents: [
-          {
-            type: "button",
-            style: "primary",
-            color: "#FF4785",
-            action: { type: "uri", label: "ดูรายการนี้", uri: liffUrl },
-          },
-          {
-            type: "button",
-            style: "secondary",
-            action: { type: "uri", label: "เปิดหน้าแอพ", uri: cleanLiff },
-          },
+          { type: "button", style: "primary", color: "#FF4785", action: { type: "uri", label: "ดูรายการนี้", uri: liffUrl } },
+          { type: "button", style: "secondary", action: { type: "uri", label: "เปิดหน้าแอพ", uri: cleanLiff } },
         ],
       },
     },
   };
 }
 
-// ---------------- PARSE TEXT ----------------
+// ---------- parse text ----------
 function parseTextToEntry(text) {
   const rawAmt = (text.match(/[\d,]+(\.\d+)?/) || [])[0];
   const amount = parseFloat((rawAmt || "").replace(/,/g, "")) || 0;
   if (!amount) return null;
 
-  let catId = "food",
-    catName = "อาหาร",
-    catIcon = "🍜",
-    type = "expense";
+  let catId = "food", catName = "อาหาร", catIcon = "🍜", type = "expense";
 
-  // income
   if (/เงินเดือน|salary|รายรับ|ได้มา|รับเงิน|โอนเข้า/i.test(text)) {
-    type = "income";
-    catId = "salary";
-    catName = "รายรับ";
-    catIcon = "💼";
+    type = "income"; catId = "salary"; catName = "รายรับ"; catIcon = "💼";
   }
-
-  // drink
   if (/กาแฟ|ชา|ไข่มุก|ชานม|น้ำ|coffee|matcha|cocoa/i.test(text)) {
-    type = "expense";
-    catId = "drink";
-    catName = "เครื่องดื่ม";
-    catIcon = "🧋";
+    type = "expense"; catId = "drink"; catName = "เครื่องดื่ม"; catIcon = "🧋";
   }
-
-  // delivery
   if (/grab|foodpanda|lineman|shopeefood|เดลิเวอรี|ส่งอาหาร/i.test(text)) {
-    type = "expense";
-    catId = "deliver";
-    catName = "เดลิเวอรี";
-    catIcon = "🛵";
+    type = "expense"; catId = "deliver"; catName = "เดลิเวอรี"; catIcon = "🛵";
   }
-
-  // travel
   if (/เดินทาง|รถ|แท็กซี่|bts|mrt|น้ำมัน|ทางด่วน/i.test(text)) {
-    type = "expense";
-    catId = "travel";
-    catName = "เดินทาง";
-    catIcon = "🚌";
+    type = "expense"; catId = "travel"; catName = "เดินทาง"; catIcon = "🚌";
   }
 
   return {
-    // IMPORTANT: ใส่ id ทีหลังตอน save เพื่อเอาไป deep link
+    id: Date.now(),                 // << ใช้ id นี้เป็น entryId ให้กดดูรายการได้
     type,
     amount,
     catId,
@@ -168,10 +118,11 @@ function parseTextToEntry(text) {
     note: text,
     date: new Date().toISOString().slice(0, 10),
     createdAt: new Date().toISOString(),
+    source: "line-webhook",
   };
 }
 
-// ---------------- FIREBASE ADMIN function initAdmin() {
+// ---------- firebase init (แบบ 3 คีย์) ----------
 function initAdmin() {
   if (admin.apps.length) return;
 
@@ -180,67 +131,52 @@ function initAdmin() {
   let privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
   if (!projectId || !clientEmail || !privateKey) {
-    throw new Error("Missing Firebase credentials");
+    throw new Error("Missing Firebase env: FIREBASE_PROJECT_ID / FIREBASE_CLIENT_EMAIL / FIREBASE_PRIVATE_KEY");
   }
 
-  // 👇 สำคัญมาก
+  // สำคัญมาก: Vercel จะเก็บ \n เป็นตัวอักษร ต้องแปลงเป็น newline จริง
   privateKey = privateKey.replace(/\\n/g, "\n");
 
   admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId,
-      clientEmail,
-      privateKey,
-    }),
+    credential: admin.credential.cert({ projectId, clientEmail, privateKey }),
   });
 }
 
-
-// ---------------- SAVE TO FIRESTORE (dongNote/{userId}) ----------------
+// ---------- save เข้า dongNote/{userId} ----------
 async function saveEntryToFirestore({ userId, entry }) {
   initAdmin();
   const db = admin.firestore();
 
   const docRef = db.collection("dongNote").doc(userId);
 
-  // สร้าง entryId ไว้ใช้ทั้งใน entries และ deep link
-  const entryId = String(Date.now());
+  // ดึงของเดิม แล้ว append เข้า array entries
+  const snap = await docRef.get();
+  const data = snap.exists ? snap.data() : {};
+  const entries = Array.isArray(data?.entries) ? data.entries : [];
 
-  const entryWithId = { ...entry, id: entryId };
+  entries.push(entry);
 
-  // เพิ่มเข้า array entries แบบไม่ทับของเก่า
   await docRef.set(
     {
-      entries: admin.firestore.FieldValue.arrayUnion(entryWithId),
+      entries,
       updatedAt: new Date().toISOString(),
     },
     { merge: true }
   );
 
-  return entryId;
+  return String(entry.id);
 }
 
-// ---------------- HELP TEXT ----------------
-function helpText() {
-  return (
-    "🐻‍❄️พิมพ์บอกดงดงได้เลย เช่น\n" +
-    "- กะเพรา 99\n" +
-    "- ชาไข่มุก 65\n" +
-    "- เงินเดือน 20,000\n\n" +
-    "ดงดงจะจัดและแยกประเภทให้อัตโนมัติค่ะ"
-  );
-}
-
-// ---------------- MAIN HANDLER ----------------
+// ---------- main handler ----------
 export default async function handler(req, res) {
   try {
-    // กัน Verify / กัน Safari เปิด url แล้วเจอ error
     if (req.method !== "POST") return res.status(200).send("OK");
 
     const rawBody = await getRawBody(req);
 
     const signature = req.headers["x-line-signature"];
     const secret = process.env.LINE_CHANNEL_SECRET;
+
     if (!secret) return res.status(500).send("Missing LINE_CHANNEL_SECRET");
     if (!signature) return res.status(400).send("Missing signature");
 
@@ -252,7 +188,6 @@ export default async function handler(req, res) {
     const ev = body?.events?.[0];
     if (!ev) return res.status(200).send("OK");
 
-    // รับเฉพาะข้อความ
     if (ev.type !== "message" || ev.message?.type !== "text") {
       return res.status(200).send("OK");
     }
@@ -261,34 +196,20 @@ export default async function handler(req, res) {
     const replyToken = ev.replyToken;
     const userId = ev.source?.userId || "unknown";
 
-    // help
-    if (/^(help|\?|วิธีใช้|ใช้งานยังไง|คู่มือ)$/i.test(text)) {
-      await replyMessage(replyToken, [{ type: "text", text: helpText() }]);
-      return res.status(200).send("OK");
-    }
-
     const entry = parseTextToEntry(text);
     if (!entry) {
-      await replyMessage(replyToken, [
-        {
-          type: "text",
-          text:
-            "พิมพ์แบบนี้ได้เลยนะคะ เช่น “อาหาร 50” หรือ “ชาไข่มุก 65” 🙂\n\nพิมพ์ “help” เพื่อดูตัวอย่าง",
-        },
-      ]);
+      await replyMessage(replyToken, [{ type: "text", text: "พิมพ์แบบนี้ได้เลย เช่น “อาหาร 50” หรือ “ชาไข่มุก 65” 🙂" }]);
       return res.status(200).send("OK");
     }
 
-    // SAVE -> dongNote/{userId}
+    // --- เซฟเข้า Firestore ---
     const entryId = await saveEntryToFirestore({ userId, entry });
 
+    // --- ทำ LIFF deep link ---
     const LIFF_ID = process.env.LIFF_ID;
     if (!LIFF_ID) throw new Error("Missing LIFF_ID");
 
-    // ลิงก์ไปหน้า “รายการ” + ชี้รายการที่เพิ่งบันทึก
-    const liffUrl = `https://liff.line.me/${LIFF_ID}?page=history&entryId=${encodeURIComponent(
-      entryId
-    )}`;
+    const liffUrl = `https://liff.line.me/${LIFF_ID}?page=history&entryId=${encodeURIComponent(entryId)}`;
 
     const flex = makeFlexReceipt({
       catName: entry.catName,
@@ -300,8 +221,8 @@ export default async function handler(req, res) {
     await replyMessage(replyToken, [flex]);
     return res.status(200).send("OK");
   } catch (e) {
+    // ตรงนี้สำคัญ: ถ้าเซฟไม่เข้า ให้ดูใน Vercel Logs
     console.error("line-webhook error:", e);
-    // สำคัญ: ตอบ 200 เพื่อไม่ให้ LINE retry รัวๆ
     return res.status(200).send("OK");
   }
 }
