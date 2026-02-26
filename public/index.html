@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ini<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
@@ -454,7 +454,26 @@ async function initLiff() {
     console.error("LIFF Error:", e);
     useFallbackUserId(); 
   }
+function updateLineProfileUI() {
+  if (!lineProfile) return; //
+  
+  const hb = document.getElementById('headerBear');
+  if (hb && lineProfile.pictureUrl) {
+    hb.innerHTML = `<img src="${lineProfile.pictureUrl}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid #FF4785;">`; //
+    hasLinePic = true; //
+  }
+
+  // ป้องกัน Error หาก Element ยังไม่ถูกสร้าง
+  const nameDisplay = document.getElementById('lineNameDisplay');
+  if (nameDisplay) nameDisplay.textContent = lineProfile.displayName; //
+
+  const picEl = document.getElementById('linePicDisplay');
+  if (picEl && lineProfile.pictureUrl) { 
+    picEl.src = lineProfile.pictureUrl; 
+    picEl.style.display = 'block'; 
+  }
 }
+
 
 
 function useFallbackUserId() {
