@@ -770,7 +770,8 @@ function doGet(){return ContentService.createTextOutput(JSON.stringify({status:'
 <div class="toast" id="toast"></div>
 
 <script>
-// ══════ FIREBASE SETUP ══════
+
+// ══════ FIREBASE SETUP (ต้องมี 2 บรรทัดนี้ ไม่งั้น db จะไม่ถูกสร้าง) ══════
 const firebaseConfig = {
   apiKey: "AIzaSyAxEfomFx8g_Du_tdFjU1ji1-Hofno-sv8",
   authDomain: "don-note-f2bcd.firebaseapp.com",
@@ -779,17 +780,14 @@ const firebaseConfig = {
   messagingSenderId: "906046825048",
   appId: "1:906046825048:web:a415a5bb1f653fcb18202d",
   measurementId: "G-S7GZWXQTL4"
-  
 };
 
-
-// ✅ FIREBASE INIT (ต้องมี)
+// ✅ สำคัญมาก: initialize + firestore instance
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// (แนะนำ) ลด warning / ทำให้ sync เสถียรขึ้นบนมือถือ
-db.enablePersistence?.().catch(()=>{});
-
+// (แนะนำ) ปรับ Firestore ให้ชัดเจนเรื่อง timestamp
+db.settings({ ignoreUndefinedProperties: true });
 
 
 // ══════ LIFF + LINE LOGIN ══════
@@ -797,6 +795,9 @@ const LIFF_ID = '2009230946-hp9vcPh3';
 let userId = null;
 let lineProfile = null;
 let hasLinePic = false;
+
+/* ... โค้ดส่วนอื่นของฝ้ายต่อเหมือนเดิม ... */
+</script>
 
 async function initLiff() {
   try {
