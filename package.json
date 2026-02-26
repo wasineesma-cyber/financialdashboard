@@ -1,14 +1,10 @@
 {
-  "name": "donnote-functions",
-  "description": "돈โนต์ LINE Bot - Firebase Cloud Functions on Vercel",
-  "version": "1.0.0",
-  "type": "module",
-  "main": "api/line-webhook.js",
-  "engines": {
-    "node": "20"
-  },
-  "dependencies": {
-    "firebase-admin": "^12.0.0",
-    "@line/bot-sdk": "^7.5.2"
+  "hosting": {
+    "public": "public",  // ถ้าไฟล์ index.html อยู่ในโฟลเดอร์ public
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
   }
 }
