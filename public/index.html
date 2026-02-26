@@ -439,17 +439,23 @@ async function initLiff() {
   try {
     await liff.init({ liffId: LIFF_ID });
     if (liff.isLoggedIn()) {
-      lineProfile = await liff.getProfile();
+      // ✅ จุดสำคัญ: ต้องเอาค่าที่ได้มาใส่ในตัวแปร lineProfile ที่เราประกาศไว้
+      lineProfile = await liff.getProfile(); 
       userId = lineProfile.userId;
+      
       document.getElementById('lineLogin').classList.add('hidden');
-      updateLineProfileUI();
-      init();
+      updateLineProfileUI(); // เรียกฟังก์ชันแสดงรูป
+      init(); // เริ่มโหลดข้อมูลจาก Firebase
     } else {
       document.getElementById('lineLogin').classList.remove('hidden');
       document.getElementById('splash').classList.add('hide');
     }
-  } catch (e) { useFallbackUserId(); }
+  } catch (e) { 
+    console.error("LIFF Error:", e);
+    useFallbackUserId(); 
+  }
 }
+
 
 function useFallbackUserId() {
   userId = localStorage.getItem('dong_local_uid') || 'local_' + Math.random().toString(36).slice(2, 10);
