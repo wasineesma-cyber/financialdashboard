@@ -1,7 +1,9 @@
 import crypto from "crypto";
 import admin from "firebase-admin";
 
-export const config = { api: { bodyParser: false } };
+export const config = {
+  api: { bodyParser: false }, // ต้องปิดเพื่ออ่าน raw body
+};
 
 function getRawBody(req) {
   return new Promise((resolve, reject) => {
@@ -25,14 +27,11 @@ function initFirebaseAdmin() {
 
   const projectId = process.env.FIREBASE_PROJECT_ID;
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-  let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+  const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n");
 
   if (!projectId || !clientEmail || !privateKey) {
     throw new Error("Missing Firebase env vars");
   }
-
-  // ทำให้ \n กลับเป็นขึ้นบรรทัดจริง
-  privateKey = privateKey.replace(/\\n/g, "\n");
 
   admin.initializeApp({
     credential: admin.credential.cert({
@@ -43,66 +42,80 @@ function initFirebaseAdmin() {
   });
 }
 
+async function replyLine(replyToken, text) {
+  const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+  if (!token) return;
+
+  await fetch("https://api.line.me/v2/bot/message/reply", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      replyToken,
+      messages: [{ type: "text", text }],
+    }),
+  });
+}
+
 export default async function handler(req, res) {
-  // ให้เปิดใน Safari แล้วไม่งง
+  // เปิดใน Safari จะเป็น GET → ให้ตอบ 200 ไว้
   if (req.method === "GET") return res.status(200).send("OK-GET");
 
   if (req.method !== "POST") return res.status(405).send("Method Not Allowed");
 
-  const rawBody = await getRawBody(req);
-  const signature = req.headers["x-line-signature"];
-  const secret = process.env.LINE_CHANNEL_SECRET;
-
-  if (!secret) return res.status(500).send("Missing LINE_CHANNEL_SECRET");
-  if (!signature) return res.status(400).send("Missing signature");
-
-  const ok = verifySignature(rawBody, signature, secret);
-  if (!ok) return res.status(401).send("Unauthorized");
-
-  // parse body
-  let body;
   try {
-    body = JSON.parse(rawBody);
-  } catch {
-    return res.status(400).send("Bad JSON");
-  }
+    const rawBody = await getRawBody(req);
 
-  // init firebase
-  try {
+    const signature = req.headers["x-line-signature"];
+    const secret = process.env.LINE_CHANNEL_SECRET;
+
+    if (!secret) return res.status(500).send("Missing LINE_CHANNEL_SECRET");
+    if (!signature) return res.status(400).send("Missing signature");
+
+    const ok = verifySignature(rawBody, signature, secret);
+    if (!ok) return res.status(401).send("Unauthorized");
+
     initFirebaseAdmin();
-  } catch (e) {
-    console.error(e);
-    return res.status(500).send("Firebase init failed");
-  }
+    const db = admin.firestore();
 
-  const db = admin.firestore();
+    const body = JSON.parse(rawBody);
 
-  // บันทึกข้อความลง Firestore (เป็น inbox ก่อน)
-  try {
+    // body.events คือรายการเหตุการณ์จาก LINE
     const events = body.events || [];
     for (const ev of events) {
-      const userId = ev?.source?.userId;
-      const text = ev?.message?.text;
+      // โฟกัส “ข้อความ” ก่อน
+      if (ev.type === "message" && ev.message?.type === "text") {
+        const userId = ev.source?.userId || "unknown";
+        const text = ev.message.text || "";
+        const ts = ev.timestamp || Date.now();
 
-      if (!userId || !text) continue;
+        // เก็บเข้า Firestore
+        await db
+          .collection("dongNote")
+          .doc(userId)
+          .collection("inbox")
+          .doc(String(ts))
+          .set({
+            text,
+            timestamp: ts,
+            source: ev.source || null,
+            raw: ev,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
 
-      const ref = db
-        .collection("dongNote")
-        .doc(userId)
-        .collection("inbox")
-        .doc(String(Date.now()));
-
-      await ref.set({
-        text,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        raw: ev,
-      });
+        // ตอบกลับใน LINE ให้รู้ว่าเข้าแล้ว
+        if (ev.replyToken) {
+          await replyLine(ev.replyToken, `บันทึกแล้ว ✅: ${text}`);
+        }
+      }
     }
-  } catch (e) {
-    console.error("Firestore write error:", e);
-    return res.status(500).send("Firestore write failed");
-  }
 
-  // สำคัญ: ตอบ 200 ให้ LINE
-  return res.status(200).send("OK");
+    // LINE ต้องได้ 200 เท่านั้นถึงจะถือว่าสำเร็จ
+    return res.status(200).send("OK");
+  } catch (e) {
+    console.error(e);
+    return res.status(500).send("Server error");
+  }
 }
