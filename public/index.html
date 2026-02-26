@@ -465,18 +465,22 @@ function useFallbackUserId() {
 }
 
 function updateLineProfileUI() {
-  if (!lineProfile) return;
+  // ถ้า lineProfile ยังเป็น null ให้หยุดทำงานก่อนป้องกัน Error
+  if (!lineProfile) return; 
+
   const hb = document.getElementById('headerBear');
+  // เช็กว่ามี URL รูปภาพส่งมาจาก LINE หรือไม่
   if (hb && lineProfile.pictureUrl) {
     hb.innerHTML = `<img src="${lineProfile.pictureUrl}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid #FF4785;">`;
-    hasLinePic = true;
+    hasLinePic = true; // ✅ เปลี่ยนสถานะเป็น true เมื่อมีรูป
   }
-  document.getElementById('lineNameDisplay').textContent = lineProfile.displayName;
-  const picEl = document.getElementById('linePicDisplay');
-  if (picEl && lineProfile.pictureUrl) { picEl.src = lineProfile.pictureUrl; picEl.style.display = 'block'; }
+  
+  // อัปเดตชื่อในหน้า Settings
+  const nameEl = document.getElementById('lineNameDisplay');
+  if (nameEl) nameEl.textContent = lineProfile.displayName;
 }
 
-function lineLogout() { liff.logout(); localStorage.removeItem('dong_local_uid'); location.reload(); }
+
 
 // ══════ DATA & SYNC ══════
 function init() {
