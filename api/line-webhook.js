@@ -73,8 +73,13 @@ async function replyMessage(replyToken, messages) {
 }
 
 // สร้าง Flex Message
+
+// เปลี่ยนวิธีสร้างลิงก์
+
+
+
 function makeFlexReceipt({ catName, catIcon, amount, liffUrl }) {
-  const cleanLiff = liffUrl?.split("&entryId=")[0] || liffUrl;
+  const liffUrl = `https://liff.line.me/${process.env.LIFF_ID}#history`; // ใช้ # แทน ?;
   return {
     type: "flex",
     altText: `บันทึกแล้ว: ${catName} ฿${amount}`,
