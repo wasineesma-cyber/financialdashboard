@@ -1,8 +1,7 @@
 import crypto from "crypto";
-import admin from "firebase-admin";
 
 export const config = {
-  api: { bodyParser: false }, // ต้องปิดเพื่ออ่าน raw body
+  api: { bodyParser: false },
 };
 
 function getRawBody(req) {
@@ -22,100 +21,156 @@ function verifySignature(rawBody, signature, channelSecret) {
   return hash === signature;
 }
 
-function initFirebaseAdmin() {
-  if (admin.apps.length) return;
-
-  const projectId = process.env.FIREBASE_PROJECT_ID;
-  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-  const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n");
-
-  if (!projectId || !clientEmail || !privateKey) {
-    throw new Error("Missing Firebase env vars");
-  }
-
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId,
-      clientEmail,
-      privateKey,
-    }),
-  });
-}
-
-async function replyLine(replyToken, text) {
-  const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
-  if (!token) return;
-
-  await fetch("https://api.line.me/v2/bot/message/reply", {
+async function replyMessage(replyToken, messages) {
+  const accessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+  const res = await fetch("https://api.line.me/v2/bot/message/reply", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${accessToken}`,
     },
-    body: JSON.stringify({
-      replyToken,
-      messages: [{ type: "text", text }],
-    }),
+    body: JSON.stringify({ replyToken, messages }),
   });
+
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error(`LINE reply error ${res.status}: ${t}`);
+  }
+}
+
+function makeFlexReceipt({ catName, catIcon, amount, liffUrl }) {
+  return {
+    type: "flex",
+    altText: `บันทึกแล้ว: ${catName} ฿${amount}`,
+    contents: {
+      type: "bubble",
+      size: "mega",
+      body: {
+        type: "box",
+        layout: "vertical",
+        spacing: "md",
+        contents: [
+          { type: "text", text: "✅ บันทึกแล้ว", weight: "bold", size: "lg" },
+          {
+            type: "box",
+            layout: "baseline",
+            spacing: "sm",
+            contents: [
+              { type: "text", text: catIcon || "💾", size: "xl", flex: 0 },
+              { type: "text", text: catName || "รายการ", size: "md", flex: 4, wrap: true },
+              { type: "text", text: `฿${amount}`, size: "md", weight: "bold", align: "end", flex: 2 },
+            ],
+          },
+          {
+            type: "text",
+            text: "กดเพื่อไปดูในแอพ Don Note",
+            size: "sm",
+            color: "#8E8E93",
+            wrap: true,
+          },
+        ],
+      },
+      footer: {
+        type: "box",
+        layout: "vertical",
+        spacing: "sm",
+        contents: [
+          {
+            type: "button",
+            style: "primary",
+            color: "#FF4785",
+            action: { type: "uri", label: "ดูรายการนี้", uri: liffUrl },
+          },
+          {
+            type: "button",
+            style: "secondary",
+            action: { type: "uri", label: "เปิดหน้าแอพ", uri: liffUrl.split("&entryId=")[0] },
+          },
+        ],
+      },
+    },
+  };
+}
+
+// ตัวอย่าง parse แบบง่าย (ฝ้ายมี logic ในเว็บอยู่แล้ว อันนี้แค่ให้ webhook ใช้ได้)
+function parseTextToEntry(text) {
+  // หาเลข
+  const amount = parseFloat((text.match(/[\d,]+(\.\d+)?/) || [])[0]?.replace(/,/g, "")) || 0;
+  if (!amount) return null;
+
+  // เดา cat ง่ายๆ (จะเอา regex เดิมของฝ้ายมายัดก็ได้)
+  let catId = "food";
+  let catName = "อาหาร";
+  let catIcon = "🍜";
+  if (/กาแฟ|ชา|ไข่มุก|ชานม|น้ำ|coffee|matcha/i.test(text)) { catId="drink"; catName="เครื่องดื่ม"; catIcon="🧋"; }
+  if (/เดินทาง|รถ|แท็กซี่|bts|mrt|น้ำมัน/i.test(text)) { catId="travel"; catName="เดินทาง"; catIcon="🚌"; }
+
+  return {
+    id: Date.now(),
+    type: "expense",
+    amount,
+    catId,
+    catName,
+    catIcon,
+    note: text,
+    date: new Date().toISOString().slice(0, 10),
+  };
 }
 
 export default async function handler(req, res) {
-  // เปิดใน Safari จะเป็น GET → ให้ตอบ 200 ไว้
-  if (req.method === "GET") return res.status(200).send("OK-GET");
-
-  if (req.method !== "POST") return res.status(405).send("Method Not Allowed");
-
   try {
+    if (req.method !== "POST") return res.status(200).send("OK");
+
     const rawBody = await getRawBody(req);
 
     const signature = req.headers["x-line-signature"];
     const secret = process.env.LINE_CHANNEL_SECRET;
-
     if (!secret) return res.status(500).send("Missing LINE_CHANNEL_SECRET");
     if (!signature) return res.status(400).send("Missing signature");
 
     const ok = verifySignature(rawBody, signature, secret);
     if (!ok) return res.status(401).send("Unauthorized");
 
-    initFirebaseAdmin();
-    const db = admin.firestore();
-
     const body = JSON.parse(rawBody);
 
-    // body.events คือรายการเหตุการณ์จาก LINE
-    const events = body.events || [];
-    for (const ev of events) {
-      // โฟกัส “ข้อความ” ก่อน
-      if (ev.type === "message" && ev.message?.type === "text") {
-        const userId = ev.source?.userId || "unknown";
-        const text = ev.message.text || "";
-        const ts = ev.timestamp || Date.now();
+    // LINE ส่ง events เป็น array
+    const ev = body?.events?.[0];
+    if (!ev) return res.status(200).send("OK");
 
-        // เก็บเข้า Firestore
-        await db
-          .collection("dongNote")
-          .doc(userId)
-          .collection("inbox")
-          .doc(String(ts))
-          .set({
-            text,
-            timestamp: ts,
-            source: ev.source || null,
-            raw: ev,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-          });
-
-        // ตอบกลับใน LINE ให้รู้ว่าเข้าแล้ว
-        if (ev.replyToken) {
-          await replyLine(ev.replyToken, `บันทึกแล้ว ✅: ${text}`);
-        }
-      }
+    // สนใจเฉพาะข้อความ
+    if (ev.type !== "message" || ev.message?.type !== "text") {
+      return res.status(200).send("OK");
     }
 
-    // LINE ต้องได้ 200 เท่านั้นถึงจะถือว่าสำเร็จ
+    const text = ev.message.text?.trim() || "";
+    const replyToken = ev.replyToken;
+
+    const entry = parseTextToEntry(text);
+    if (!entry) {
+      await replyMessage(replyToken, [
+        { type: "text", text: "พิมพ์แบบนี้ได้เลยนะคะ เช่น “อาหาร 50” หรือ “ชาไข่มุก 65” 🙂" },
+      ]);
+      return res.status(200).send("OK");
+    }
+
+    // TODO: ตรงนี้คือ “จุดบันทึกลง Firebase/Firestore”
+    // ถ้าฝ้ายบันทึกแล้ว ให้ได้ entryId จริงกลับมา (ตอนนี้ใช้ entry.id ไปก่อน)
+    const entryId = entry.id;
+
+    const LIFF_ID = process.env.LIFF_ID; // แนะนำใส่ env ด้วย
+    const liffUrl = `https://liff.line.me/${LIFF_ID}?page=history&entryId=${entryId}`;
+
+    const flex = makeFlexReceipt({
+      catName: entry.catName,
+      catIcon: entry.catIcon,
+      amount: entry.amount,
+      liffUrl,
+    });
+
+    await replyMessage(replyToken, [flex]);
     return res.status(200).send("OK");
   } catch (e) {
     console.error(e);
-    return res.status(500).send("Server error");
+    return res.status(200).send("OK"); // ให้ LINE ไม่ retry จนพัง
   }
 }
