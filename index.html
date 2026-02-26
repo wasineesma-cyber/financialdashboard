@@ -771,16 +771,27 @@ function doGet(){return ContentService.createTextOutput(JSON.stringify({status:'
 
 <script>
 // ══════ FIREBASE SETUP ══════
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyAOAr6OsQpf_e-xv8qfLyIUu6Dant1MkS4",
-  authDomain: "don-note.firebaseapp.com",
-  projectId: "don-note",
-  storageBucket: "don-note.firebasestorage.app",
-  messagingSenderId: "661381674055",
-  appId: "1:661381674055:web:0427dc17348fb11b56ed62"
+  apiKey: "AIzaSyAxEfomFx8g_Du_tdFjU1ji1-Hofno-sv8",
+  authDomain: "don-note-f2bcd.firebaseapp.com",
+  projectId: "don-note-f2bcd",
+  storageBucket: "don-note-f2bcd.firebasestorage.app",
+  messagingSenderId: "906046825048",
+  appId: "1:906046825048:web:6fdfb92d99e29b3518202d",
+  measurementId: "G-3DSW6JGQZK"
 };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 
 // ══════ LIFF + LINE LOGIN ══════
 const LIFF_ID = '2009230946-hp9vcPh3';
