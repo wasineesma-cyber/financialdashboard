@@ -435,25 +435,39 @@ let budgets = JSON.parse(localStorage.getItem('dong_budgets') || '{}');
 let addType = 'expense', selCatId = 'food', sumTab = 'expense', budgetTab = 'expense', editCatId = null, piePeriod = 'month';
 
 // ══════ LIFF & AUTH ══════
-async function initLiff() {
+
+  
+  async function initLiff() {
   try {
     await liff.init({ liffId: LIFF_ID });
     if (liff.isLoggedIn()) {
-      // ✅ จุดสำคัญ: ต้องเอาค่าที่ได้มาใส่ในตัวแปร lineProfile ที่เราประกาศไว้
-      lineProfile = await liff.getProfile(); 
+      lineProfile = await liff.getProfile();
       userId = lineProfile.userId;
       
       document.getElementById('lineLogin').classList.add('hidden');
-      updateLineProfileUI(); // เรียกฟังก์ชันแสดงรูป
-      init(); // เริ่มโหลดข้อมูลจาก Firebase
+      updateLineProfileUI();
+      init(); // ฟังก์ชันที่ทำหน้าที่โหลดข้อมูลและ render หน้าจอ
+
+      // ✅ วางโค้ดตรวจสอบ # ตรงนี้ (ก่อนปิดปีกกาของ if)
+      if (window.location.hash === '#history') {
+        goPanel('panel-history'); // ให้กระโดดไปหน้าประวัติทันที
+      }
     } else {
       document.getElementById('lineLogin').classList.remove('hidden');
       document.getElementById('splash').classList.add('hide');
     }
-  } catch (e) { 
+  } catch (e) {
     console.error("LIFF Error:", e);
-    useFallbackUserId(); 
+    useFallbackUserId();
   }
+}
+
+  
+  
+  
+  
+  
+  
 function updateLineProfileUI() {
   if (!lineProfile) return; //
   
