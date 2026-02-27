@@ -583,7 +583,7 @@ body{padding-bottom:var(--nav-h);}
     </button>
   </div>
 
-  <div class="home-bear-wrap" id="homeBear" onclick="runDong()">🐼</div>
+  <div class="home-bear-wrap" id="homeBear" onclick="runDong()"></div>
 
   <div class="chat-box">
     <div class="form-label" style="margin-bottom:8px;">⚡ พิมพ์สั้นๆ เช่น "ชาไข่มุก 65"</div>
@@ -839,7 +839,7 @@ function doPost(e){
             saveRow(entry);
             replyLine(ev.replyToken,'✅ บันทึกแล้วค่ะ!\n'+entry.catIcon+' '+entry.catName+' ฿'+entry.amount);
           } else {
-            replyLine(ev.replyToken,'พิมพ์แบบนี้ได้เลยค่ะ เช่น "ข้าว50" หรือ "ชาไข่มุก45" 🐼');
+            replyLine(ev.replyToken,'พิมพ์แบบนี้ได้เลยค่ะ เช่น "ข้าว50" หรือ "ชาไข่มุก45" ');
           }
         }
       });
@@ -1040,7 +1040,7 @@ function applyPremiumUI() {
 
     const expEl = document.getElementById('premiumExpirySub');
     if (expEl) {
-      if (premiumUntil === 'lifetime') expEl.textContent = '✨ ตลอดชีพ — ขอบคุณที่สนับสนุนค่ะ 🐼';
+      if (premiumUntil === 'lifetime') expEl.textContent = '✨ ตลอดชีพ — ขอบคุณที่สนับสนุนค่ะ ';
       else expEl.textContent = `หมดอายุ ${new Date(premiumUntil).toLocaleDateString('th-TH')}`;
     }
   } else {
@@ -1286,7 +1286,7 @@ function goPanel(id){
   if(id==='panel-budget') renderBudgetList();
 }
 
-function cyclePeriod(){ showToast('🐼 ฟีเจอร์หลายรอบงบกำลังมาเร็วๆ นี้!'); }
+function cyclePeriod(){ showToast(' ฟีเจอร์หลายรอบงบกำลังมาเร็วๆ นี้!'); }
 
 function switchSumTab(tab){
   sumTab=tab;
@@ -1389,7 +1389,7 @@ function setAmt(v){
 
 function addEntry(){
   const amt=parseFloat(document.getElementById('inputAmt').value);
-  if(!amt||amt<=0){ showToast('ใส่จำนวนเงินก่อนนะ 🐼'); return; }
+  if(!amt||amt<=0){ showToast('ใส่จำนวนเงินก่อนนะ '); return; }
   const note=document.getElementById('noteField').value.trim();
   const allCats=[...EXP_CATS,...INC_CATS];
   const cat=allCats.find(c=>c.id===selCatId)||allCats[0];
@@ -1605,7 +1605,7 @@ function renderPieChart(){
 // ══════ DONG ══════
 function initDong(){
   const h=new Date().getHours();
-  const emoji=h<12?'🐼‍❄️':h<18?'🐼':'🐼';
+  const emoji=h<12?':h<18?'':'';
 
   // อย่าไปทับรูปโปรไฟล์ที่ header ถ้ามีรูป LINE
   if(!hasLinePic) document.getElementById('headerBear').textContent=emoji;
