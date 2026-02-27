@@ -360,6 +360,22 @@ body{padding-bottom:var(--nav-h);}
 .si2-left .si2-sub  {font-size:.72rem;color:var(--sub);margin-top:2px;}
 .si2-right{color:var(--sub);font-size:.85rem;}
 
+/* ── PREMIUM ── */
+.premium-badge{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#f7971e,#ffd200);color:#fff;font-size:.65rem;font-weight:800;padding:2px 8px;border-radius:20px;letter-spacing:.04em;}
+.lock-row{opacity:.55;pointer-events:none;}
+.lock-badge{font-size:.75rem;margin-left:6px;}
+.upgrade-card{background:linear-gradient(135deg,#667eea,#764ba2);border-radius:16px;padding:16px;margin-bottom:10px;color:#fff;text-align:center;}
+.upgrade-card .up-title{font-size:1rem;font-weight:800;margin-bottom:4px;}
+.upgrade-card .up-sub{font-size:.75rem;opacity:.85;margin-bottom:12px;}
+.plan-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;}
+.plan-card{background:rgba(255,255,255,.15);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;border:2px solid transparent;transition:.2s;}
+.plan-card.selected{background:rgba(255,255,255,.3);border-color:#fff;}
+.plan-card .p-name{font-size:.7rem;font-weight:700;}
+.plan-card .p-price{font-size:1rem;font-weight:800;margin:4px 0;}
+.plan-card .p-per{font-size:.62rem;opacity:.8;}
+.btn-upgrade{width:100%;background:#fff;color:#764ba2;font-weight:800;font-size:.9rem;border:none;border-radius:12px;padding:12px;cursor:pointer;}
+.btn-upgrade:active{opacity:.85;}
+
 /* ── TOAST ── */
 .toast{
   position:fixed;bottom:calc(var(--nav-h)+16px);left:50%;
@@ -680,13 +696,47 @@ body{padding-bottom:var(--nav-h);}
     </div>
   </div>
 
+  <!-- พรีเมี่ยม -->
+  <div id="premiumUpgradeCard" class="upgrade-card" style="display:none;">
+    <div class="up-title">👑 Don Note Premium</div>
+    <div class="up-sub">ปลดล็อกทุกฟีเจอร์ ซิงค์ Sheet · บอท LINE · Export ฯลฯ</div>
+    <div class="plan-grid">
+      <div class="plan-card selected" id="planMonthly" onclick="selectPlan('monthly')">
+        <div class="p-name">รายเดือน</div>
+        <div class="p-price">฿59</div>
+        <div class="p-per">/เดือน</div>
+      </div>
+      <div class="plan-card" id="planYearly" onclick="selectPlan('yearly')">
+        <div class="p-name">รายปี</div>
+        <div class="p-price">฿499</div>
+        <div class="p-per">/ปี</div>
+      </div>
+      <div class="plan-card" id="planLifetime" onclick="selectPlan('lifetime')">
+        <div class="p-name">ตลอดชีพ</div>
+        <div class="p-price">฿999</div>
+        <div class="p-per">one-time</div>
+      </div>
+    </div>
+    <button class="btn-upgrade" onclick="goUpgrade()">อัพเกรดเลย 🚀</button>
+  </div>
+
+  <div id="premiumActiveCard" class="settings-card" style="display:none;">
+    <div class="sc-title">👑 แพลนของคุณ</div>
+    <div class="si2">
+      <div class="si2-left">
+        <div class="si2-label">✨ Premium <span class="premium-badge">PREMIUM</span></div>
+        <div class="si2-sub" id="premiumExpirySub"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="settings-card">
-    <div class="sc-title">Google Sheet</div>
-    <div class="si2" onclick="openSheetModal()">
+    <div class="sc-title">Google Sheet <span class="lock-badge" id="sheetLockBadge">👑</span></div>
+    <div class="si2" id="sheetConnectRow" onclick="guardPremium(openSheetModal)">
       <div class="si2-left"><div class="si2-label">📊 เชื่อม Google Sheet</div><div class="si2-sub" id="sheetUrlSub">ยังไม่ได้เชื่อม</div></div>
       <div class="si2-right">›</div>
     </div>
-    <div class="si2" onclick="syncToSheet()">
+    <div class="si2" id="sheetSyncRow" onclick="guardPremium(syncToSheet)">
       <div class="si2-left"><div class="si2-label">🔄 ซิงค์ข้อมูลไป Sheet</div><div class="si2-sub" id="syncStatusSub">กดเพื่อส่งข้อมูลทั้งหมด</div></div>
       <div class="si2-right">›</div>
     </div>
@@ -694,6 +744,10 @@ body{padding-bottom:var(--nav-h);}
 
   <div class="settings-card">
     <div class="sc-title">ข้อมูล</div>
+    <div class="si2" id="exportRow" onclick="guardPremium(exportCSV)">
+      <div class="si2-left"><div class="si2-label">📥 Export CSV <span class="lock-badge" id="exportLockBadge">👑</span></div><div class="si2-sub">ดาวน์โหลดข้อมูลทั้งหมด</div></div>
+      <div class="si2-right">›</div>
+    </div>
     <div class="si2" onclick="clearData()">
       <div class="si2-left"><div class="si2-label" style="color:var(--pink);">🗑️ ลบข้อมูลทั้งหมด</div><div class="si2-sub">ไม่สามารถกู้คืนได้</div></div>
       <div class="si2-right">›</div>
@@ -927,6 +981,97 @@ function lineLogout(){
   location.reload();
 }
 
+// ══════ PREMIUM ══════
+function checkIsPremium(data) {
+  if (!data?.isPremium) return false;
+  if (data.premiumUntil === 'lifetime') return true;
+  if (data.premiumUntil && new Date(data.premiumUntil) > new Date()) return true;
+  return false;
+}
+
+function applyPremiumUI() {
+  const upgradeCard  = document.getElementById('premiumUpgradeCard');
+  const activeCard   = document.getElementById('premiumActiveCard');
+  const sheetLock    = document.getElementById('sheetLockBadge');
+  const exportLock   = document.getElementById('exportLockBadge');
+  const sheetConnect = document.getElementById('sheetConnectRow');
+  const sheetSync    = document.getElementById('sheetSyncRow');
+  const exportRow    = document.getElementById('exportRow');
+
+  if (isPremium) {
+    upgradeCard?.classList.add('hidden') || (upgradeCard && (upgradeCard.style.display='none'));
+    activeCard && (activeCard.style.display='');
+    if (sheetLock) sheetLock.style.display = 'none';
+    if (exportLock) exportLock.style.display = 'none';
+    sheetConnect?.classList.remove('lock-row');
+    sheetSync?.classList.remove('lock-row');
+    exportRow?.classList.remove('lock-row');
+
+    const expEl = document.getElementById('premiumExpirySub');
+    if (expEl) {
+      if (premiumUntil === 'lifetime') expEl.textContent = '✨ ตลอดชีพ — ขอบคุณที่สนับสนุนค่ะ 🐼';
+      else expEl.textContent = `หมดอายุ ${new Date(premiumUntil).toLocaleDateString('th-TH')}`;
+    }
+  } else {
+    upgradeCard && (upgradeCard.style.display='');
+    activeCard && (activeCard.style.display='none');
+    sheetConnect?.classList.add('lock-row');
+    sheetSync?.classList.add('lock-row');
+    exportRow?.classList.add('lock-row');
+  }
+}
+
+function guardPremium(fn) {
+  if (isPremium) { fn(); return; }
+  showToast('👑 ฟีเจอร์นี้สำหรับสมาชิก Premium ค่ะ');
+  document.getElementById('panel-settings')?.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function selectPlan(plan) {
+  selectedPlan = plan;
+  ['monthly','yearly','lifetime'].forEach(p => {
+    document.getElementById('plan'+p.charAt(0).toUpperCase()+p.slice(1))?.classList.remove('selected');
+  });
+  document.getElementById('plan'+plan.charAt(0).toUpperCase()+plan.slice(1))?.classList.add('selected');
+}
+
+async function goUpgrade() {
+  if (!userId) { showToast('กรุณา login ก่อนนะคะ'); return; }
+  showToast('⏳ กำลังเปิดหน้าชำระเงิน...');
+  try {
+    const res = await fetch('/api/createCheckoutSession', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        plan: selectedPlan,
+        successUrl: window.location.origin + '?premium=success',
+        cancelUrl:  window.location.origin + '?premium=cancel',
+      }),
+    });
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
+    else showToast('❌ เกิดข้อผิดพลาด ลองใหม่อีกครั้งค่ะ');
+  } catch (e) {
+    showToast('❌ เชื่อมต่อไม่ได้ ลองใหม่ค่ะ');
+  }
+}
+
+function exportCSV() {
+  if (!entries.length) { showToast('ยังไม่มีข้อมูลค่ะ'); return; }
+  const header = 'วันที่,ประเภท,หมวด,ไอคอน,จำนวน,หมายเหตุ';
+  const rows = entries.map(e =>
+    [e.date, e.type==='expense'?'รายจ่าย':'รายรับ', e.catName||'', e.catIcon||'', e.amount, `"${(e.note||'').replace(/"/g,'""')}"`].join(',')
+  );
+  const csv = '\uFEFF' + header + '\n' + rows.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `donnote_${todayStr()}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast('📥 Export CSV แล้วค่ะ!');
+}
+
 // ══════ CLOUD SYNC ══════
 async function saveToCloud() {
   try {
@@ -950,9 +1095,14 @@ async function loadFromCloud() {
       const data = doc.data();
       if (data.entries) { entries = data.entries; localStorage.setItem('dong_entries', JSON.stringify(entries)); }
       if (data.budgets) { budgets = data.budgets; localStorage.setItem('dong_budgets', JSON.stringify(budgets)); }
+      // โหลด premium status
+      isPremium    = checkIsPremium(data);
+      premiumPlan  = data.premiumPlan  || null;
+      premiumUntil = data.premiumUntil || null;
     } else if (entries.length > 0 || Object.keys(budgets).length > 0) {
       await saveToCloud(); return;
     }
+    applyPremiumUI();
     updateCloudStatus('✅ ซิงค์แล้ว');
   } catch(e) {
     updateCloudStatus('⚠️ ออฟไลน์ - ใช้ข้อมูลในเครื่อง');
@@ -997,6 +1147,10 @@ const TH_MS = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','ม
 // ══════ STATE ══════
 let entries  = JSON.parse(localStorage.getItem('dong_entries') || '[]');
 let budgets  = JSON.parse(localStorage.getItem('dong_budgets') || '{}');
+let isPremium = false;
+let premiumPlan = null;
+let premiumUntil = null;
+let selectedPlan = 'monthly';
 let addType  = 'expense';
 let selCatId = 'food';
 let sumTab   = 'expense';
