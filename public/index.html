@@ -621,7 +621,6 @@ body{padding-bottom:var(--nav-h);}
   <button class="btn-add exp-btn" id="btnAdd" onclick="addEntry()">บันทึก ✓</button>
 </div>
 
-
 <!-- ════════ PANEL: หมวด/งบ ════════ -->
 <div class="panel" id="panel-budget">
   <div class="budget-header">จัดการหมวดและงบ</div>
@@ -701,87 +700,6 @@ body{padding-bottom:var(--nav-h);}
     </div>
   </div>
 </div>
-
-<!-- ════════ PANEL: หมวด/งบ ════════ -->
-<div class="panel" id="panel-budget">
-  <div class="budget-header">จัดการหมวดและงบ</div>
-
-  <div class="period-setting-card">
-    <div class="psc-left">
-      <div class="psc-title">รอบตัดงบ</div>
-      <div class="psc-val">📅 รายเดือน (วันที่ 1)</div>
-    </div>
-    <button class="btn-small" type="button">✏️ ตั้งค่า</button>
-  </div>
-
-  <div class="budget-type-tabs">
-    <button class="btt exp active" id="bttExp" onclick="switchBudgetTab('expense')">รายจ่าย</button>
-    <button class="btt inc"        id="bttInc" onclick="switchBudgetTab('income')">รายรับ</button>
-  </div>
-
-  <div class="budget-list" id="budgetList"></div>
-</div>
-
-<!-- ════════ PANEL: รายการ ════════ -->
-<div class="panel" id="panel-history">
-  <div class="filter-row2">
-    <input type="month" id="filterMonth" onchange="renderHistory()">
-    <select id="filterType" onchange="renderHistory()">
-      <option value="all">ทั้งหมด</option>
-      <option value="expense">รายจ่าย</option>
-      <option value="income">รายรับ</option>
-    </select>
-  </div>
-  <div class="tx-list2" id="txList2"></div>
-</div>
-
-<!-- ════════ PANEL: ตั้งค่า ════════ -->
-<div class="panel" id="panel-settings">
-  <div style="text-align:center;padding:20px 0 16px;">
-    <img id="linePicDisplay" src="" alt="" style="display:none;width:72px;height:72px;border-radius:50%;object-fit:cover;margin-bottom:10px;border:3px solid var(--pink);">
-    <div id="settingsBear" style="font-size:3.5rem;cursor:pointer;" onclick="runDong()">🐼</div>
-    <div style="font-size:1rem;font-weight:700;margin-top:6px;" id="lineNameDisplay">돈노트 Don Note ⭐</div>
-    <div style="font-size:.75rem;color:var(--sub);margin-top:2px;">v2.0 · โน้ตเงินสไตล์เกาหลี</div>
-  </div>
-
-  <div class="settings-card">
-    <div class="sc-title">☁️ Cloud Sync</div>
-    <div class="si2">
-      <div class="si2-left">
-        <div class="si2-label">☁️ สถานะ Firebase</div>
-        <div class="si2-sub" id="cloudStatusSub">⏳ กำลังเชื่อมต่อ...</div>
-      </div>
-    </div>
-    <div class="si2" onclick="lineLogout()">
-      <div class="si2-left">
-        <div class="si2-label" style="color:#06C755;">🟢 LINE Account</div>
-        <div class="si2-sub">แตะเพื่อออกจากระบบ</div>
-      </div>
-      <div class="si2-right">›</div>
-    </div>
-  </div>
-
-  <div class="settings-card">
-    <div class="sc-title">Google Sheet</div>
-    <div class="si2" onclick="openSheetModal()">
-      <div class="si2-left"><div class="si2-label">📊 เชื่อม Google Sheet</div><div class="si2-sub" id="sheetUrlSub">ยังไม่ได้เชื่อม</div></div>
-      <div class="si2-right">›</div>
-    </div>
-    <div class="si2" onclick="syncToSheet()">
-      <div class="si2-left"><div class="si2-label">🔄 ซิงค์ข้อมูลไป Sheet</div><div class="si2-sub" id="syncStatusSub">กดเพื่อส่งข้อมูลทั้งหมด</div></div>
-      <div class="si2-right">›</div>
-    </div>
-  </div>
-
-  <div class="settings-card">
-    <div class="sc-title">ข้อมูล</div>
-    <div class="si2" onclick="clearData()">
-      <div class="si2-left"><div class="si2-label" style="color:var(--pink);">🗑️ ลบข้อมูลทั้งหมด</div><div class="si2-sub">ไม่สามารถกู้คืนได้</div></div>
-      <div class="si2-right">›</div>
-    </div>
-  </div>
-</div>
-
 
 <!-- ── BOTTOM NAV ── -->
 <nav class="bottom-nav">
@@ -1537,6 +1455,3 @@ initLiff();
 </script>
 </body>
 </html>
-
-
-
