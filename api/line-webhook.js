@@ -19,6 +19,7 @@ function verifySignature(rawBody, signature, secret) {
 
 function initAdmin() {
   if (admin.apps.length) return;
+
   const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n").trim();
 
   admin.initializeApp({
@@ -28,7 +29,7 @@ function initAdmin() {
       privateKey,
     }),
   });
-  console.log("✅ Firebase Admin Initialized Successfully");
+  console.log("✅ Firebase Admin Initialized");
 }
 
 async function saveEntry({ userId, entry }) {
@@ -36,30 +37,29 @@ async function saveEntry({ userId, entry }) {
   const db = admin.firestore();
   const ref = db.collection("dongNote").doc(userId);
 
-  console.log(`🔄 Saving for user: ${userId}`);
-  console.log(`📦 Entry to save:`, JSON.stringify(entry, null, 2));
+  console.log(`🔄 Saving for ${userId} | Amount: ${entry.amount}`);
 
   const snap = await ref.get();
   let entries = snap.exists ? (snap.data().entries || []) : [];
 
   entries.push(entry);
 
-  await ref.set({
-    entries,
-    updatedAt: new Date().toISOString(),
-  });
+  await ref.set({ entries, updatedAt: new Date().toISOString() });
 
-  console.log(`✅ SAVED SUCCESSFULLY! Total entries now: ${entries.length}`);
+  console.log(`✅ SAVED SUCCESSFULLY! Total entries: ${entries.length}`);
 }
 
-async function reply(replyToken, messages) {
+async function reply(replyToken, text) {
   await fetch("https://api.line.me/v2/bot/message/reply", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`,
     },
-    body: JSON.stringify({ replyToken, messages }),
+    body: JSON.stringify({
+      replyToken,
+      messages: [{ type: "text", text }]
+    }),
   });
 }
 
@@ -72,7 +72,7 @@ export default async function handler(req, res) {
     const secret = process.env.LINE_CHANNEL_SECRET;
 
     if (!verifySignature(rawBody, signature, secret)) {
-      console.error("❌ Signature verification failed");
+      console.error("❌ Signature failed");
       return res.status(401).send("Unauthorized");
     }
 
@@ -83,17 +83,13 @@ export default async function handler(req, res) {
       const text = event.message.text.trim();
       const userId = event.source.userId;
 
-      console.log(`\n📨=== NEW MESSAGE ===`);
-      console.log(`From: ${userId}`);
-      console.log(`Text: "${text}"`);
+      console.log(`📨 Message: "${text}" from ${userId}`);
 
-      // Parse
       const match = text.match(/[\d,]+(\.\d+)?/);
       const amount = match ? parseFloat(match[0].replace(/,/g, "")) : 0;
 
       if (!amount) {
-        console.log("❌ No amount found");
-        await reply(event.replyToken, [{ type: "text", text: "🐼 พิมพ์ตัวเลขด้วยนะ เช่น ชาไข่มุก 65" }]);
+        await reply(event.replyToken, "🐼 พิมพ์ตัวเลขด้วยนะ เช่น ชาไข่มุก 65");
         return res.status(200).send("OK");
       }
 
@@ -109,22 +105,13 @@ export default async function handler(req, res) {
         source: "line-webhook"
       };
 
-      console.log("✅ Parsed entry successfully");
-
       await saveEntry({ userId, entry });
-
-      // ส่ง Flex กลับ
-      await reply(event.replyToken, [{
-        type: "text",
-        text: `✅ บันทึกแล้ว ฿${amount}\n${text}`
-      }]);
-
-      console.log("🎉 Webhook Completed Successfully");
+      await reply(event.replyToken, `✅ บันทึกแล้ว\n${text} ฿${amount}`);
     }
 
     return res.status(200).send("OK");
   } catch (err) {
-    console.error("🚨 CRITICAL ERROR:", err.message);
+    console.error("🚨 ERROR:", err.message);
     console.error(err.stack);
     return res.status(200).send("OK");
   }
