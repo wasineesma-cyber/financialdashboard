@@ -19,18 +19,13 @@ function verifySignature(rawBody, signature, secret) {
 
 function initAdmin() {
   if (admin.apps.length) return;
-
   const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n").trim();
-
-  if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !privateKey) {
-    throw new Error("❌ Missing Firebase Env Vars in Vercel");
-  }
 
   admin.initializeApp({
     credential: admin.credential.cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: privateKey,
+      privateKey,
     }),
   });
   console.log("✅ Firebase Admin Initialized Successfully");
@@ -41,15 +36,20 @@ async function saveEntry({ userId, entry }) {
   const db = admin.firestore();
   const ref = db.collection("dongNote").doc(userId);
 
+  console.log(`🔄 Saving for user: ${userId}`);
+  console.log(`📦 Entry to save:`, JSON.stringify(entry, null, 2));
+
   const snap = await ref.get();
-  const data = snap.exists ? snap.data() : { entries: [] };
+  let entries = snap.exists ? (snap.data().entries || []) : [];
 
-  data.entries = data.entries || [];
-  data.entries.push(entry);
-  data.updatedAt = new Date().toISOString();
+  entries.push(entry);
 
-  await ref.set(data);
-  console.log(`✅ Saved entry for user ${userId}`);
+  await ref.set({
+    entries,
+    updatedAt: new Date().toISOString(),
+  });
+
+  console.log(`✅ SAVED SUCCESSFULLY! Total entries now: ${entries.length}`);
 }
 
 async function reply(replyToken, messages) {
@@ -72,7 +72,7 @@ export default async function handler(req, res) {
     const secret = process.env.LINE_CHANNEL_SECRET;
 
     if (!verifySignature(rawBody, signature, secret)) {
-      console.error("❌ Signature failed");
+      console.error("❌ Signature verification failed");
       return res.status(401).send("Unauthorized");
     }
 
@@ -80,15 +80,19 @@ export default async function handler(req, res) {
     const event = body.events?.[0];
 
     if (event?.type === "message" && event.message.type === "text") {
-      const text = event.message.text;
+      const text = event.message.text.trim();
       const userId = event.source.userId;
 
-      console.log(`📨 Received: "${text}" from ${userId}`);
+      console.log(`\n📨=== NEW MESSAGE ===`);
+      console.log(`From: ${userId}`);
+      console.log(`Text: "${text}"`);
 
-      // parse
+      // Parse
       const match = text.match(/[\d,]+(\.\d+)?/);
       const amount = match ? parseFloat(match[0].replace(/,/g, "")) : 0;
+
       if (!amount) {
+        console.log("❌ No amount found");
         await reply(event.replyToken, [{ type: "text", text: "🐼 พิมพ์ตัวเลขด้วยนะ เช่น ชาไข่มุก 65" }]);
         return res.status(200).send("OK");
       }
@@ -105,20 +109,23 @@ export default async function handler(req, res) {
         source: "line-webhook"
       };
 
+      console.log("✅ Parsed entry successfully");
+
       await saveEntry({ userId, entry });
 
+      // ส่ง Flex กลับ
       await reply(event.replyToken, [{
-        type: "flex",
-        altText: `✅ บันทึก ${amount} บาท`,
-        contents: { /* flex message สั้นๆ */ type: "bubble", body: { type: "box", layout: "vertical", contents: [{ type: "text", text: `✅ บันทึกแล้ว ฿${amount}` }] } }
+        type: "text",
+        text: `✅ บันทึกแล้ว ฿${amount}\n${text}`
       }]);
 
-      console.log("🎉 Webhook Success");
+      console.log("🎉 Webhook Completed Successfully");
     }
 
     return res.status(200).send("OK");
   } catch (err) {
-    console.error("🚨 CRITICAL ERROR:", err.message || err);
+    console.error("🚨 CRITICAL ERROR:", err.message);
+    console.error(err.stack);
     return res.status(200).send("OK");
   }
 }
