@@ -797,7 +797,6 @@ let lineProfile = null;
 let hasLinePic = false;
 
 /* ... โค้ดส่วนอื่นของฝ้ายต่อเหมือนเดิม ... */
-</script>
 
 async function initLiff() {
   try {
@@ -1298,7 +1297,9 @@ function delEntry(id){
 // ══════ SETTINGS ══════
 function clearData(){
   if(!confirm('ลบข้อมูลทั้งหมดไหม?'))return;
-  entries=[];budgets={};save();renderAll();showToast('🗑️ ลบข้อมูลแล้ว');
+  entries=[];budgets={};
+  localStorage.setItem('dong_budgets',JSON.stringify(budgets));
+  save();renderAll();showToast('🗑️ ลบข้อมูลแล้ว');
 }
 
 // ══════ PIE CHART ══════
