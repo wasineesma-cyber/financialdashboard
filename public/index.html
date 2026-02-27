@@ -139,7 +139,6 @@ body{padding-bottom:var(--nav-h);}
 </div>
 
 <div class="toast" id="toast"></div>
-
 <script>
 // 1. ตั้งค่า Firebase (ตรวจสอบให้ตรงกับ Console ของคุณ)
 const firebaseConfig = {
@@ -153,49 +152,50 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// 2. ตั้งค่า LIFF ID (ตรวจสอบให้ตรงกับหน้า LINE Developers)
+// 2. ตั้งค่า LIFF ID
 const LIFF_ID = '2009250866-MmcKPhwq'; 
 let userId = null;
 let lineProfile = null;
 let entries = JSON.parse(localStorage.getItem('dong_entries') || '[]');
 let addType = 'expense', selCatId = 'food';
 
-// หมวดหมู่สำหรับสร้างปุ่มบนหน้าจอ
-const EXP_CATS = [
-  {id:'food', icon:'🍜', name:'อาหาร'}, {id:'drink', icon:'🧋', name:'กาแฟ'},
-  {id:'deliver', icon:'🛵', name:'เดลิเวอรี'}, {id:'travel', icon:'🚌', name:'เดินทาง'},
-  {id:'shop', icon:'🛍️', name:'ช้อปปิ้ง'}, {id:'other', icon:'📦', name:'อื่นๆ'}
-];
-const INC_CATS = [
-  {id:'salary', icon:'💼', name:'เงินเดือน'}, {id:'special', icon:'⭐', name:'รายได้เสริม'}
-];
+const EXP_CATS = [{id:'food',icon:'🍜',name:'อาหาร'},{id:'drink',icon:'🧋',name:'กาแฟ'},{id:'deliver',icon:'🛵',name:'ส่งอาหาร'},{id:'travel',icon:'🚌',name:'เดินทาง'},{id:'shop',icon:'🛍️',name:'ช้อปปิ้ง'},{id:'other',icon:'📦',name:'อื่นๆ'}];
+const INC_CATS = [{id:'salary',icon:'💼',name:'เงินเดือน'},{id:'special',icon:'⭐',name:'รายได้เสริม'}];
 
-// 3. เริ่มต้นระบบ LIFF และเช็กการ Login
+// 3. เริ่มต้นระบบ LIFF (แก้ไขลำดับการทำงาน)
 async function initLiff() {
   try {
     await liff.init({ liffId: LIFF_ID });
     if (liff.isLoggedIn()) {
-      lineProfile = await liff.getProfile(); // ดึง Profile (ชื่อ/รูป)
+      // ✅ ดึง Profile ก่อน แล้วค่อยไปต่อ
+      lineProfile = await liff.getProfile(); 
       userId = lineProfile.userId;
       
+      // ✅ ซ่อนหน้า Login และหน้า Splash ทันทีที่พร้อม
       document.getElementById('lineLogin').classList.add('hidden');
-      updateLineProfileUI(); // แสดงรูปโปรไฟล์ทันที
-      initApp(); // เริ่มวาดหน้าจอ
       
-      // รองรับลิงก์จาก Flex Message
+      updateLineProfileUI(); 
+      initApp(); 
+      
+      // ✅ ตรวจสอบ Fragment เพื่อเปลี่ยนหน้า
       if (window.location.hash === '#history') goPanel('panel-history');
     } else {
+      // ❌ ถ้ายังไม่ Login ให้รอรับคำสั่งกดปุ่ม
       document.getElementById('lineLogin').classList.remove('hidden');
       document.getElementById('splash').classList.add('hide');
     }
-  } catch (e) { console.error("LIFF Error:", e); }
+  } catch (e) { 
+    console.error("LIFF Error:", e);
+    // กรณี Error ให้ลองรันแอปแบบ Local (Fallback)
+    document.getElementById('lineLogin').classList.add('hidden');
+    initApp(); 
+  }
 }
 
-// 4. แสดงผลรูปโปรไฟล์และชื่อจาก LINE
+// 4. แสดงรูปและชื่อโปรไฟล์
 function updateLineProfileUI() {
   if (!lineProfile) return;
   const hb = document.getElementById('headerBear');
-  // เปลี่ยนจากหมี 🐼 เป็นรูปโปรไฟล์จริง
   if (hb && lineProfile.pictureUrl) {
     hb.innerHTML = `<img src="${lineProfile.pictureUrl}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid #FF4785;">`;
   }
@@ -205,18 +205,34 @@ function updateLineProfileUI() {
 
 // 5. โหลดข้อมูลและแสดงผลหน้าจอ
 function initApp() {
-  renderAll(); // คำนวณยอดเงินรวม
-  renderCatGrid2(); // วาดปุ่มหมวดหมู่ (อาหาร, กาแฟ ฯลฯ)
-  loadFromCloud(); // ดึงข้อมูลที่เคยเซฟไว้ใน Firebase
-  setTimeout(() => document.getElementById('splash').classList.add('hide'), 1000);
+  // ✅ ต้องเรียก render ต่างๆ เพื่อให้ UI มีข้อมูล
+  renderAll(); 
+  renderCatGrid2(); 
+  
+  // ✅ โหลดข้อมูลจาก Cloud (ถ้ามี)
+  loadFromCloud().then(() => {
+    // ซ่อน Splash Screen เมื่อโหลดทุกอย่างเสร็จ (หรือผ่านไป 1 วิ)
+    setTimeout(() => {
+      const splash = document.getElementById('splash');
+      if (splash) splash.classList.add('hide');
+    }, 800);
+  });
 }
 
 function renderAll() {
   const inc = entries.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
   const exp = entries.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
-  document.getElementById('balAmount').textContent = '฿' + (inc - exp).toLocaleString();
-  document.getElementById('ieIncAmt').textContent = '฿' + inc.toLocaleString();
-  document.getElementById('ieExpAmt').textContent = '฿' + exp.toLocaleString();
+  
+  const balEl = document.getElementById('balAmount');
+  if (balEl) {
+    const bal = inc - exp;
+    balEl.textContent = '฿' + bal.toLocaleString();
+    balEl.className = 'balance-amount ' + (bal < 0 ? 'negative' : 'positive');
+  }
+  if (document.getElementById('ieIncAmt')) document.getElementById('ieIncAmt').textContent = '฿' + inc.toLocaleString();
+  if (document.getElementById('ieExpAmt')) document.getElementById('ieExpAmt').textContent = '฿' + exp.toLocaleString();
+  
+  renderCatRows();
 }
 
 function renderCatGrid2() {
@@ -229,36 +245,56 @@ function renderCatGrid2() {
     </div>`).join('');
 }
 
+function renderCatRows() {
+  const md = entries.filter(e => e.type === (addType || 'expense'));
+  const catMap = {}; md.forEach(e => catMap[e.catId] = (catMap[e.catId] || 0) + e.amount);
+  const cats = (addType === 'expense' ? EXP_CATS : INC_CATS);
+  const catRows = document.getElementById('catRows');
+  if (!catRows) return;
+  catRows.innerHTML = cats.map(c => {
+    const a = catMap[c.id] || 0;
+    return `<div class="cat-row"><div class="cat-row-top"><span>${c.name}</span><span>฿${a.toLocaleString()}</span></div><div class="bar-track"><div class="bar-fill" style="width:100%;background:${addType==='expense'?'#FF4785':'#00C9A7'}"></div></div></div>`;
+  }).join('');
+}
+
 // 6. การจัดการหน้าพาเนล
 function goPanel(id) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  const target = document.getElementById(id);
+  if (target) target.classList.add('active');
   const key = id.replace('panel-', '');
-  document.getElementById('nav-' + key)?.classList.add('active');
+  const btn = document.getElementById('nav-' + key);
+  if (btn) btn.classList.add('active');
+  if (id === 'panel-history') renderHistory();
 }
 
-// 7. การเซฟและโหลด Cloud Sync
+// 7. การดึงข้อมูล Cloud Sync
 async function loadFromCloud() {
   if (!userId) return;
-  const doc = await db.collection('dongNote').doc(userId).get();
-  if (doc.exists) {
-    entries = doc.data().entries || [];
-    renderAll();
-    const status = document.getElementById('cloudStatusSub');
-    if(status) status.textContent = 'สถานะ: ✅ เชื่อมต่อ Cloud แล้ว';
-  }
+  try {
+    const doc = await db.collection('dongNote').doc(userId).get();
+    if (doc.exists) {
+      entries = doc.data().entries || [];
+      renderAll();
+      const status = document.getElementById('cloudStatusSub');
+      if(status) status.textContent = 'สถานะ: ✅ เชื่อมต่อ Cloud แล้ว';
+    }
+  } catch (e) { console.error("Cloud Error:", e); }
 }
 
 function showToast(m) { 
   const t = document.getElementById('toast'); 
-  t.textContent = m; t.classList.add('show'); 
-  setTimeout(() => t.classList.remove('show'), 2000); 
+  if (t) {
+    t.textContent = m; t.classList.add('show'); 
+    setTimeout(() => t.classList.remove('show'), 2000); 
+  }
 }
 
-// เริ่มรันระบบ
+// ══════ เริ่มรันระบบ ══════
 initLiff();
 </script>
+
 
 </body>
 </html>
