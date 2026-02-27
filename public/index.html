@@ -990,7 +990,7 @@ async function syncToSheet(){
     await fetch(gsUrl, {
       method: 'POST',
       mode: 'no-cors',
-      headers: {'Content-Type':'application/json'},
+      headers: {'Content-Type':'text/plain'},
       body: JSON.stringify({action:'sync', entries})
     });
     const now = new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
