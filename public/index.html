@@ -40,18 +40,19 @@ body{padding-bottom:var(--nav-h);}
 
 /* ── HEADER ── */
 .header{
-  background:var(--white);
-  padding:12px 18px;
-  padding-top:calc(12px + env(safe-area-inset-top));
+  background:linear-gradient(135deg,#1D4ED8,var(--pink));
+  padding:14px 18px;
+  padding-top:calc(14px + env(safe-area-inset-top));
   display:flex;align-items:center;justify-content:center;
   position:relative;
+  box-shadow:0 2px 16px rgba(37,99,235,.25);
 }
-.header-title{font-size:1rem;font-weight:700;color:var(--text);}
+.header-title{font-size:1.15rem;font-weight:900;color:#fff;letter-spacing:.04em;text-shadow:0 1px 4px rgba(0,0,0,.15);}
 .header-bear{
   position:absolute;left:16px;
   font-size:1.3rem;cursor:pointer;
 }
-.header-right{position:absolute;right:16px;font-size:.8rem;color:var(--sub);}
+.header-right{position:absolute;right:16px;font-size:.8rem;color:rgba(255,255,255,.75);}
 
 /* ── BOTTOM NAV ── */
 .bottom-nav{
@@ -88,16 +89,21 @@ body{padding-bottom:var(--nav-h);}
 .period-pill .pi-arrow{color:var(--sub);font-size:.7rem;}
 
 /* Balance */
-.balance-wrap{text-align:center;margin-bottom:14px;}
-.balance-label{font-size:.72rem;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:.06em;}
-.balance-amount{font-size:2.6rem;font-weight:900;margin:4px 0 8px;color:#1C1C1E;}
-.balance-amount.positive{color:#34C759;}
-.balance-amount.negative{color:var(--pink);}
+.balance-wrap{
+  background:linear-gradient(135deg,#1D4ED8,var(--pink));
+  border-radius:24px;text-align:center;margin-bottom:14px;
+  padding:28px 20px 22px;
+  box-shadow:0 8px 28px rgba(37,99,235,.28);
+}
+.balance-label{font-size:.72rem;color:rgba(255,255,255,.75);font-weight:600;text-transform:uppercase;letter-spacing:.06em;}
+.balance-amount{font-size:2.6rem;font-weight:900;margin:4px 0 8px;color:#fff;}
+.balance-amount.positive{color:#6EE7B7;}
+.balance-amount.negative{color:#FCA5A5;}
 .period-btn{
   display:inline-flex;align-items:center;gap:5px;
-  border:1px solid var(--border);border-radius:20px;
-  padding:6px 14px;font-size:.78rem;font-weight:600;color:var(--text);
-  background:var(--white);cursor:pointer;
+  border:1px solid rgba(255,255,255,.35);border-radius:20px;
+  padding:6px 14px;font-size:.78rem;font-weight:600;color:rgba(255,255,255,.9);
+  background:rgba(255,255,255,.18);cursor:pointer;
 }
 
 /* Inc/Exp cards */
@@ -453,16 +459,23 @@ body{padding-bottom:var(--nav-h);}
 /* ── SPLASH SCREEN ── */
 #splash{
   position:fixed;inset:0;z-index:9999;
-  background:#1D4ED8;
+  background:linear-gradient(160deg,#1D4ED8,#2563EB 60%,#3B82F6);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:16px;
   transition:opacity .5s ease;
 }
 #splash.hide{opacity:0;pointer-events:none;}
-.splash-bear{font-size:72px;animation:splashBounce .7s ease infinite alternate;}
-.splash-title{color:#fff;font-size:1.5rem;font-weight:800;letter-spacing:.02em;}
-.splash-sub{color:rgba(255,255,255,.75);font-size:.85rem;letter-spacing:.05em;}
-@keyframes splashBounce{from{transform:translateY(0);}to{transform:translateY(-10px);}}
+.splash-logo{
+  width:88px;height:88px;border-radius:28px;
+  background:rgba(255,255,255,.18);border:2px solid rgba(255,255,255,.35);
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.4rem;
+  box-shadow:0 8px 32px rgba(0,0,0,.2);
+  animation:splashBounce .8s ease infinite alternate;
+}
+.splash-title{color:#fff;font-size:1.8rem;font-weight:900;letter-spacing:.04em;text-shadow:0 2px 8px rgba(0,0,0,.2);}
+.splash-sub{color:rgba(255,255,255,.72);font-size:.85rem;letter-spacing:.06em;}
+@keyframes splashBounce{from{transform:translateY(0);}to{transform:translateY(-8px);}}
 
 /* ── INSTALL BANNER ── */
 #installBanner{
@@ -484,14 +497,23 @@ body{padding-bottom:var(--nav-h);}
 /* ── LINE LOGIN SCREEN ── */
 #lineLogin{
   position:fixed;inset:0;z-index:10000;
-  background:var(--bg);
+  background:linear-gradient(160deg,#1D4ED8,#2563EB 60%,#3B82F6);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:32px;
 }
 #lineLogin.hidden{display:none;}
-.ll-bear{font-size:5rem;margin-bottom:12px;}
-.ll-title{font-size:1.4rem;font-weight:900;color:var(--pink);margin-bottom:6px;}
-.ll-sub{font-size:.85rem;color:var(--sub);margin-bottom:32px;line-height:1.6;}
+.ll-logo{
+  width:80px;height:80px;border-radius:24px;
+  background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.35);
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.2rem;margin-bottom:16px;
+  box-shadow:0 8px 24px rgba(0,0,0,.15);
+}
+.ll-title{font-size:1.6rem;font-weight:900;color:#fff;margin-bottom:6px;letter-spacing:.04em;text-shadow:0 2px 8px rgba(0,0,0,.2);}
+.ll-sub{font-size:.85rem;color:rgba(255,255,255,.78);margin-bottom:32px;line-height:1.6;}
+/* ── HIDE BEAR ELEMENTS ── */
+.home-bear-wrap{display:none!important;}
+#dong-run{display:none!important;}
 .btn-line-login{
   background:#06C755;color:#fff;border:none;
   padding:16px 36px;border-radius:16px;
@@ -507,8 +529,9 @@ body{padding-bottom:var(--nav-h);}
 
 <!-- LINE LOGIN SCREEN -->
 <div id="lineLogin" class="hidden">
-  <div class="ll-bear">🐼</div>
+  <div class="ll-logo">💳</div>
   <div class="ll-title">แม่ละเมียด</div>
+  <div style="font-size:.95rem;font-weight:600;color:rgba(255,255,255,.6);margin-bottom:4px;letter-spacing:.08em;">MAE LAMIET</div>
   <div class="ll-sub">เข้าสู่ระบบด้วย LINE<br>ข้อมูลปลอดภัยผูกกับบัญชี LINE ของคุณ</div>
   <button class="btn-line-login" onclick="liff.login()">
     <img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/LINE_New_App_Icon_%282020-12%29.png" alt="LINE">
@@ -518,14 +541,14 @@ body{padding-bottom:var(--nav-h);}
 
 <!-- SPLASH SCREEN -->
 <div id="splash">
-  <div class="splash-bear">🐼</div>
+  <div class="splash-logo">💳</div>
   <div class="splash-title">แม่ละเมียด</div>
-  <div class="splash-sub">บันทึกการเงินส่วนตัว</div>
+  <div class="splash-sub">Mae Lamiet · บันทึกการเงินส่วนตัว</div>
 </div>
 
 <!-- INSTALL BANNER (iOS) -->
 <div id="installBanner">
-  <div class="ib-icon">🐼</div>
+  <div class="ib-icon">📱</div>
   <div class="ib-text">
     <strong>เพิ่มไปหน้าจอหลัก</strong>
     <span>แตะ ⬡ แล้วเลือก "เพิ่มลงในหน้าจอเริ่มต้น"</span>
@@ -535,8 +558,11 @@ body{padding-bottom:var(--nav-h);}
 
 <!-- HEADER -->
 <div class="header">
-  <div class="header-bear" id="headerBear">🐼</div>
-  <div class="header-title">แม่ละเมียด</div>
+  <div class="header-bear" id="headerBear">👤</div>
+  <div style="text-align:center;">
+    <div class="header-title">แม่ละเมียด</div>
+    <div style="font-size:.65rem;color:rgba(255,255,255,.6);font-weight:600;letter-spacing:.1em;margin-top:1px;">MAE LAMIET</div>
+  </div>
   <div class="header-right" id="headerRight"></div>
 </div>
 
@@ -674,9 +700,9 @@ body{padding-bottom:var(--nav-h);}
 <div class="panel" id="panel-settings">
   <div style="text-align:center;padding:20px 0 16px;">
     <img id="linePicDisplay" src="" alt="" style="display:none;width:72px;height:72px;border-radius:50%;object-fit:cover;margin-bottom:10px;border:3px solid var(--pink);">
-    <div id="settingsBear" style="font-size:3.5rem;cursor:pointer;" onclick="runDong()">🐼</div>
-    <div style="font-size:1rem;font-weight:700;margin-top:6px;" id="lineNameDisplay">แม่ละเมียด</div>
-    <div style="font-size:.75rem;color:var(--sub);margin-top:2px;">v2.0 · บันทึกการเงินส่วนตัว</div>
+    <div id="settingsBear" style="display:none;"></div>
+    <div style="font-size:1.2rem;font-weight:900;margin-top:6px;color:var(--pink);" id="lineNameDisplay">แม่ละเมียด</div>
+    <div style="font-size:.75rem;color:var(--sub);margin-top:2px;">Mae Lamiet · v2.0</div>
   </div>
 
   <div class="settings-card">
@@ -877,7 +903,7 @@ function ok(){return ContentService.createTextOutput(JSON.stringify({status:'ok'
   </div>
 </div>
 
-<div id="dong-run">🐼</div>
+<div id="dong-run"></div>
 <div class="toast" id="toast"></div>
 
 <script>
