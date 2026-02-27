@@ -1,66 +1,62 @@
 import { onRequest } from "firebase-functions/v2/https";
+import * as functions from "firebase-functions";
 import admin from "firebase-admin";
 import crypto from "crypto";
 
 admin.initializeApp();
 
-// ── Verify LINE Signature ──
-function verifySignature(rawBody, signature, channelSecret) {
+// ดึงค่าจาก Firebase Config (สำคัญมาก!)
+const config = functions.config();
+
+console.log("✅ Config Loaded:", {
+  hasSecret: !!config.line?.channel_secret,
+  hasToken: !!config.line?.channel_access_token
+});
+
+function verifySignature(rawBody, signature) {
   const hash = crypto
-    .createHmac("SHA256", channelSecret)
+    .createHmac("SHA256", config.line.channel_secret)
     .update(rawBody)
     .digest("base64");
   return hash === signature;
 }
 
-// ── บันทึกเข้า Firestore ──
 async function saveToFirestore(userId, entry) {
   const db = admin.firestore();
-  const docRef = db.collection("dongNote").doc(userId);
+  const ref = db.collection("dongNote").doc(userId);
 
-  const snapshot = await docRef.get();
-  let entries = snapshot.exists ? (snapshot.data().entries || []) : [];
+  const snap = await ref.get();
+  let entries = snap.exists ? (snap.data().entries || []) : [];
 
   entries.push(entry);
 
-  await docRef.set({
-    entries,
-    updatedAt: new Date().toISOString(),
-  });
-
-  console.log(`✅ Saved to Firestore | User: ${userId} | Amount: ${entry.amount}`);
+  await ref.set({ entries, updatedAt: new Date().toISOString() });
+  console.log(`✅ SAVED SUCCESSFULLY! User: ${userId} | Amount: ${entry.amount}`);
 }
 
-// ── ส่งข้อความกลับ LINE ──
-async function replyMessage(replyToken, text) {
-  const accessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
-
+async function reply(replyToken, text) {
   await fetch("https://api.line.me/v2/bot/message/reply", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${config.line.channel_access_token}`,
     },
     body: JSON.stringify({
       replyToken,
-      messages: [{ type: "text", text }],
+      messages: [{ type: "text", text }]
     }),
   });
 }
 
-// ── Cloud Function (HTTP Trigger) ──
 export const lineWebhook = onRequest(async (req, res) => {
-  if (req.method !== "POST") {
-    return res.status(200).send("OK");
-  }
+  if (req.method !== "POST") return res.status(200).send("OK");
 
   try {
     const rawBody = req.rawBody || JSON.stringify(req.body);
     const signature = req.headers["x-line-signature"];
-    const channelSecret = process.env.LINE_CHANNEL_SECRET;
 
-    if (!verifySignature(rawBody, signature, channelSecret)) {
-      console.error("❌ Signature verification failed");
+    if (!verifySignature(rawBody, signature)) {
+      console.error("❌ Signature failed");
       return res.status(401).send("Unauthorized");
     }
 
@@ -73,34 +69,33 @@ export const lineWebhook = onRequest(async (req, res) => {
 
       console.log(`📨 Received: "${text}" from ${userId}`);
 
-      // แยกจำนวนเงิน
       const match = text.match(/[\d,]+(\.\d+)?/);
       const amount = match ? parseFloat(match[0].replace(/,/g, "")) : 0;
 
       if (!amount) {
-        await replyMessage(event.replyToken, "🐼 พิมพ์ตัวเลขด้วยนะ เช่น ชาไข่มุก 65");
+        await reply(event.replyToken, "🐼 พิมพ์ตัวเลขด้วยนะ เช่น ชาไข่มุก 65");
         return res.status(200).send("OK");
       }
 
       const entry = {
         id: Date.now(),
         type: "expense",
-        amount: amount,
+        amount,
         catId: "other",
         catName: "อื่นๆ",
         catIcon: "📦",
         note: text,
         date: new Date().toISOString().slice(0, 10),
-        source: "line-webhook",
+        source: "line-webhook"
       };
 
       await saveToFirestore(userId, entry);
-      await replyMessage(event.replyToken, `✅ บันทึกแล้ว\n${text} ฿${amount}`);
+      await reply(event.replyToken, `✅ บันทึกแล้ว\n${text} ฿${amount}`);
     }
 
     return res.status(200).send("OK");
-  } catch (error) {
-    console.error("🚨 Webhook Error:", error);
+  } catch (err) {
+    console.error("🚨 ERROR:", err.message);
     return res.status(200).send("OK");
   }
 });
