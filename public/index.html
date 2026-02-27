@@ -48,7 +48,7 @@ body{padding-bottom:var(--nav-h);}
   box-shadow:0 2px 16px rgba(37,99,235,.25);
 }
 .header-title{font-size:1.15rem;font-weight:900;color:#fff;letter-spacing:.04em;text-shadow:0 1px 4px rgba(0,0,0,.15);}
-.header-bear{
+.header-profile{
   position:absolute;left:16px;
   font-size:1.3rem;cursor:pointer;
 }
@@ -394,17 +394,6 @@ body{padding-bottom:var(--nav-h);}
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* ── RUNNING DONG ── */
-#dong-run{
-  position:fixed;bottom:calc(var(--nav-h)+8px);left:-70px;
-  font-size:2rem;animation:dong-run 16s linear infinite;
-  cursor:pointer;z-index:40;pointer-events:auto;
-}
-@keyframes dong-run{from{left:-70px}to{left:110%}}
-
-/* ── HOME BEAR ── */
-.home-bear-wrap{text-align:center;margin:4px 0 10px;font-size:2.5rem;cursor:pointer;}
-
 /* ── CHAT BOX (home) ── */
 .chat-box{
   background:var(--white);border-radius:16px;padding:14px;
@@ -511,9 +500,6 @@ body{padding-bottom:var(--nav-h);}
 }
 .ll-title{font-size:1.6rem;font-weight:900;color:#fff;margin-bottom:6px;letter-spacing:.04em;text-shadow:0 2px 8px rgba(0,0,0,.2);}
 .ll-sub{font-size:.85rem;color:rgba(255,255,255,.78);margin-bottom:32px;line-height:1.6;}
-/* ── HIDE BEAR ELEMENTS ── */
-.home-bear-wrap{display:none!important;}
-#dong-run{display:none!important;}
 .btn-line-login{
   background:#06C755;color:#fff;border:none;
   padding:16px 36px;border-radius:16px;
@@ -563,7 +549,7 @@ body{padding-bottom:var(--nav-h);}
 
 <!-- HEADER -->
 <div class="header">
-  <div class="header-bear" id="headerBear">👤</div>
+  <div class="header-profile" id="headerProfile">👤</div>
   <div style="text-align:center;">
     <div class="header-title">แม่ละเมียด</div>
     <div style="font-size:.65rem;color:rgba(255,255,255,.6);font-weight:600;letter-spacing:.1em;margin-top:1px;">MAE LAMIET</div>
@@ -582,8 +568,6 @@ body{padding-bottom:var(--nav-h);}
       <span>⇄</span>
     </button>
   </div>
-
-  <div class="home-bear-wrap" id="homeBear" onclick="runDong()"></div>
 
   <div class="chat-box">
     <div class="form-label" style="margin-bottom:8px;">⚡ พิมพ์สั้นๆ เช่น "ชาไข่มุก 65"</div>
@@ -705,7 +689,6 @@ body{padding-bottom:var(--nav-h);}
 <div class="panel" id="panel-settings">
   <div style="text-align:center;padding:20px 0 16px;">
     <img id="linePicDisplay" src="" alt="" style="display:none;width:72px;height:72px;border-radius:50%;object-fit:cover;margin-bottom:10px;border:3px solid var(--pink);">
-    <div id="settingsBear" style="display:none;"></div>
     <div style="font-size:1.2rem;font-weight:900;margin-top:6px;color:var(--pink);" id="lineNameDisplay">แม่ละเมียด</div>
     <div style="font-size:.75rem;color:var(--sub);margin-top:2px;">Mae Lamiet · v2.0</div>
   </div>
@@ -839,7 +822,7 @@ function doPost(e){
             saveRow(entry);
             replyLine(ev.replyToken,'✅ บันทึกแล้วค่ะ!\n'+entry.catIcon+' '+entry.catName+' ฿'+entry.amount);
           } else {
-            replyLine(ev.replyToken,'พิมพ์แบบนี้ได้เลยค่ะ เช่น "ข้าว50" หรือ "ชาไข่มุก45" ');
+            replyLine(ev.replyToken,'พิมพ์แบบนี้ได้เลยค่ะ เช่น "ข้าว50" หรือ "ชาไข่มุก45"');
           }
         }
       });
@@ -908,7 +891,6 @@ function ok(){return ContentService.createTextOutput(JSON.stringify({status:'ok'
   </div>
 </div>
 
-<div id="dong-run"></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -984,7 +966,7 @@ function updateLineProfileUI() {
   hasLinePic = false;
   if (!lineProfile) return;
 
-  const hb = document.getElementById('headerBear');
+  const hb = document.getElementById('headerProfile');
   if (hb && lineProfile.pictureUrl) {
     hb.innerHTML = `<img src="${lineProfile.pictureUrl}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid #2563EB;">`;
     hasLinePic = true;
@@ -1040,7 +1022,7 @@ function applyPremiumUI() {
 
     const expEl = document.getElementById('premiumExpirySub');
     if (expEl) {
-      if (premiumUntil === 'lifetime') expEl.textContent = '✨ ตลอดชีพ — ขอบคุณที่สนับสนุนค่ะ ';
+      if (premiumUntil === 'lifetime') expEl.textContent = '✨ ตลอดชีพ — ขอบคุณที่สนับสนุนค่ะ';
       else expEl.textContent = `หมดอายุ ${new Date(premiumUntil).toLocaleDateString('th-TH')}`;
     }
   } else {
@@ -1250,7 +1232,6 @@ function init(){
   renderCatGrid2();
   renderAll();
   renderBudgetList();
-  initDong();
   renderPieChart();
   updateSheetSubLabel();
   updateCloudStatus('⏳ กำลังซิงค์...');
@@ -1286,7 +1267,7 @@ function goPanel(id){
   if(id==='panel-budget') renderBudgetList();
 }
 
-function cyclePeriod(){ showToast(' ฟีเจอร์หลายรอบงบกำลังมาเร็วๆ นี้!'); }
+function cyclePeriod(){ showToast('ฟีเจอร์หลายรอบงบกำลังมาเร็วๆ นี้!'); }
 
 function switchSumTab(tab){
   sumTab=tab;
@@ -1389,7 +1370,7 @@ function setAmt(v){
 
 function addEntry(){
   const amt=parseFloat(document.getElementById('inputAmt').value);
-  if(!amt||amt<=0){ showToast('ใส่จำนวนเงินก่อนนะ '); return; }
+  if(!amt||amt<=0){ showToast('ใส่จำนวนเงินก่อนนะ'); return; }
   const note=document.getElementById('noteField').value.trim();
   const allCats=[...EXP_CATS,...INC_CATS];
   const cat=allCats.find(c=>c.id===selCatId)||allCats[0];
@@ -1518,7 +1499,7 @@ function renderHistory(){
   if(ft!=='all') data=data.filter(e=>e.type===ft);
   data.sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
   const c=document.getElementById('txList2');
-  if(!data.length){c.innerHTML=`<div class="empty2">🐼<br><br>ยังไม่มีรายการเลยนะ</div>`;return;}
+  if(!data.length){c.innerHTML=`<div class="empty2">ยังไม่มีรายการเลยนะ</div>`;return;}
   c.innerHTML=data.map(e=>`
     <div class="tx2 ${e.type}">
       <div class="tx2-icon">${e.catIcon||'💰'}</div>
@@ -1600,28 +1581,6 @@ function renderPieChart(){
       <span>รายรับ ฿${fmt0(inc)}</span>
     </div>
   `;
-}
-
-// ══════ DONG ══════
-function initDong(){
-  const h=new Date().getHours();
-  const emoji=h<12?':h<18?'':'';
-
-  // อย่าไปทับรูปโปรไฟล์ที่ header ถ้ามีรูป LINE
-  if(!hasLinePic) document.getElementById('headerBear').textContent=emoji;
-
-  document.getElementById('dong-run').textContent=emoji;
-  document.getElementById('settingsBear').textContent=emoji;
-  document.getElementById('homeBear').textContent=emoji;
-
-  document.getElementById('dong-run').onclick=()=>{
-    const msgs=['แม่ละเมียด: อย่าลืมบันทึกรายการด้วยนะ!','แม่ละเมียด: วันนี้ประหยัดเก่งมาก 💰','แม่ละเมียด: รักนายที่สุดเลย 💕'];
-    showToast(msgs[Math.floor(Math.random()*msgs.length)]);
-  };
-}
-function runDong(){
-  document.getElementById('dong-run').style.animation='none';
-  setTimeout(()=>{ document.getElementById('dong-run').style.animation='dong-run 6s linear'; },10);
 }
 
 // ══════ HELPERS ══════
