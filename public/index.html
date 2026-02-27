@@ -719,30 +719,87 @@ body{padding-bottom:var(--nav-h);}
       <b>ขั้นตอน:</b><br>
       1. เปิด Google Sheet ใหม่ของคุณ<br>
       2. เมนู <b>Extensions → Apps Script</b><br>
-      3. ลบโค้ดเดิม → วางโค้ดด้านล่าง → Save<br>
-      4. <b>Deploy → New deployment → Web app</b><br>
-      5. Execute as: <b>Me</b> · Access: <b>Anyone</b><br>
-      6. Copy URL มาใส่ด้านล่าง
+      3. ลบโค้ดเดิม → วางโค้ดด้านล่าง<br>
+      4. บรรทัดแรก ใส่ <b>LINE Channel Access Token</b> ของคุณ<br>
+      5. Save → <b>Deploy → New deployment → Web app</b><br>
+      6. Execute as: <b>Me</b> · Access: <b>Anyone</b><br>
+      7. Copy URL → ใส่ด้านล่าง <b>และ</b> ใส่ใน LINE Developers Console (Webhook URL)
     </div>
-    <div class="gs-code-label">📋 แตะเพื่อคัดลอก Apps Script:</div>
-    <div class="gs-code" id="gsCodeBlock" onclick="copyGsCode()">function doPost(e){
+    <div class="gs-code-label">📋 แตะเพื่อคัดลอก Apps Script (รองรับทั้ง LINE bot + Sheet sync):</div>
+    <div class="gs-code" id="gsCodeBlock" onclick="copyGsCode()">var LINE_TOKEN = 'ใส่ Channel Access Token ตรงนี้';
+
+function doPost(e){
   try{
-    var d=JSON.parse(e.postData.contents);
-    var ss=SpreadsheetApp.getActiveSpreadsheet();
-    var sh=ss.getSheetByName('DonNote')||ss.insertSheet('DonNote');
-    if(sh.getLastRow()===0) sh.appendRow(['วันที่','ประเภท','หมวด','ไอคอน','จำนวน','หมายเหตุ']);
-    if(d.action==='sync'){
+    var body = JSON.parse(e.postData.contents);
+
+    // sync จากแอพ
+    if(body.action==='sync'){
+      var ss=SpreadsheetApp.getActiveSpreadsheet();
+      var sh=ss.getSheetByName('DonNote')||ss.insertSheet('DonNote');
+      if(sh.getLastRow()===0) sh.appendRow(['วันที่','ประเภท','หมวด','ไอคอน','จำนวน','หมายเหตุ']);
       if(sh.getLastRow()>1) sh.deleteRows(2,sh.getLastRow()-1);
-      d.entries.forEach(function(r){
+      body.entries.forEach(function(r){
         sh.appendRow([r.date,r.type==='expense'?'รายจ่าย':'รายรับ',r.catName,r.catIcon,r.amount,r.note]);
       });
+      return ok();
     }
-    return ContentService.createTextOutput(JSON.stringify({status:'ok'})).setMimeType(ContentService.MimeType.JSON);
+
+    // LINE webhook
+    if(body.events){
+      body.events.forEach(function(ev){
+        if(ev.type==='message' && ev.message.type==='text'){
+          var text=ev.message.text.trim();
+          var entry=parseText(text);
+          if(entry){
+            saveRow(entry);
+            replyLine(ev.replyToken,'✅ บันทึกแล้วค่ะ!\n'+entry.catIcon+' '+entry.catName+' ฿'+entry.amount);
+          } else {
+            replyLine(ev.replyToken,'พิมพ์แบบนี้ได้เลยค่ะ เช่น "ข้าว50" หรือ "ชาไข่มุก45" 🐼');
+          }
+        }
+      });
+      return ok();
+    }
+
+    return ok();
   }catch(err){
     return ContentService.createTextOutput(JSON.stringify({status:'error',msg:err.toString()})).setMimeType(ContentService.MimeType.JSON);
   }
 }
-function doGet(){return ContentService.createTextOutput(JSON.stringify({status:'ok'})).setMimeType(ContentService.MimeType.JSON);}</div>
+
+function doGet(){return ok();}
+
+function parseText(text){
+  var m=text.match(/[\d,]+(\.\d+)?/);
+  if(!m) return null;
+  var amount=parseFloat(m[0].replace(/,/g,''));
+  if(!amount) return null;
+  var catId='food',catName='อาหาร',catIcon='🍜',type='expense';
+  if(/เงินเดือน|รายรับ|ได้มา|รับเงิน|โอนเข้า/.test(text)){type='income';catId='salary';catName='รายรับ';catIcon='💼';}
+  else if(/กาแฟ|ชา|ไข่มุก|ชานม|น้ำ|coffee|matcha/.test(text)){catId='drink';catName='เครื่องดื่ม';catIcon='🧋';}
+  else if(/grab|foodpanda|lineman|เดลิเวอรี/.test(text)){catId='deliver';catName='เดลิเวอรี';catIcon='🛵';}
+  else if(/เดินทาง|รถ|แท็กซี่|bts|mrt|น้ำมัน/.test(text)){catId='travel';catName='เดินทาง';catIcon='🚌';}
+  else if(/ช้อปปิ้ง|ซื้อของ|เสื้อ|กางเกง|รองเท้า/.test(text)){catId='shopping';catName='ช้อปปิ้ง';catIcon='🛍️';}
+  return{date:Utilities.formatDate(new Date(),'Asia/Bangkok','yyyy-MM-dd'),type:type,catId:catId,catName:catName,catIcon:catIcon,amount:amount,note:text};
+}
+
+function saveRow(entry){
+  var ss=SpreadsheetApp.getActiveSpreadsheet();
+  var sh=ss.getSheetByName('DonNote')||ss.insertSheet('DonNote');
+  if(sh.getLastRow()===0) sh.appendRow(['วันที่','ประเภท','หมวด','ไอคอน','จำนวน','หมายเหตุ']);
+  sh.appendRow([entry.date,entry.type==='expense'?'รายจ่าย':'รายรับ',entry.catName,entry.catIcon,entry.amount,entry.note]);
+}
+
+function replyLine(replyToken,message){
+  UrlFetchApp.fetch('https://api.line.me/v2/bot/message/reply',{
+    method:'post',contentType:'application/json',
+    headers:{'Authorization':'Bearer '+LINE_TOKEN},
+    payload:JSON.stringify({replyToken:replyToken,messages:[{type:'text',text:message}]}),
+    muteHttpExceptions:true
+  });
+}
+
+function ok(){return ContentService.createTextOutput(JSON.stringify({status:'ok'})).setMimeType(ContentService.MimeType.JSON);}</div>
     <input class="sheet-input" id="gsUrlInput" placeholder="https://script.google.com/macros/s/..." style="font-size:.78rem;">
     <div class="sync-status" id="gsTestStatus"></div>
     <div class="modal-btns2" style="margin-top:10px;">
