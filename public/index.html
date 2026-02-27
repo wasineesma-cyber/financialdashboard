@@ -621,6 +621,7 @@ body{padding-bottom:var(--nav-h);}
   <button class="btn-add exp-btn" id="btnAdd" onclick="addEntry()">บันทึก ✓</button>
 </div>
 
+
 <!-- ════════ PANEL: หมวด/งบ ════════ -->
 <div class="panel" id="panel-budget">
   <div class="budget-header">จัดการหมวดและงบ</div>
@@ -700,6 +701,87 @@ body{padding-bottom:var(--nav-h);}
     </div>
   </div>
 </div>
+
+<!-- ════════ PANEL: หมวด/งบ ════════ -->
+<div class="panel" id="panel-budget">
+  <div class="budget-header">จัดการหมวดและงบ</div>
+
+  <div class="period-setting-card">
+    <div class="psc-left">
+      <div class="psc-title">รอบตัดงบ</div>
+      <div class="psc-val">📅 รายเดือน (วันที่ 1)</div>
+    </div>
+    <button class="btn-small" type="button">✏️ ตั้งค่า</button>
+  </div>
+
+  <div class="budget-type-tabs">
+    <button class="btt exp active" id="bttExp" onclick="switchBudgetTab('expense')">รายจ่าย</button>
+    <button class="btt inc"        id="bttInc" onclick="switchBudgetTab('income')">รายรับ</button>
+  </div>
+
+  <div class="budget-list" id="budgetList"></div>
+</div>
+
+<!-- ════════ PANEL: รายการ ════════ -->
+<div class="panel" id="panel-history">
+  <div class="filter-row2">
+    <input type="month" id="filterMonth" onchange="renderHistory()">
+    <select id="filterType" onchange="renderHistory()">
+      <option value="all">ทั้งหมด</option>
+      <option value="expense">รายจ่าย</option>
+      <option value="income">รายรับ</option>
+    </select>
+  </div>
+  <div class="tx-list2" id="txList2"></div>
+</div>
+
+<!-- ════════ PANEL: ตั้งค่า ════════ -->
+<div class="panel" id="panel-settings">
+  <div style="text-align:center;padding:20px 0 16px;">
+    <img id="linePicDisplay" src="" alt="" style="display:none;width:72px;height:72px;border-radius:50%;object-fit:cover;margin-bottom:10px;border:3px solid var(--pink);">
+    <div id="settingsBear" style="font-size:3.5rem;cursor:pointer;" onclick="runDong()">🐼</div>
+    <div style="font-size:1rem;font-weight:700;margin-top:6px;" id="lineNameDisplay">돈노트 Don Note ⭐</div>
+    <div style="font-size:.75rem;color:var(--sub);margin-top:2px;">v2.0 · โน้ตเงินสไตล์เกาหลี</div>
+  </div>
+
+  <div class="settings-card">
+    <div class="sc-title">☁️ Cloud Sync</div>
+    <div class="si2">
+      <div class="si2-left">
+        <div class="si2-label">☁️ สถานะ Firebase</div>
+        <div class="si2-sub" id="cloudStatusSub">⏳ กำลังเชื่อมต่อ...</div>
+      </div>
+    </div>
+    <div class="si2" onclick="lineLogout()">
+      <div class="si2-left">
+        <div class="si2-label" style="color:#06C755;">🟢 LINE Account</div>
+        <div class="si2-sub">แตะเพื่อออกจากระบบ</div>
+      </div>
+      <div class="si2-right">›</div>
+    </div>
+  </div>
+
+  <div class="settings-card">
+    <div class="sc-title">Google Sheet</div>
+    <div class="si2" onclick="openSheetModal()">
+      <div class="si2-left"><div class="si2-label">📊 เชื่อม Google Sheet</div><div class="si2-sub" id="sheetUrlSub">ยังไม่ได้เชื่อม</div></div>
+      <div class="si2-right">›</div>
+    </div>
+    <div class="si2" onclick="syncToSheet()">
+      <div class="si2-left"><div class="si2-label">🔄 ซิงค์ข้อมูลไป Sheet</div><div class="si2-sub" id="syncStatusSub">กดเพื่อส่งข้อมูลทั้งหมด</div></div>
+      <div class="si2-right">›</div>
+    </div>
+  </div>
+
+  <div class="settings-card">
+    <div class="sc-title">ข้อมูล</div>
+    <div class="si2" onclick="clearData()">
+      <div class="si2-left"><div class="si2-label" style="color:var(--pink);">🗑️ ลบข้อมูลทั้งหมด</div><div class="si2-sub">ไม่สามารถกู้คืนได้</div></div>
+      <div class="si2-right">›</div>
+    </div>
+  </div>
+</div>
+
 
 <!-- ── BOTTOM NAV ── -->
 <nav class="bottom-nav">
@@ -787,8 +869,7 @@ const db = firebase.firestore();
 db.settings({ ignoreUndefinedProperties: true });
 
 // ══════ LIFF + LINE LOGIN ══════
-const LIFF_ID = '2009250866-MmcKPhwq';
-
+const LIFF_ID = '2009230946-hp9vcPh3';
 let userId = null;
 let lineProfile = null;
 let hasLinePic = false;
@@ -993,7 +1074,7 @@ async function syncToSheet(){
   }
 }
 
-// ══════ INIT ══════
+// ══════ INIT + แชทแก้บั๊กนิ่ง (เวอร์ชันใหม่) ══════
 function init(){
   document.getElementById('filterMonth').value = todayYM();
   renderCatGrid2();
@@ -1004,15 +1085,100 @@ function init(){
   updateSheetSubLabel();
   updateCloudStatus('⏳ กำลังซิงค์...');
 
-  const ci=document.getElementById('chatIn');
+  // === แก้ช่องแชทนิ่ง (สำคัญ) ===
+  const ci = document.getElementById('chatIn');
   if(ci){
-    ci.addEventListener('keydown',e=>{ if(e.key==='Enter') parseChat(); });
-    ci.addEventListener('focus',()=>{ setTimeout(()=>ci.scrollIntoView({behavior:'smooth',block:'center'}),300); });
+    // ลบ listener เก่าเพื่อป้องกันซ้ำซ้อน
+    if(ci._parseHandler) ci.removeEventListener('keydown', ci._parseHandler);
+    
+    ci._parseHandler = function(e){
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        parseChat();
+      }
+    };
+    
+    ci.addEventListener('keydown', ci._parseHandler);
+    
+    ci.addEventListener('focus', () => {
+      setTimeout(() => ci.scrollIntoView({behavior:'smooth', block:'center'}), 300);
+    });
   }
 
-  loadFromCloud().then(()=>{ renderAll(); renderBudgetList(); });
+  loadFromCloud().then(() => {
+    renderAll();
+    renderBudgetList();
+  });
 }
 
+// ══════ PARSE CHAT (เวอร์ชันใหม่ แก้บั๊กนิ่ง) ══════
+function parseChat(){
+  try {
+    const input = document.getElementById('chatIn');
+    const text = input.value.trim();
+
+    if(!text){
+      showToast('พิมพ์รายการก่อนนะ ⭐');
+      return;
+    }
+
+    const match = text.match(/[\d,]+(\.\d+)?/);
+    const amt = match ? parseFloat(match[0].replace(/,/g,'')) : NaN;
+
+    if(!amt || isNaN(amt)){
+      showToast('🐼 หาจำนวนเงินไม่เจอ ลองพิมพ์ตัวเลขด้วยนะ');
+      return;
+    }
+
+    const t = text.toLowerCase();
+
+    const textWords = t.replace(/[\d,\.]+/g,'').trim().split(/\s+/).filter(w=>w.length>1);
+    let learned = null;
+    if(textWords.length > 0){
+      const recent = [...entries].reverse().slice(0,60);
+      for(const e of recent){
+        const en = (e.note || '').toLowerCase();
+        if(textWords.some(w => w.length>2 && en.includes(w))){
+          learned = {catId: e.catId, type: e.type};
+          break;
+        }
+      }
+    }
+
+    const guessed = guessCategory(t);
+    const useLearned = learned && guessed.catId === 'other';
+    const {catId, type} = useLearned ? learned : guessed;
+
+    const allCats = [...EXP_CATS, ...INC_CATS];
+    const cat = allCats.find(c => c.id === catId) || allCats[0];
+
+    entries.push({
+      id: Date.now(),
+      type,
+      amount: amt,
+      catId: cat.id,
+      catIcon: cat.icon,
+      catName: cat.name,
+      note: text,
+      date: todayStr()
+    });
+
+    save();
+    renderAll();
+
+    input.value = '';
+    input.blur();
+    setTimeout(() => window.scrollTo({top:0, behavior:'smooth'}), 80);
+
+    showToast(`${cat.icon} "${cat.name}" ฿${fmt0(amt)} บันทึกแล้ว!`);
+
+  } catch(err){
+    console.error('ParseChat Error:', err);
+    showToast('❌ มีปัญหาเล็กน้อย ลองพิมพ์ใหม่อีกครั้ง 🐼');
+  }
+}
+
+// ══════ ฟังก์ชันอื่นๆ (เหมือนเดิม) ══════
 function todayStr(){ return new Date().toISOString().slice(0,10); }
 function todayYM() { return new Date().toISOString().slice(0,7); }
 function fmtDate(d){
@@ -1023,7 +1189,6 @@ function fmt(n){ return Number(n).toLocaleString('th-TH',{minimumFractionDigits:
 function fmt0(n){ return Number(n).toLocaleString('th-TH',{minimumFractionDigits:0,maximumFractionDigits:0}); }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// ══════ PANEL NAV ══════
 function goPanel(id){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
@@ -1151,7 +1316,7 @@ function addEntry(){
   goPanel('panel-home');
 }
 
-// ══════ PARSE CHAT ══════
+// ══════ GUESS CATEGORY (เหมือนเดิม) ══════
 function guessCategory(t){
   if(/เงินเดือน|salary|ได้เงินเดือน/.test(t)) return {catId:'salary', type:'income'};
   if(/ฟรีแลนซ์|freelance|งานฟรี|free.?lance/.test(t)) return {catId:'freelance', type:'income'};
@@ -1185,42 +1350,7 @@ function guessCategory(t){
   return {catId:'other', type:'expense'};
 }
 
-function parseChat(){
-  const text=document.getElementById('chatIn').value.trim();
-  if(!text){showToast('พิมพ์รายการก่อนนะ ⭐');return;}
-  const amt=parseFloat((text.match(/[\d,]+(\.\d+)?/)||[])[0]?.replace(/,/g,''));
-  if(!amt){showToast('돈노트 หาจำนวนเงินไม่เจอ ⭐');return;}
-
-  const t=text.toLowerCase();
-
-  const textWords=t.replace(/[\d,\.]+/g,'').trim().split(/\s+/).filter(w=>w.length>1);
-  let learned=null;
-  if(textWords.length>0){
-    const recent=[...entries].reverse().slice(0,60);
-    for(const e of recent){
-      const en=(e.note||'').toLowerCase();
-      if(textWords.some(w=>w.length>2&&en.includes(w))){
-        learned={catId:e.catId,type:e.type};
-        break;
-      }
-    }
-  }
-
-  const guessed=guessCategory(t);
-  const {catId,type}=(learned&&guessed.catId==='other')?learned:guessed;
-
-  const allCats=[...EXP_CATS,...INC_CATS];
-  const cat=allCats.find(c=>c.id===catId)||allCats[0];
-  entries.push({id:Date.now(),type,amount:amt,catId:cat.id,catIcon:cat.icon,catName:cat.name,note:text,date:todayStr()});
-  save(); renderAll();
-  const ci=document.getElementById('chatIn');
-  ci.value='';
-  ci.blur();
-  setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),100);
-  showToast(`${cat.icon} "${cat.name}" ฿${fmt0(amt)} บันทึกแล้ว!`);
-}
-
-// ══════ BUDGET ══════
+// ══════ BUDGET, HISTORY, SETTINGS, PIE, DONG (เหมือนเดิม) ══════
 function switchBudgetTab(tab){
   budgetTab=tab;
   document.getElementById('bttExp').classList.toggle('active',tab==='expense');
@@ -1259,7 +1389,6 @@ function saveBudget(){
   showToast('✅ บันทึกงบแล้ว');
 }
 
-// ══════ HISTORY ══════
 function renderHistory(){
   const ym=document.getElementById('filterMonth').value;
   const ft=document.getElementById('filterType').value;
@@ -1285,13 +1414,11 @@ function delEntry(id){
   showToast('🗑️ ลบแล้ว');
 }
 
-// ══════ SETTINGS ══════
 function clearData(){
   if(!confirm('ลบข้อมูลทั้งหมดไหม?'))return;
   entries=[];budgets={};save();renderAll();showToast('🗑️ ลบข้อมูลแล้ว');
 }
 
-// ══════ PIE CHART ══════
 function setPiePeriod(p){
   piePeriod=p;
   document.getElementById('pieTabDay').classList.toggle('active',p==='day');
@@ -1349,7 +1476,6 @@ function renderPieChart(){
   `;
 }
 
-// ══════ DONG ══════
 function initDong(){
   const h=new Date().getHours();
   const emoji=h<12?'🐼‍❄️':h<18?'🐼':'🐼';
@@ -1361,7 +1487,7 @@ function initDong(){
   document.getElementById('homeBear').textContent=emoji;
 
   document.getElementById('dong-run').onclick=()=>{
-    const msgs=['돈노트: อย่าลืมบันทึกรายการด้วยนะ! ⭐','돈노트: วันนี้ประหยัดเก่งมาก 💰','돈노트: รักนายที่สุดเลย ⭐💕'];
+    const msgs=['돈노트: อย่าลืมบันทึกรายการด้วยนะ! ⭐','돈노트: วันนี้ประหยัดเก่งมาก 💰','돈노ต: รักนายที่สุดเลย ⭐💕'];
     showToast(msgs[Math.floor(Math.random()*msgs.length)]);
   };
 }
@@ -1370,14 +1496,13 @@ function runDong(){
   setTimeout(()=>{ document.getElementById('dong-run').style.animation='dong-run 6s linear'; },10);
 }
 
-// ══════ HELPERS ══════
 function save(){ localStorage.setItem('dong_entries',JSON.stringify(entries)); saveToCloud(); }
 function showToast(msg){
   const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2500);
 }
 
-// ══════ SPLASH ══════
+// ══════ SPLASH + INSTALL + SERVICE WORKER ══════
 window.addEventListener('load', () => {
   const sp = document.getElementById('splash');
   setTimeout(() => {
@@ -1386,7 +1511,6 @@ window.addEventListener('load', () => {
   }, 1400);
 });
 
-// ══════ INSTALL BANNER (iOS) ══════
 function isInStandalone() {
   return window.navigator.standalone === true ||
          window.matchMedia('(display-mode: standalone)').matches;
@@ -1404,7 +1528,6 @@ function dismissInstall() {
   }
 })();
 
-// ══════ SERVICE WORKER ══════
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
@@ -1414,3 +1537,6 @@ initLiff();
 </script>
 </body>
 </html>
+
+
+
