@@ -140,9 +140,8 @@ body{padding-bottom:var(--nav-h);}
 
 <div class="toast" id="toast"></div>
 
-
 <script>
-// 1. ตั้งค่า Firebase (อ้างอิงจากโปรเจกต์ Don Note ของคุณ)
+// 1. ตั้งค่า Firebase (ตรวจสอบให้ตรงกับ Console ของคุณ)
 const firebaseConfig = {
   apiKey: "AIzaSyAxEfomFx8g_Du_tdFjU1ji1-Hofno-sv8",
   authDomain: "don-note-f2bcd.firebaseapp.com",
@@ -154,29 +153,36 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// 2. ตั้งค่า LINE LIFF
-const LIFF_ID = '2009250866-MmcKPhwq';
-let userId = null, lineProfile = null;
+// 2. ตั้งค่า LIFF ID (ตรวจสอบให้ตรงกับหน้า LINE Developers)
+const LIFF_ID = '2009250866-MmcKPhwq'; 
+let userId = null;
+let lineProfile = null;
 let entries = JSON.parse(localStorage.getItem('dong_entries') || '[]');
 let addType = 'expense', selCatId = 'food';
 
-// หมวดหมู่สำหรับวาด UI (ต้องมีเพื่อให้ปุ่มขึ้น)
-const EXP_CATS = [{id:'food',icon:'🍜',name:'อาหาร'},{id:'drink',icon:'🧋',name:'เครื่องดื่ม'},{id:'travel',icon:'🚌',name:'เดินทาง'},{id:'shop',icon:'🛍️',name:'ช้อปปิ้ง'},{id:'other',icon:'📦',name:'อื่นๆ'}];
-const INC_CATS = [{id:'salary',icon:'💼',name:'เงินเดือน'},{id:'special',icon:'⭐',name:'รายได้เสริม'}];
+// หมวดหมู่สำหรับสร้างปุ่มบนหน้าจอ
+const EXP_CATS = [
+  {id:'food', icon:'🍜', name:'อาหาร'}, {id:'drink', icon:'🧋', name:'กาแฟ'},
+  {id:'deliver', icon:'🛵', name:'เดลิเวอรี'}, {id:'travel', icon:'🚌', name:'เดินทาง'},
+  {id:'shop', icon:'🛍️', name:'ช้อปปิ้ง'}, {id:'other', icon:'📦', name:'อื่นๆ'}
+];
+const INC_CATS = [
+  {id:'salary', icon:'💼', name:'เงินเดือน'}, {id:'special', icon:'⭐', name:'รายได้เสริม'}
+];
 
-// 3. เริ่มต้นระบบ LIFF
+// 3. เริ่มต้นระบบ LIFF และเช็กการ Login
 async function initLiff() {
   try {
     await liff.init({ liffId: LIFF_ID });
     if (liff.isLoggedIn()) {
-      lineProfile = await liff.getProfile(); // ดึงข้อมูล Profile มาเก็บไว้
+      lineProfile = await liff.getProfile(); // ดึง Profile (ชื่อ/รูป)
       userId = lineProfile.userId;
       
       document.getElementById('lineLogin').classList.add('hidden');
-      updateLineProfileUI(); // แสดงรูปและชื่อ
-      initApp(); // เริ่มโหลดข้อมูล
+      updateLineProfileUI(); // แสดงรูปโปรไฟล์ทันที
+      initApp(); // เริ่มวาดหน้าจอ
       
-      // เช็กถ้ากดมาจาก LINE Webhook (#history)
+      // รองรับลิงก์จาก Flex Message
       if (window.location.hash === '#history') goPanel('panel-history');
     } else {
       document.getElementById('lineLogin').classList.remove('hidden');
@@ -185,10 +191,11 @@ async function initLiff() {
   } catch (e) { console.error("LIFF Error:", e); }
 }
 
-// 4. แสดงรูปและชื่อโปรไฟล์
+// 4. แสดงผลรูปโปรไฟล์และชื่อจาก LINE
 function updateLineProfileUI() {
   if (!lineProfile) return;
   const hb = document.getElementById('headerBear');
+  // เปลี่ยนจากหมี 🐼 เป็นรูปโปรไฟล์จริง
   if (hb && lineProfile.pictureUrl) {
     hb.innerHTML = `<img src="${lineProfile.pictureUrl}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid #FF4785;">`;
   }
@@ -196,21 +203,12 @@ function updateLineProfileUI() {
   if (nameDisplay) nameDisplay.textContent = lineProfile.displayName;
 }
 
-// 5. จัดการหน้าจอและข้อมูล
+// 5. โหลดข้อมูลและแสดงผลหน้าจอ
 function initApp() {
-  renderAll(); 
-  renderCatGrid2(); 
-  loadFromCloud();
+  renderAll(); // คำนวณยอดเงินรวม
+  renderCatGrid2(); // วาดปุ่มหมวดหมู่ (อาหาร, กาแฟ ฯลฯ)
+  loadFromCloud(); // ดึงข้อมูลที่เคยเซฟไว้ใน Firebase
   setTimeout(() => document.getElementById('splash').classList.add('hide'), 1000);
-}
-
-function goPanel(id) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  const key = id.replace('panel-', '');
-  document.getElementById('nav-' + key)?.classList.add('active');
-  if (id === 'panel-history') renderHistory();
 }
 
 function renderAll() {
@@ -221,48 +219,46 @@ function renderAll() {
   document.getElementById('ieExpAmt').textContent = '฿' + exp.toLocaleString();
 }
 
-// 6. บันทึกและซิงค์ข้อมูล
-function addEntry() {
-  const amt = parseFloat(document.getElementById('inputAmt').value);
-  if (!amt) return showToast('ใส่ยอดเงินด้วยนะ 🐼');
-  const cat = [...EXP_CATS, ...INC_CATS].find(c => c.id === selCatId);
-  entries.push({ id: Date.now(), type: addType, amount: amt, catId: selCatId, catName: cat.name, catIcon: cat.icon, date: new Date().toISOString().slice(0,10) });
-  saveData();
-  goPanel('panel-home');
-  showToast('บันทึกแล้ว ✨');
+function renderCatGrid2() {
+  const cats = (addType === 'expense' ? EXP_CATS : INC_CATS);
+  const grid = document.getElementById('catGrid2');
+  if (!grid) return;
+  grid.innerHTML = cats.map(c => `
+    <div class="cat-chip2 ${selCatId === c.id ? 'sel' : ''}" onclick="selCatId='${c.id}';renderCatGrid2()">
+      <span>${c.icon}</span><small>${c.name}</small>
+    </div>`).join('');
 }
 
-function saveData() {
-  localStorage.setItem('dong_entries', JSON.stringify(entries));
-  if (userId) {
-    db.collection('dongNote').doc(userId).set({ entries, updatedAt: new Date().toISOString() });
-  }
-  renderAll();
+// 6. การจัดการหน้าพาเนล
+function goPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const key = id.replace('panel-', '');
+  document.getElementById('nav-' + key)?.classList.add('active');
 }
 
+// 7. การเซฟและโหลด Cloud Sync
 async function loadFromCloud() {
   if (!userId) return;
   const doc = await db.collection('dongNote').doc(userId).get();
   if (doc.exists) {
     entries = doc.data().entries || [];
     renderAll();
-    if(document.getElementById('cloudStatusSub')) document.getElementById('cloudStatusSub').textContent = 'สถานะ: ✅ ซิงค์ข้อมูลแล้ว';
+    const status = document.getElementById('cloudStatusSub');
+    if(status) status.textContent = 'สถานะ: ✅ เชื่อมต่อ Cloud แล้ว';
   }
 }
 
-// ฟังก์ชันเสริม
-function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
-function setAddType(t) { addType = t; selCatId = (t === 'expense' ? 'food' : 'salary'); renderCatGrid2(); }
-function renderCatGrid2() {
-  const cats = (addType === 'expense' ? EXP_CATS : INC_CATS);
-  document.getElementById('catGrid2').innerHTML = cats.map(c => `
-    <div class="cat-chip2 ${selCatId === c.id ? 'sel' : ''}" onclick="selCatId='${c.id}';renderCatGrid2()">
-      <span>${c.icon}</span><small>${c.name}</small>
-    </div>`).join('');
+function showToast(m) { 
+  const t = document.getElementById('toast'); 
+  t.textContent = m; t.classList.add('show'); 
+  setTimeout(() => t.classList.remove('show'), 2000); 
 }
 
-// เริ่มการทำงาน
+// เริ่มรันระบบ
 initLiff();
 </script>
+
 </body>
 </html>
