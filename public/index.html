@@ -6,7 +6,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Don Note">
-<meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#FF4785">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -14,542 +13,256 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-<title>돈โนท Don Note ⭐</title>
+<title>돈노ท Don Note ⭐</title>
 
 <style>
 :root {
-  --pink:       #FF4785;
-  --pink-light: #FFF0F5;
-  --pink-border:#FFADD2;
-  --pink-track: #FFD6E7;
-  --teal:       #00C9A7;
-  --teal-light: #E8FAF7;
-  --teal-border:#80E5D8;
-  --teal-track: #B2F0E8;
-  --bg:         #F5F5F5;
-  --white:      #FFFFFF;
-  --text:       #1C1C1E;
-  --sub:        #8E8E93;
-  --border:     #E5E5EA;
-  --nav-h:      60px;
+  --pink: #FF4785; --pink-light: #FFF0F5; --teal: #00C9A7; --teal-light: #E8FAF7;
+  --bg: #F5F5F5; --white: #FFFFFF; --text: #1C1C1E; --sub: #8E8E93; --border: #E5E5EA; --nav-h: 60px;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Text','Segoe UI',sans-serif;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,sans-serif;}
 body{padding-bottom:var(--nav-h);}
-.header{background:var(--white);padding:12px 18px;padding-top:calc(12px + env(safe-area-inset-top));display:flex;align-items:center;justify-content:center;position:relative;}
-.header-title{font-size:1rem;font-weight:700;color:var(--text);}
+.header{background:var(--white);padding:12px 18px;padding-top:calc(12px + env(safe-area-inset-top));display:flex;align-items:center;justify-content:center;position:relative;border-bottom:1px solid var(--border);}
+.header-title{font-size:1rem;font-weight:700;}
 .header-bear{position:absolute;left:16px;font-size:1.3rem;cursor:pointer;}
-.header-right{position:absolute;right:16px;font-size:.8rem;color:var(--sub);}
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);background:var(--white);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom);z-index:100;}
-.nav-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;cursor:pointer;color:var(--sub);font-size:.58rem;font-weight:600;letter-spacing:.02em;transition:color .2s;}
-.nav-btn .ni{font-size:1.3rem;}
+.nav-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;color:var(--sub);font-size:.58rem;font-weight:600;}
 .nav-btn.active{color:var(--pink);}
-.panel{display:none;max-width:480px;margin:0 auto;padding:14px 14px;}
+.nav-btn span{font-size:1.3rem;}
+.panel{display:none;max-width:480px;margin:0 auto;padding:14px;}
 .panel.active{display:block;}
-.balance-wrap{text-align:center;margin-bottom:14px;}
-.balance-label{font-size:.72rem;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:.06em;}
-.balance-amount{font-size:2.6rem;font-weight:900;margin:4px 0 8px;color:#1C1C1E;}
+.balance-wrap{text-align:center;margin-bottom:14px;padding:10px 0;}
+.balance-amount{font-size:2.6rem;font-weight:900;}
 .balance-amount.positive{color:#34C759;}
 .balance-amount.negative{color:var(--pink);}
-.period-btn{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:.78rem;font-weight:600;color:var(--text);background:var(--white);cursor:pointer;}
 .ie-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
-.ie-card{padding:14px 14px;border-radius:16px;border:2px solid var(--border);background:var(--white);cursor:pointer;transition:border-color .2s;}
-.ie-card.exp-card{background:var(--pink-light);}
-.ie-card.inc-card{background:var(--teal-light);}
-.ie-card.active.exp-card{border-color:var(--pink);}
-.ie-card.active.inc-card{border-color:var(--teal);}
+.ie-card{padding:14px;border-radius:16px;border:2px solid var(--border);background:var(--white);cursor:pointer;}
+.ie-card.active.exp-card{border-color:var(--pink);background:var(--pink-light);}
+.ie-card.active.inc-card{border-color:var(--teal);background:var(--teal-light);}
 .sum-card{background:var(--white);border-radius:20px;padding:18px 16px;box-shadow:0 1px 6px rgba(0,0,0,.07);}
-.bar-track{height:5px;border-radius:4px;overflow:hidden;background:#eee;}
-.bar-fill{height:100%;border-radius:4px;transition:width .9s ease;}
+.bar-track{height:5px;border-radius:4px;overflow:hidden;background:#eee;margin-top:5px;}
+.bar-fill{height:100%;transition:width .9s ease;}
 .cat-row{margin-bottom:14px;}
-.cat-row-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;}
-.note-field{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:12px;font-size:.9rem;outline:none;background:var(--white);margin-bottom:14px;}
-.btn-add{width:100%;padding:14px;border:none;border-radius:14px;font-size:1rem;font-weight:800;color:#fff;cursor:pointer;}
-#splash{position:fixed;inset:0;z-index:9999;background:#FF4785;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .5s ease;}
+.cat-row-top{display:flex;justify-content:space-between;font-size:.92rem;font-weight:600;}
+.cat-chip2{padding:10px 4px;border-radius:14px;border:2px solid var(--border);background:var(--white);text-align:center;display:flex;flex-direction:column;gap:3px;}
+.cat-chip2.sel{border-color:var(--pink);background:var(--pink-light);}
+#splash{position:fixed;inset:0;z-index:9999;background:#FF4785;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:0.5s;}
 #splash.hide{opacity:0;pointer-events:none;}
-.toast{position:fixed;bottom:calc(var(--nav-h)+16px);left:50%;transform:translateX(-50%);background:#1C1C1E;color:#fff;padding:10px 20px;border-radius:20px;font-size:.85rem;opacity:0;transition:all .3s;z-index:600;}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1C1C1E;color:#fff;padding:10px 20px;border-radius:20px;font-size:.85rem;opacity:0;transition:0.3s;z-index:600;}
 .toast.show{opacity:1;}
 .hidden{display:none;}
 </style>
 </head>
 
 
-
-
 <body>
-
-<div id="lineLogin" class="hidden">
-  <div class="ll-bear">🐼</div>
-  <div class="ll-title">돈노트 Don Note ⭐</div>
-  <div class="ll-sub">เข้าสู่ระบบด้วย LINE<br>ข้อมูลปลอดภัยผูกกับบัญชี LINE ของคุณ</div>
-  <button class="btn-line-login" onclick="liff.login()">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/LINE_New_App_Icon_%282020-12%29.png" alt="LINE">
+<div id="lineLogin" class="hidden" style="position:fixed;inset:0;z-index:10000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;">
+  <div style="font-size:5rem;margin-bottom:12px;">🐼</div>
+  <div style="font-size:1.4rem;font-weight:900;color:var(--pink);margin-bottom:6px;">Don Note ⭐</div>
+  <div style="font-size:.85rem;color:var(--sub);margin-bottom:32px;text-align:center;">กรุณาเข้าสู่ระบบเพื่อซิงค์ข้อมูลของคุณ</div>
+  <button class="btn-line-login" onclick="liff.login()" style="background:#06C755;color:#fff;border:none;padding:16px 36px;border-radius:16px;font-size:1rem;font-weight:800;display:flex;align-items:center;gap:10px;cursor:pointer;">
     เข้าสู่ระบบด้วย LINE
   </button>
 </div>
 
 <div id="splash">
-  <div class="splash-bear">🐼</div>
-  <div class="splash-title">돈노트 Don Note</div>
-  <div class="splash-sub">โน้ตเงินสไตล์เกาหลี ⭐</div>
-</div>
-
-<div id="installBanner">
-  <div class="ib-icon">🐼</div>
-  <div class="ib-text">
-    <strong>เพิ่มไปหน้าจอหลัก</strong>
-    <span>แตะ ⬡ แล้วเลือก "เพิ่มลงในหน้าจอเริ่มต้น"</span>
-  </div>
-  <button class="ib-close" onclick="dismissInstall()">✕</button>
+  <div style="font-size:72px;">🐼</div>
+  <div style="color:#fff;font-size:1.5rem;font-weight:800;margin-top:10px;">Don Note</div>
 </div>
 
 <div class="header">
   <div class="header-bear" id="headerBear">🐼</div>
-  <div class="header-title">돈노트 Don Note ⭐</div>
-  <div class="header-right" id="headerRight"></div>
+  <div class="header-title">Don Note ⭐</div>
 </div>
 
 <div class="panel active" id="panel-home">
   <div class="balance-wrap">
-    <div class="balance-label">เหลือเก็บ</div>
+    <div style="font-size:.72rem;color:var(--sub);font-weight:600;text-transform:uppercase;">เหลือเก็บ</div>
     <div class="balance-amount" id="balAmount">฿0</div>
-    <button class="period-btn" onclick="cyclePeriod()">
-      <span id="periodLabel">รอบงบนี้</span>
-      <span>⇄</span>
-    </button>
   </div>
 
-  <div class="home-bear-wrap" id="homeBear" onclick="runDong()">🐼</div>
-
-  <div class="chat-box">
-    <div class="form-label" style="margin-bottom:8px;">⚡ พิมพ์สั้นๆ เช่น "ชาไข่มุก 65"</div>
+  <div class="chat-box" style="background:var(--white);border-radius:16px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.05);margin-bottom:14px;">
     <div style="display:flex;gap:8px;">
-      <input class="note-field" id="chatIn" placeholder="กินข้าว 80 / รับเงินเดือน 25000" style="margin:0;flex:1;min-width:0;" inputmode="text" enterkeyhint="send" autocomplete="off">
-      <button onclick="parseChat()" style="padding:0 18px;border:none;border-radius:12px;background:var(--pink);color:#fff;font-weight:700;cursor:pointer;white-space:nowrap;font-size:.88rem;flex-shrink:0;">➤</button>
+      <input class="note-field" id="chatIn" placeholder="พิมพ์สั้นๆ เช่น ข้าว 50" style="margin:0;flex:1;border:1px solid var(--border);border-radius:12px;padding:10px;">
+      <button onclick="parseChat()" style="padding:0 18px;border:none;border-radius:12px;background:var(--pink);color:#fff;font-weight:700;cursor:pointer;">➤</button>
     </div>
   </div>
 
   <div class="ie-grid">
     <div class="ie-card exp-card active" id="ieExp" onclick="switchSumTab('expense')">
-      <div class="iec-label">รายจ่าย</div>
-      <div class="iec-amount" id="ieExpAmt">฿0.00</div>
+      <div style="font-size:.72rem;font-weight:700;color:var(--pink);margin-bottom:5px;">รายจ่าย</div>
+      <div class="iec-amount" id="ieExpAmt" style="font-size:1.25rem;font-weight:900;color:var(--pink);">฿0</div>
     </div>
     <div class="ie-card inc-card" id="ieInc" onclick="switchSumTab('income')">
-      <div class="iec-label">รายรับ</div>
-      <div class="iec-amount" id="ieIncAmt">฿0.00</div>
+      <div style="font-size:.72rem;font-weight:700;color:var(--teal);margin-bottom:5px;">รายรับ</div>
+      <div class="iec-amount" id="ieIncAmt" style="font-size:1.25rem;font-weight:900;color:var(--teal);">฿0</div>
     </div>
-  </div>
-
-  <div class="pie-section">
-    <div class="pie-filter-row">
-      <button class="pie-tab active" id="pieTabDay" onclick="setPiePeriod('day')">วันนี้</button>
-      <button class="pie-tab" id="pieTabMonth" onclick="setPiePeriod('month')">เดือนนี้</button>
-    </div>
-    <canvas id="pieChart" width="180" height="180" style="max-width:180px;"></canvas>
-    <div class="pie-legend" id="pieLegend"></div>
   </div>
 
   <div class="sum-card">
-    <div class="sum-card-header">
-      <div class="dong-badge">Don<br>Note</div>
-      <div class="sum-card-title exp-title" id="sumCardTitle">สรุปรายจ่าย</div>
-      <div style="width:44px;"></div>
-    </div>
     <div id="catRows"></div>
-    <button class="btn-manage" onclick="goPanel('panel-budget')">✏️ จัดการหมวดและงบ</button>
-    <button class="invite-banner" type="button">ชวนเพื่อนมาเป็น <span class="invite-badge">Don Note Pro</span> รับฟรี 1 เดือน</button>
   </div>
 </div>
 
 <div class="panel" id="panel-add">
-  <div class="add-header">บันทึกรายการ</div>
-  <div class="type-tabs">
-    <button class="type-tab exp active" id="tabExp" onclick="setAddType('expense')">รายจ่าย</button>
-    <button class="type-tab inc" id="tabInc" onclick="setAddType('income')">รายรับ</button>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+    <button id="tabExp" onclick="setAddType('expense')" style="padding:10px;border:none;border-radius:10px;font-weight:700;cursor:pointer;">รายจ่าย</button>
+    <button id="tabInc" onclick="setAddType('income')" style="padding:10px;border:none;border-radius:10px;font-weight:700;cursor:pointer;">รายรับ</button>
   </div>
-  <div class="amount-box">
-    <span class="curr">฿</span>
-    <input type="number" id="inputAmt" placeholder="0" inputmode="decimal" min="0">
-  </div>
-  <div class="quick-row" id="quickRow">
-    <div class="q-chip" onclick="setAmt(30)">30</div>
-    <div class="q-chip" onclick="setAmt(50)">50</div>
-    <div class="q-chip" onclick="setAmt(100)">100</div>
-    <div class="q-chip" onclick="setAmt(500)">500</div>
-  </div>
-  <div class="form-label">หมวดหมู่</div>
-  <div class="cat-grid2" id="catGrid2"></div>
-  <input class="note-field" id="noteField" placeholder="รายละเอียด (ไม่บังคับ)">
-  <button class="btn-add exp-btn" id="btnAdd" onclick="addEntry()">บันทึก ✓</button>
-</div>
-
-<div class="panel" id="panel-budget">
-  <div class="budget-header">จัดการหมวดและงบ</div>
-  <div class="period-setting-card">
-    <div class="psc-left">
-      <div class="psc-title">รอบตัดงบ</div>
-      <div class="psc-val">📅 รายเดือน (วันที่ 1)</div>
-    </div>
-    <button class="btn-small" type="button">✏️ ตั้งค่า</button>
-  </div>
-  <div class="budget-type-tabs">
-    <button class="btt exp active" id="bttExp" onclick="switchBudgetTab('expense')">รายจ่าย</button>
-    <button class="btt inc" id="bttInc" onclick="switchBudgetTab('income')">รายรับ</button>
-  </div>
-  <div class="budget-list" id="budgetList"></div>
+  <input type="number" id="inputAmt" placeholder="0" style="width:100%;font-size:2.5rem;font-weight:800;text-align:center;border:none;background:transparent;margin-bottom:20px;outline:none;">
+  <div id="catGrid2" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;"></div>
+  <input id="noteField" class="note-field" placeholder="รายละเอียด..." style="width:100%;padding:12px;border:1px solid var(--border);border-radius:12px;margin-bottom:20px;">
+  <button onclick="addEntry()" style="width:100%;padding:16px;border:none;border-radius:14px;background:var(--pink);color:#fff;font-size:1.1rem;font-weight:800;cursor:pointer;">บันทึก ✓</button>
 </div>
 
 <div class="panel" id="panel-history">
-  <div class="filter-row2">
-    <input type="month" id="filterMonth" onchange="renderHistory()">
-    <select id="filterType" onchange="renderHistory()">
-      <option value="all">ทั้งหมด</option>
-      <option value="expense">รายจ่าย</option>
-      <option value="income">รายรับ</option>
-    </select>
+  <div style="margin-bottom:15px;">
+    <input type="month" id="filterMonth" onchange="renderHistory()" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);">
   </div>
-  <div class="tx-list2" id="txList2"></div>
-</div>
-
-<div class="panel" id="panel-settings">
-  <div style="text-align:center;padding:20px 0 16px;">
-    <img id="linePicDisplay" src="" alt="" style="display:none;width:72px;height:72px;border-radius:50%;object-fit:cover;margin-bottom:10px;border:3px solid var(--pink);">
-    <div id="settingsBear" style="font-size:3.5rem;cursor:pointer;" onclick="runDong()">🐼</div>
-    <div style="font-size:1rem;font-weight:700;margin-top:6px;" id="lineNameDisplay">돈โนท Don Note ⭐</div>
-    <div style="font-size:.75rem;color:var(--sub);margin-top:2px;">v2.0 · โน้ตเงินสไตล์เกาหลี</div>
-  </div>
-  <div class="settings-card">
-    <div class="sc-title">☁️ Cloud Sync</div>
-    <div class="si2"><div class="si2-left"><div class="si2-label">☁️ สถานะ Firebase</div><div class="si2-sub" id="cloudStatusSub">⏳ กำลังเชื่อมต่อ...</div></div></div>
-    <div class="si2" onclick="lineLogout()"><div class="si2-left"><div class="si2-label" style="color:#06C755;">🟢 LINE Account</div><div class="si2-sub">แตะเพื่อออกจากระบบ</div></div><div class="si2-right">›</div></div>
-  </div>
-  <div class="settings-card">
-    <div class="sc-title">ข้อมูล</div>
-    <div class="si2" onclick="clearData()"><div class="si2-left"><div class="si2-label" style="color:var(--pink);">🗑️ ลบข้อมูลทั้งหมด</div><div class="si2-sub">ไม่สามารถกู้คืนได้</div></div><div class="si2-right">›</div></div>
-  </div>
+  <div id="txList2"></div>
 </div>
 
 <nav class="bottom-nav">
-  <button class="nav-btn active" id="nav-home" onclick="goPanel('panel-home')"><span class="ni">🏠</span>สรุป</button>
-  <button class="nav-btn" id="nav-add" onclick="goPanel('panel-add')"><span class="ni">✏️</span>บันทึก</button>
-  <button class="nav-btn" id="nav-budget" onclick="goPanel('panel-budget')"><span class="ni">🥧</span>หมวด/งบ</button>
-  <button class="nav-btn" id="nav-history" onclick="goPanel('panel-history')"><span class="ni">📋</span>รายการ</button>
-  <button class="nav-btn" id="nav-settings" onclick="goPanel('panel-settings')"><span class="ni">⚙️</span>ตั้งค่า</button>
+  <button class="nav-btn active" id="nav-home" onclick="goPanel('panel-home')"><span>🏠</span>สรุป</button>
+  <button class="nav-btn" id="nav-add" onclick="goPanel('panel-add')"><span>✏️</span>บันทึก</button>
+  <button class="nav-btn" id="nav-history" onclick="goPanel('panel-history')"><span>📋</span>รายการ</button>
+  <button class="nav-btn" id="nav-settings" onclick="goPanel('panel-settings')"><span>⚙️</span>ตั้งค่า</button>
 </nav>
 
-<div class="overlay hidden" id="budgetSheet">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title" id="sheetTitle">ตั้งงบหมวด</div>
-    <input class="sheet-input" type="number" id="sheetInput" placeholder="0" inputmode="decimal">
-    <div class="sheet-btns">
-      <button class="btn-sheet-cancel" onclick="closeSheet()">ยกเลิก</button>
-      <button class="btn-sheet-save" id="btnSheetSave" onclick="saveBudget()">บันทึก</button>
-    </div>
+<div class="panel" id="panel-settings">
+  <div style="background:white;border-radius:20px;padding:20px;text-align:center;">
+    <div id="lineNameDisplay" style="font-weight:700;font-size:1.2rem;margin-bottom:10px;">User Name</div>
+    <div id="cloudStatusSub" style="font-size:0.8rem;color:var(--sub);margin-bottom:20px;">สถานะ: กำลังเช็กระบบ...</div>
+    <button onclick="liff.logout();location.reload();" style="color:var(--pink);background:none;border:1px solid var(--pink);padding:8px 20px;border-radius:10px;cursor:pointer;">ออกจากระบบ</button>
   </div>
 </div>
 
-<div id="dong-run">🐼</div>
 <div class="toast" id="toast"></div>
 
+
 <script>
-// 1. ตั้งค่าพื้นฐาน
+// 1. ตั้งค่า Firebase (อ้างอิงจากโปรเจกต์ Don Note ของคุณ)
 const firebaseConfig = {
   apiKey: "AIzaSyAxEfomFx8g_Du_tdFjU1ji1-Hofno-sv8",
   authDomain: "don-note-f2bcd.firebaseapp.com",
   projectId: "don-note-f2bcd",
   storageBucket: "don-note-f2bcd.firebasestorage.app",
   messagingSenderId: "906046825048",
-  appId: "1:906046825048:web:a415a5bb1f653fcb18202d",
-  measurementId: "G-S7GZWXQTL4"
+  appId: "1:906046825048:web:a415a5bb1f653fcb18202d"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-db.settings({ ignoreUndefinedProperties: true });
 
+// 2. ตั้งค่า LINE LIFF
 const LIFF_ID = '2009250866-MmcKPhwq';
-let userId = null, lineProfile = null, hasLinePic = false;
-
-// 2. ข้อมูลหมวดหมู่
-const EXP_CATS = [
-  {id:'food', icon:'🍜', name:'อาหาร'}, {id:'drink', icon:'🧋', name:'กาแฟ'},
-  {id:'deliver', icon:'🛵', name:'เดลิเวอรี'}, {id:'travel', icon:'🚌', name:'เดินทาง'},
-  {id:'place', icon:'🏠', name:'ที่พัก'}, {id:'shop', icon:'🛍️', name:'ชอปปิ้ง'},
-  {id:'beauty', icon:'💄', name:'ความงาม'}, {id:'health', icon:'💊', name:'สุขภาพ'},
-  {id:'phone', icon:'📱', name:'ค่าโทรศัพท์'}, {id:'net', icon:'📶', name:'ค่าเน็ต'},
-  {id:'sub', icon:'🎬', name:'Subscription'}, {id:'other', icon:'📦', name:'อื่นๆ'}
-];
-const INC_CATS = [
-  {id:'salary', icon:'💼', name:'เงินเดือน'}, {id:'special', icon:'⭐', name:'งานพิเศษ'},
-  {id:'freelance', icon:'💻', name:'ฟรีแลนซ์'}, {id:'sell', icon:'🏷️', name:'ขายของ'},
-  {id:'invest', icon:'📈', name:'ลงทุน'}, {id:'gift', icon:'🎁', name:'ของขวัญ'},
-  {id:'other_i', icon:'💰', name:'อื่นๆ'}
-];
-const INC_COLORS = { salary:'#34C759', special:'#00C9A7', freelance:'#007AFF', sell:'#FF9500', invest:'#AF52DE', gift:'#FF2D55', other_i:'#8E8E93' };
-
-// 3. ตัวแปรสถานะ
+let userId = null, lineProfile = null;
 let entries = JSON.parse(localStorage.getItem('dong_entries') || '[]');
-let budgets = JSON.parse(localStorage.getItem('dong_budgets') || '{}');
-let addType = 'expense', selCatId = 'food', sumTab = 'expense', budgetTab = 'expense', editCatId = null, piePeriod = 'month';
+let addType = 'expense', selCatId = 'food';
 
-// 4. ฟังก์ชันจัดการ LINE & รูปโปรไฟล์
+// หมวดหมู่สำหรับวาด UI (ต้องมีเพื่อให้ปุ่มขึ้น)
+const EXP_CATS = [{id:'food',icon:'🍜',name:'อาหาร'},{id:'drink',icon:'🧋',name:'เครื่องดื่ม'},{id:'travel',icon:'🚌',name:'เดินทาง'},{id:'shop',icon:'🛍️',name:'ช้อปปิ้ง'},{id:'other',icon:'📦',name:'อื่นๆ'}];
+const INC_CATS = [{id:'salary',icon:'💼',name:'เงินเดือน'},{id:'special',icon:'⭐',name:'รายได้เสริม'}];
+
+// 3. เริ่มต้นระบบ LIFF
 async function initLiff() {
   try {
     await liff.init({ liffId: LIFF_ID });
     if (liff.isLoggedIn()) {
-      lineProfile = await liff.getProfile();
+      lineProfile = await liff.getProfile(); // ดึงข้อมูล Profile มาเก็บไว้
       userId = lineProfile.userId;
+      
       document.getElementById('lineLogin').classList.add('hidden');
-      updateLineProfileUI();
-      init();
+      updateLineProfileUI(); // แสดงรูปและชื่อ
+      initApp(); // เริ่มโหลดข้อมูล
+      
+      // เช็กถ้ากดมาจาก LINE Webhook (#history)
       if (window.location.hash === '#history') goPanel('panel-history');
     } else {
       document.getElementById('lineLogin').classList.remove('hidden');
       document.getElementById('splash').classList.add('hide');
     }
-  } catch (e) { useFallbackUserId(); }
+  } catch (e) { console.error("LIFF Error:", e); }
 }
 
+// 4. แสดงรูปและชื่อโปรไฟล์
 function updateLineProfileUI() {
   if (!lineProfile) return;
   const hb = document.getElementById('headerBear');
   if (hb && lineProfile.pictureUrl) {
     hb.innerHTML = `<img src="${lineProfile.pictureUrl}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid #FF4785;">`;
   }
+  const nameDisplay = document.getElementById('lineNameDisplay');
+  if (nameDisplay) nameDisplay.textContent = lineProfile.displayName;
 }
 
-function useFallbackUserId() {
-  userId = localStorage.getItem('dong_local_uid') || 'local_' + Math.random().toString(36).slice(2, 10);
-  localStorage.setItem('dong_local_uid', userId);
-  document.getElementById('lineLogin')?.classList.add('hidden');
-  init();
-}
-
-// 5. ฟังก์ชันเริ่มต้นแอป
-function init() {
-  const filterMonthInput = document.getElementById('filterMonth');
-  if(filterMonthInput) filterMonthInput.value = new Date().toISOString().slice(0, 7);
-  
-  renderCatGrid2(); 
+// 5. จัดการหน้าจอและข้อมูล
+function initApp() {
   renderAll(); 
-  renderBudgetList();
-  
-  loadFromCloud().then(() => { 
-    renderAll(); 
-    renderBudgetList(); 
-  });
-  
-  setTimeout(() => {
-    const splash = document.getElementById('splash');
-    if(splash) splash.classList.add('hide');
-  }, 1000);
+  renderCatGrid2(); 
+  loadFromCloud();
+  setTimeout(() => document.getElementById('splash').classList.add('hide'), 1000);
 }
 
-// 6. ฟังก์ชันจัดการหน้าจอ & ข้อมูล
-function renderCatGrid2() {
-  const cats = addType === 'expense' ? EXP_CATS : INC_CATS;
-  const grid = document.getElementById('catGrid2');
-  if (!grid) return;
-  grid.innerHTML = cats.map(c => `
-    <div class="cat-chip2 ${selCatId === c.id ? 'sel ' + (addType === 'expense' ? 'exp-sel' : 'inc-sel') : ''}" onclick="selCat2('${c.id}')">
-      <div class="cc2-icon">${c.icon}</div><div class="cc2-name">${c.name}</div>
-    </div>`).join('');
-}
-function selCat2(id) { selCatId = id; renderCatGrid2(); }
-
-function renderBudgetList() {
-  const list = document.getElementById('budgetList');
-  if(!list) return;
-  const cats = budgetTab === 'expense' ? EXP_CATS : INC_CATS;
-  list.innerHTML = cats.map(c => `
-    <div class="budget-item" onclick="openSheet('${c.id}','${c.name}')">
-      <span class="bi-name">${c.name}</span>
-      <div class="bi-right">
-        <span class="bi-budget">${budgets[c.id] ? '฿'+budgets[c.id].toLocaleString() : 'ไม่มีงบ'}</span>
-        <span class="bi-arrow">›</span>
-      </div>
-    </div>`).join('');
-}
-
-async function saveToCloud() {
-  if(!userId) return;
-  try {
-    await db.collection('dongNote').doc(userId).set({ entries, budgets, updatedAt: new Date().toISOString() });
-    const cloudStatus = document.getElementById('cloudStatusSub');
-    if(cloudStatus) cloudStatus.textContent = '✅ ซิงค์แล้ว';
-  } catch(e) { 
-    const cloudStatus = document.getElementById('cloudStatusSub');
-    if(cloudStatus) cloudStatus.textContent = '⚠️ ออฟไลน์'; 
-  }
-}
-
-async function loadFromCloud() {
-  if(!userId) return;
-  try {
-    const doc = await db.collection('dongNote').doc(userId).get();
-    if (doc.exists) {
-      const data = doc.data();
-      entries = data.entries || [];
-      budgets = data.budgets || {};
-      localStorage.setItem('dong_entries', JSON.stringify(entries));
-      localStorage.setItem('dong_budgets', JSON.stringify(budgets));
-    }
-  } catch(e) { console.error(e); }
-}
-
-// 7. UI Actions
 function goPanel(id) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  const panel = document.getElementById(id);
-  if(panel) panel.classList.add('active');
+  document.getElementById(id).classList.add('active');
   const key = id.replace('panel-', '');
-  const btn = document.getElementById('nav-' + key);
-  if(btn) btn.classList.add('active');
+  document.getElementById('nav-' + key)?.classList.add('active');
   if (id === 'panel-history') renderHistory();
 }
 
 function renderAll() {
-  const ym = new Date().toISOString().slice(0, 7);
-  const cur = entries.filter(e => e.date.startsWith(ym));
-  const inc = cur.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
-  const exp = cur.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
-  const bal = inc - exp;
-  
-  const balEl = document.getElementById('balAmount');
-  if(balEl) {
-    balEl.textContent = '฿' + bal.toLocaleString();
-    balEl.className = 'balance-amount ' + (bal < 0 ? 'negative' : 'positive');
-  }
-  if(document.getElementById('ieIncAmt')) document.getElementById('ieIncAmt').textContent = '฿' + inc.toLocaleString();
-  if(document.getElementById('ieExpAmt')) document.getElementById('ieExpAmt').textContent = '฿' + exp.toLocaleString();
-  renderCatRows(); renderPieChart();
+  const inc = entries.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
+  const exp = entries.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
+  document.getElementById('balAmount').textContent = '฿' + (inc - exp).toLocaleString();
+  document.getElementById('ieIncAmt').textContent = '฿' + inc.toLocaleString();
+  document.getElementById('ieExpAmt').textContent = '฿' + exp.toLocaleString();
 }
 
-function renderCatRows() {
-  const ym = new Date().toISOString().slice(0, 7);
-  const md = entries.filter(e => e.date.startsWith(ym) && e.type === sumTab);
-  const catMap = {};
-  md.forEach(e => { catMap[e.catId] = (catMap[e.catId] || 0) + e.amount; });
-  const cats = sumTab === 'expense' ? EXP_CATS : INC_CATS;
-  const catRows = document.getElementById('catRows');
-  if(!catRows) return;
-  catRows.innerHTML = cats.map(c => {
-    const amt = catMap[c.id] || 0;
-    const bgt = budgets[c.id] || 0;
-    const pct = bgt > 0 ? Math.min(100, (amt / bgt) * 100) : 0;
-    return `
-      <div class="cat-row">
-        <div class="cat-row-top"><span class="cat-row-name">${c.name}</span><span class="cat-row-amt">฿${amt.toLocaleString()} / ${bgt > 0 ? '฿' + bgt.toLocaleString() : '-'}</span></div>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:${sumTab === 'expense' ? 'var(--pink)' : (INC_COLORS[c.id] || 'var(--teal)')};"></div></div>
-      </div>`;
-  }).join('');
-}
-
+// 6. บันทึกและซิงค์ข้อมูล
 function addEntry() {
-  const amtInput = document.getElementById('inputAmt');
-  const amt = parseFloat(amtInput.value);
-  if (!amt || amt <= 0) return showToast('ใส่ยอดเงินก่อนนะ 🐼');
+  const amt = parseFloat(document.getElementById('inputAmt').value);
+  if (!amt) return showToast('ใส่ยอดเงินด้วยนะ 🐼');
   const cat = [...EXP_CATS, ...INC_CATS].find(c => c.id === selCatId);
-  entries.push({ id: Date.now(), type: addType, amount: amt, catId: cat.id, catIcon: cat.icon, catName: cat.name, note: document.getElementById('noteField').value || cat.name, date: new Date().toISOString().slice(0, 10) });
-  save(); renderAll(); goPanel('panel-home');
-  amtInput.value = ''; document.getElementById('noteField').value = '';
-  showToast('บันทึกเรียบร้อยแล้ว ✨');
+  entries.push({ id: Date.now(), type: addType, amount: amt, catId: selCatId, catName: cat.name, catIcon: cat.icon, date: new Date().toISOString().slice(0,10) });
+  saveData();
+  goPanel('panel-home');
+  showToast('บันทึกแล้ว ✨');
 }
 
-function parseChat() {
-  const chatInput = document.getElementById('chatIn');
-  const text = chatInput.value.trim();
-  const amtMatch = text.match(/\d+/);
-  const amt = amtMatch ? parseFloat(amtMatch[0]) : 0;
-  if (!amt) return showToast('ลืมใส่ยอดเงินหรือเปล่า? 🐼');
-  let type = text.includes('รับ') ? 'income' : 'expense';
-  const cat = (type === 'expense' ? EXP_CATS : INC_CATS)[0];
-  entries.push({ id: Date.now(), type, amount: amt, catId: cat.id, catIcon: cat.icon, catName: cat.name, note: text, date: new Date().toISOString().slice(0, 10) });
-  save(); renderAll(); chatInput.value = '';
-  showToast('โน้ตให้แล้วนะ! 🐼✨');
+function saveData() {
+  localStorage.setItem('dong_entries', JSON.stringify(entries));
+  if (userId) {
+    db.collection('dongNote').doc(userId).set({ entries, updatedAt: new Date().toISOString() });
+  }
+  renderAll();
 }
 
-function renderHistory() {
-  const ym = document.getElementById('filterMonth').value;
-  const list = entries.filter(e => e.date.startsWith(ym)).reverse();
-  const txList = document.getElementById('txList2');
-  if(!txList) return;
-  txList.innerHTML = list.length ? list.map(e => `
-    <div class="tx2 ${e.type}">
-      <div class="tx2-icon">${e.catIcon}</div>
-      <div class="tx2-info"><div class="tx2-desc">${e.note}</div><div class="tx2-meta">${e.catName} · ${e.date}</div></div>
-      <div class="tx2-amt">${e.type === 'income' ? '+' : '-'}฿${e.amount.toLocaleString()}</div>
-      <button class="tx2-del" onclick="delEntry(${e.id})">🗑️</button>
-    </div>`).join('') : '<div style="text-align:center;padding:40px;color:var(--sub);">ยังไม่มีรายการจ้า 🐼</div>';
+async function loadFromCloud() {
+  if (!userId) return;
+  const doc = await db.collection('dongNote').doc(userId).get();
+  if (doc.exists) {
+    entries = doc.data().entries || [];
+    renderAll();
+    if(document.getElementById('cloudStatusSub')) document.getElementById('cloudStatusSub').textContent = 'สถานะ: ✅ ซิงค์ข้อมูลแล้ว';
+  }
 }
 
-function renderPieChart() {
-  const canvas = document.getElementById('pieChart');
-  if(!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const ym = new Date().toISOString().slice(0, 7);
-  const cur = entries.filter(e => e.date.startsWith(ym));
-  const inc = cur.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
-  const exp = cur.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
-  const total = inc + exp;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  if(total === 0) return;
-  let start = -Math.PI / 2;
-  const drawSlice = (amt, color) => {
-    const slice = (amt / total) * Math.PI * 2;
-    ctx.beginPath(); ctx.moveTo(90, 90); ctx.arc(90, 90, 80, start, start + slice);
-    ctx.fillStyle = color; ctx.fill(); start += slice;
-  };
-  drawSlice(exp, '#FF4785'); drawSlice(inc, '#00C9A7');
-  ctx.beginPath(); ctx.arc(90, 90, 55, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill();
+// ฟังก์ชันเสริม
+function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+function setAddType(t) { addType = t; selCatId = (t === 'expense' ? 'food' : 'salary'); renderCatGrid2(); }
+function renderCatGrid2() {
+  const cats = (addType === 'expense' ? EXP_CATS : INC_CATS);
+  document.getElementById('catGrid2').innerHTML = cats.map(c => `
+    <div class="cat-chip2 ${selCatId === c.id ? 'sel' : ''}" onclick="selCatId='${c.id}';renderCatGrid2()">
+      <span>${c.icon}</span><small>${c.name}</small>
+    </div>`).join('');
 }
 
-function delEntry(id) { if(confirm('ลบรายการนี้ไหม?')) { entries = entries.filter(e => e.id !== id); save(); renderAll(); renderHistory(); } }
-function showToast(msg) { const t = document.getElementById('toast'); if(t) { t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); } }
-function initDong() { }
-function lineLogout() { liff.logout(); localStorage.removeItem('dong_local_uid'); location.reload(); }
-function save() { localStorage.setItem('dong_entries', JSON.stringify(entries)); saveToCloud(); }
-function setAddType(t) { addType = t; renderCatGrid2(); }
-function switchSumTab(t) { sumTab = t; renderAll(); }
-function setAmt(v) { document.getElementById('inputAmt').value = v; }
-function dismissInstall() { document.getElementById('installBanner').style.display = 'none'; }
-function cyclePeriod() { showToast('เปลี่ยนรอบงบได้เร็วๆ นี้! 🐼'); }
-function switchBudgetTab(t) { budgetTab = t; renderBudgetList(); }
-function clearData() { if(confirm('ลบข้อมูลทั้งหมด?')) { entries = []; budgets = {}; save(); renderAll(); showToast('ล้างข้อมูลแล้ว 🗑️'); } }
-function setPiePeriod(p) { piePeriod = p; renderPieChart(); }
-
-function openSheet(id, name) {
-  editCatId = id;
-  const title = document.getElementById('sheetTitle');
-  const input = document.getElementById('sheetInput');
-  const sheet = document.getElementById('budgetSheet');
-  if(title) title.textContent = 'ตั้งงบ "' + name + '"';
-  if(input) input.value = budgets[id] || '';
-  if(sheet) sheet.classList.remove('hidden');
-}
-function closeSheet() { const sheet = document.getElementById('budgetSheet'); if(sheet) sheet.classList.add('hidden'); }
-function saveBudget() {
-  const val = parseFloat(document.getElementById('sheetInput').value) || 0;
-  if(val > 0) budgets[editCatId] = val; else delete budgets[editCatId];
-  localStorage.setItem('dong_budgets', JSON.stringify(budgets));
-  saveToCloud(); closeSheet(); renderBudgetList(); renderAll();
-  showToast('บันทึกงบแล้ว ✅');
-}
-
-// ══════ START ══════
+// เริ่มการทำงาน
 initLiff();
 </script>
-
-
-
 </body>
 </html>
-
-
-
-
-
-
-
