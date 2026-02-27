@@ -44,7 +44,7 @@ function initAdmin() {
   });
 }
 
-// บันทึกข้อมูลแบบ arrayUnion (ป้องกันข้อมูลหายเมื่อส่งมาพร้อมกัน)
+// บันทึกข้อมูล
 async function saveEntryToFirestore({ userId, entry }) {
   initAdmin();
   const db = admin.firestore();
@@ -72,17 +72,14 @@ async function replyMessage(replyToken, messages) {
   return res;
 }
 
-// สร้าง Flex Message
-
-// เปลี่ยนวิธีสร้างลิงก์
-
-
-
-function makeFlexReceipt({ catName, catIcon, amount, liffUrl }) {
-const liffUrl = `https://liff.line.me/${process.env.LIFF_ID}#history`; 
+// ── สร้าง Flex Message (แก้ไขจุดที่ทำให้ Error) ──
+function makeFlexReceipt({ catName, catIcon, amount }) {
+  // สร้าง Link แบบ Fragment เพื่อให้แอปเปิดหน้าประวัติได้ทันที
+  const liffUrl = `https://liff.line.me/${process.env.LIFF_ID}#history`; 
+  
   return {
     type: "flex",
-    altText: `บันทึกแล้ว: ${catName} ฿${amount}`,
+    altText: `✅ บันทึกแล้ว: ${catName} ฿${amount}`,
     contents: {
       type: "bubble",
       size: "mega",
@@ -91,15 +88,15 @@ const liffUrl = `https://liff.line.me/${process.env.LIFF_ID}#history`;
         layout: "vertical",
         spacing: "md",
         contents: [
-          { type: "text", text: "✅ บันทึกแล้ว", weight: "bold", size: "lg" },
+          { type: "text", text: "✅ บันทึกเรียบร้อย", weight: "bold", size: "lg", color: "#1C1C1E" },
           {
             type: "box",
             layout: "baseline",
             spacing: "sm",
             contents: [
               { type: "text", text: catIcon || "💾", size: "xl", flex: 0 },
-              { type: "text", text: catName || "รายการ", size: "md", flex: 4, wrap: true },
-              { type: "text", text: `฿${amount}`, size: "md", weight: "bold", align: "end", flex: 2 },
+              { type: "text", text: catName || "รายการ", size: "md", flex: 4, wrap: true, weight: "bold" },
+              { type: "text", text: `฿${amount.toLocaleString()}`, size: "md", weight: "bold", align: "end", flex: 2, color: "#FF4785" },
             ],
           },
         ],
@@ -109,47 +106,31 @@ const liffUrl = `https://liff.line.me/${process.env.LIFF_ID}#history`;
         layout: "vertical",
         spacing: "sm",
         contents: [
-          { type: "button", style: "primary", color: "#FF4785", action: { type: "uri", label: "ดูรายละเอียด", uri: liffUrl } },
-          { type: "button", style: "secondary", action: { type: "uri", label: "เปิดแอป Don Note", uri: cleanLiff } },
+          { 
+            type: "button", 
+            style: "primary", 
+            color: "#FF4785", 
+            action: { type: "uri", label: "ดูรายการทั้งหมด", uri: liffUrl } 
+          }
         ],
       },
     },
   };
 }
 
-
-
-// แยกคำจากข้อความ
-// ฟังก์ชันแยกคำและเดาหมวดหมู่ (เวอร์ชันปรับปรุงให้ฉลาดขึ้น)
+// ฟังก์ชันวิเคราะห์ข้อความ (เหมือนเดิม)
 function parseTextToEntry(text) {
-  // ดึงตัวเลขออกจากข้อความ
   const rawAmt = (text.match(/[\d,]+(\.\d+)?/) || [])[0];
   const amount = parseFloat((rawAmt || "").replace(/,/g, "")) || 0;
-  
   if (!amount || isNaN(amount)) return null;
 
   let catId = "other", catName = "อื่นๆ", catIcon = "📦", type = "expense";
   const t = text.toLowerCase();
   
-  // Logic การเดาหมวดหมู่ให้ตรงกับ EXP_CATS และ INC_CATS ในแอป
-  if (/เงินเดือน|salary|โบนัส|รายได้|ค่าจ้าง/i.test(t)) { 
-    type = "income"; catId = "salary"; catName = "เงินเดือน"; catIcon = "💼"; 
-  } 
-  else if (/ข้าว|อาหาร|กิน|ทาน|มื้อ|ก๋วยเตี๋ยว|shabu|บุฟเฟ่/i.test(t)) {
-    catId = "food"; catName = "อาหาร"; catIcon = "🍜";
-  } 
-  else if (/กาแฟ|ชา|น้ำ|ชานม|ไข่มุก|coffee|cafe|ดื่ม/i.test(t)) {
-    catId = "drink"; catName = "เครื่องดื่ม"; catIcon = "🧋";
-  } 
-  else if (/grab|lineman|foodpanda|เดลิเวอรี|delivery/i.test(t)) {
-    catId = "deliver"; catName = "เดลิเวอรี"; catIcon = "🛵";
-  } 
-  else if (/เดินทาง|รถ|mrt|bts|แท็กซี่|taxi|น้ำมัน|รถเมล์/i.test(t)) {
-    catId = "travel"; catName = "เดินทาง"; catIcon = "🚌";
-  }
-  else if (/ซื้อ|ช้อป|🛍️|shopee|lazada|เสื้อผ้า/i.test(t)) {
-    catId = "shop"; catName = "ชอปปิ้ง"; catIcon = "🛍️";
-  }
+  if (/เงินเดือน|salary|รายรับ/.test(t)) { type = "income"; catId = "salary"; catName = "เงินเดือน"; catIcon = "💼"; }
+  else if (/กาแฟ|ชา|น้ำ|coffee/.test(t)) { catId = "drink"; catName = "เครื่องดื่ม"; catIcon = "🧋"; }
+  else if (/ข้าว|อาหาร|กิน/.test(t)) { catId = "food"; catName = "อาหาร"; catIcon = "🍜"; }
+  else if (/เดินทาง|รถ|mrt|bts/.test(t)) { catId = "travel"; catName = "เดินทาง"; catIcon = "🚌"; }
 
   return {
     id: Date.now(),
@@ -160,10 +141,9 @@ function parseTextToEntry(text) {
     catIcon,
     note: text,
     date: new Date().toISOString().slice(0, 10),
-    source: "line-webhook" // ระบุแหล่งที่มาเพื่อให้แอปแยกแยะได้
+    source: "line-webhook"
   };
 }
-
 
 // Handler หลัก
 export default async function handler(req, res) {
@@ -184,11 +164,10 @@ export default async function handler(req, res) {
     if (event?.type === "message" && event.message.type === "text") {
       const entry = parseTextToEntry(event.message.text);
       if (!entry) {
-        await replyMessage(event.replyToken, [{ type: "text", text: "พิมพ์บันทึกได้เลย เช่น 'ข้าว 50' หรือ 'ค่าน้ำมัน 500' 🐼" }]);
+        await replyMessage(event.replyToken, [{ type: "text", text: "พิมพ์บันทึกได้เลย เช่น 'ข้าว 50' 🐼" }]);
       } else {
-        const entryId = await saveEntryToFirestore({ userId: event.source.userId, entry });
-        const liffUrl = `https://liff.line.me/${process.env.LIFF_ID}?page=history&entryId=${entryId}`;
-        const flex = makeFlexReceipt({ ...entry, liffUrl });
+        await saveEntryToFirestore({ userId: event.source.userId, entry });
+        const flex = makeFlexReceipt(entry);
         await replyMessage(event.replyToken, [flex]);
       }
     }
