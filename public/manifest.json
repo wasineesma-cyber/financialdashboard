@@ -1,11 +1,11 @@
 {
-  "name": "돈노트 Don Note",
-  "short_name": "Don Note",
-  "description": "โน้ตเงินสไตล์เกาหลี 🐻",
+  "name": "แม่ละเมียด",
+  "short_name": "แม่ละเมียด",
+  "description": "บันทึกการเงินส่วนตัว",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#FF4785",
+  "theme_color": "#2563EB",
   "orientation": "portrait-primary",
   "icons": [
     {

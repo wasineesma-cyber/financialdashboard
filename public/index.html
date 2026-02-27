@@ -5,32 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Don Note">
+<meta name="apple-mobile-web-app-title" content="แม่ละเมียด">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#FF4785">
+<meta name="theme-color" content="#2563EB">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-<title>돈노트 Don Note ⭐</title>
+<title>แม่ละเมียด</title>
 
 <style>
 :root {
-  --pink:       #FF4785;
-  --pink-light: #FFF0F5;
-  --pink-border:#FFADD2;
-  --pink-track: #FFD6E7;
-  --teal:       #00C9A7;
-  --teal-light: #E8FAF7;
-  --teal-border:#80E5D8;
-  --teal-track: #B2F0E8;
-  --bg:         #F5F5F5;
+  --pink:       #2563EB;
+  --pink-light: #EFF6FF;
+  --pink-border:#93C5FD;
+  --pink-track: #BFDBFE;
+  --teal:       #059669;
+  --teal-light: #ECFDF5;
+  --teal-border:#6EE7B7;
+  --teal-track: #A7F3D0;
+  --bg:         #F1F5F9;
   --white:      #FFFFFF;
-  --text:       #1C1C1E;
-  --sub:        #8E8E93;
-  --border:     #E5E5EA;
+  --text:       #0F172A;
+  --sub:        #64748B;
+  --border:     #E2E8F0;
   --nav-h:      60px;
 }
 
@@ -170,7 +170,7 @@ body{padding-bottom:var(--nav-h);}
 /* Invite banner */
 .invite-banner{
   width:100%;padding:14px;margin-top:10px;
-  background:linear-gradient(135deg,var(--pink),#FF7BB5);
+  background:linear-gradient(135deg,var(--pink),#60A5FA);
   border:none;border-radius:14px;font-size:.88rem;font-weight:800;
   color:#fff;cursor:pointer;
   display:flex;align-items:center;justify-content:center;gap:8px;
@@ -453,7 +453,7 @@ body{padding-bottom:var(--nav-h);}
 /* ── SPLASH SCREEN ── */
 #splash{
   position:fixed;inset:0;z-index:9999;
-  background:#FF4785;
+  background:#1D4ED8;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:16px;
   transition:opacity .5s ease;
@@ -508,7 +508,7 @@ body{padding-bottom:var(--nav-h);}
 <!-- LINE LOGIN SCREEN -->
 <div id="lineLogin" class="hidden">
   <div class="ll-bear">🐼</div>
-  <div class="ll-title">돈노트 Don Note ⭐</div>
+  <div class="ll-title">แม่ละเมียด</div>
   <div class="ll-sub">เข้าสู่ระบบด้วย LINE<br>ข้อมูลปลอดภัยผูกกับบัญชี LINE ของคุณ</div>
   <button class="btn-line-login" onclick="liff.login()">
     <img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/LINE_New_App_Icon_%282020-12%29.png" alt="LINE">
@@ -519,8 +519,8 @@ body{padding-bottom:var(--nav-h);}
 <!-- SPLASH SCREEN -->
 <div id="splash">
   <div class="splash-bear">🐼</div>
-  <div class="splash-title">돈노트 Don Note</div>
-  <div class="splash-sub">โน้ตเงินสไตล์เกาหลี ⭐</div>
+  <div class="splash-title">แม่ละเมียด</div>
+  <div class="splash-sub">บันทึกการเงินส่วนตัว</div>
 </div>
 
 <!-- INSTALL BANNER (iOS) -->
@@ -536,7 +536,7 @@ body{padding-bottom:var(--nav-h);}
 <!-- HEADER -->
 <div class="header">
   <div class="header-bear" id="headerBear">🐼</div>
-  <div class="header-title">돈노트 Don Note ⭐</div>
+  <div class="header-title">แม่ละเมียด</div>
   <div class="header-right" id="headerRight"></div>
 </div>
 
@@ -589,7 +589,7 @@ body{padding-bottom:var(--nav-h);}
 
   <div class="sum-card">
     <div class="sum-card-header">
-      <div class="dong-badge">Don<br>Note</div>
+      <div class="dong-badge">แม่<br>ละเมียด</div>
       <div class="sum-card-title exp-title" id="sumCardTitle">สรุปรายจ่าย</div>
       <div style="width:44px;"></div>
     </div>
@@ -599,7 +599,7 @@ body{padding-bottom:var(--nav-h);}
     </button>
     <button class="invite-banner" type="button">
       ชวนเพื่อนมาเป็น
-      <span class="invite-badge">Don Note Pro</span>
+      <span class="invite-badge">แม่ละเมียด Pro</span>
       รับฟรี 1 เดือน
     </button>
   </div>
@@ -675,8 +675,8 @@ body{padding-bottom:var(--nav-h);}
   <div style="text-align:center;padding:20px 0 16px;">
     <img id="linePicDisplay" src="" alt="" style="display:none;width:72px;height:72px;border-radius:50%;object-fit:cover;margin-bottom:10px;border:3px solid var(--pink);">
     <div id="settingsBear" style="font-size:3.5rem;cursor:pointer;" onclick="runDong()">🐼</div>
-    <div style="font-size:1rem;font-weight:700;margin-top:6px;" id="lineNameDisplay">돈노트 Don Note ⭐</div>
-    <div style="font-size:.75rem;color:var(--sub);margin-top:2px;">v2.0 · โน้ตเงินสไตล์เกาหลี</div>
+    <div style="font-size:1rem;font-weight:700;margin-top:6px;" id="lineNameDisplay">แม่ละเมียด</div>
+    <div style="font-size:.75rem;color:var(--sub);margin-top:2px;">v2.0 · บันทึกการเงินส่วนตัว</div>
   </div>
 
   <div class="settings-card">
@@ -698,7 +698,7 @@ body{padding-bottom:var(--nav-h);}
 
   <!-- พรีเมี่ยม -->
   <div id="premiumUpgradeCard" class="upgrade-card" style="display:none;">
-    <div class="up-title">👑 Don Note Premium</div>
+    <div class="up-title">👑 แม่ละเมียด Premium</div>
     <div class="up-sub">ปลดล็อกทุกฟีเจอร์ ซิงค์ Sheet · บอท LINE · Export ฯลฯ</div>
     <div class="plan-grid">
       <div class="plan-card selected" id="planMonthly" onclick="selectPlan('monthly')">
@@ -955,7 +955,7 @@ function updateLineProfileUI() {
 
   const hb = document.getElementById('headerBear');
   if (hb && lineProfile.pictureUrl) {
-    hb.innerHTML = `<img src="${lineProfile.pictureUrl}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid #FF4785;">`;
+    hb.innerHTML = `<img src="${lineProfile.pictureUrl}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid #2563EB;">`;
     hasLinePic = true;
   }
   const nameEl = document.getElementById('lineNameDisplay');
@@ -1409,7 +1409,7 @@ function parseChat(){
   const text=document.getElementById('chatIn').value.trim();
   if(!text){showToast('พิมพ์รายการก่อนนะ ⭐');return;}
   const amt=parseFloat((text.match(/[\d,]+(\.\d+)?/)||[])[0]?.replace(/,/g,''));
-  if(!amt){showToast('돈노트 หาจำนวนเงินไม่เจอ ⭐');return;}
+  if(!amt){showToast('แม่ละเมียด หาจำนวนเงินไม่เจอ');return;}
 
   const t=text.toLowerCase();
 
@@ -1546,7 +1546,7 @@ function renderPieChart(){
     if(exp>0){
       ctx.beginPath();ctx.moveTo(cx,cy);
       ctx.arc(cx,cy,r,start,start+expAngle);
-      ctx.closePath();ctx.fillStyle='#FF4785';ctx.fill();
+      ctx.closePath();ctx.fillStyle='#2563EB';ctx.fill();
     }
     if(inc>0){
       ctx.beginPath();ctx.moveTo(cx,cy);
@@ -1561,7 +1561,7 @@ function renderPieChart(){
 
   document.getElementById('pieLegend').innerHTML=`
     <div class="pie-legend-item">
-      <div class="pie-dot" style="background:#FF4785;"></div>
+      <div class="pie-dot" style="background:#2563EB;"></div>
       <span>รายจ่าย ฿${fmt0(exp)}</span>
     </div>
     <div class="pie-legend-item">
@@ -1584,7 +1584,7 @@ function initDong(){
   document.getElementById('homeBear').textContent=emoji;
 
   document.getElementById('dong-run').onclick=()=>{
-    const msgs=['돈노트: อย่าลืมบันทึกรายการด้วยนะ! ⭐','돈노트: วันนี้ประหยัดเก่งมาก 💰','돈노트: รักนายที่สุดเลย ⭐💕'];
+    const msgs=['แม่ละเมียด: อย่าลืมบันทึกรายการด้วยนะ!','แม่ละเมียด: วันนี้ประหยัดเก่งมาก 💰','แม่ละเมียด: รักนายที่สุดเลย 💕'];
     showToast(msgs[Math.floor(Math.random()*msgs.length)]);
   };
 }
