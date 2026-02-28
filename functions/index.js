@@ -229,60 +229,81 @@ async function lineReply(replyToken, messages) {
 
 // หมวดหมู่ทั้งหมด (ต้องตรงกับ index.html)
 const CAT_META = {
-  food:     { name: "อาหาร",        icon: "🍜", type: "expense" },
-  drink:    { name: "เครื่องดื่ม",  icon: "🧋", type: "expense" },
-  deliver:  { name: "เดลิเวอรี",    icon: "🛵", type: "expense" },
-  travel:   { name: "เดินทาง",      icon: "🚌", type: "expense" },
-  place:    { name: "ที่พัก",       icon: "🏠", type: "expense" },
-  shop:     { name: "ชอปปิ้ง",     icon: "🛍️", type: "expense" },
-  beauty:   { name: "ความงาม",     icon: "💄", type: "expense" },
-  health:   { name: "สุขภาพ",      icon: "💊", type: "expense" },
-  phone:    { name: "ค่าโทรศัพท์", icon: "📱", type: "expense" },
-  net:      { name: "ค่าเน็ต",     icon: "📶", type: "expense" },
-  sub:      { name: "Subscription", icon: "🎬", type: "expense" },
-  other:    { name: "อื่นๆ",        icon: "📦", type: "expense" },
-  salary:   { name: "เงินเดือน",   icon: "💼", type: "income" },
-  special:  { name: "งานพิเศษ",    icon: "⭐", type: "income" },
-  freelance:{ name: "ฟรีแลนซ์",    icon: "💻", type: "income" },
-  sell:     { name: "ขายของ",      icon: "🏷️", type: "income" },
-  invest:   { name: "ลงทุน",       icon: "📈", type: "income" },
-  gift:     { name: "ของขวัญ",     icon: "🎁", type: "income" },
-  other_i:  { name: "อื่นๆ",       icon: "💰", type: "income" },
+  food:      { name: "อาหาร",        icon: "🍜", type: "expense" },
+  drink:     { name: "เครื่องดื่ม",  icon: "🧋", type: "expense" },
+  deliver:   { name: "เดลิเวอรี",    icon: "🛵", type: "expense" },
+  travel:    { name: "เดินทาง",      icon: "🚌", type: "expense" },
+  place:     { name: "ที่พัก",       icon: "🏠", type: "expense" },
+  shop:      { name: "ชอปปิ้ง",     icon: "🛍️", type: "expense" },
+  beauty:    { name: "ความงาม",     icon: "💄", type: "expense" },
+  health:    { name: "สุขภาพ",      icon: "💊", type: "expense" },
+  phone:     { name: "ค่าโทรศัพท์", icon: "📱", type: "expense" },
+  net:       { name: "ค่าเน็ต",     icon: "📶", type: "expense" },
+  sub:       { name: "Subscription", icon: "🎬", type: "expense" },
+  entertain: { name: "บันเทิง",      icon: "🎡", type: "expense" },
+  edu:       { name: "การศึกษา",     icon: "📚", type: "expense" },
+  charity:   { name: "บริจาค",       icon: "💝", type: "expense" },
+  vehicle:   { name: "ยานพาหนะ",    icon: "🚗", type: "expense" },
+  pet:       { name: "สัตว์เลี้ยง",  icon: "🐾", type: "expense" },
+  insurance: { name: "ประกัน",       icon: "🛡️", type: "expense" },
+  transfer:  { name: "โอนเงิน",      icon: "💸", type: "expense" },
+  other:     { name: "อื่นๆ",        icon: "📦", type: "expense" },
+  salary:    { name: "เงินเดือน",   icon: "💼", type: "income" },
+  special:   { name: "งานพิเศษ",    icon: "⭐", type: "income" },
+  freelance: { name: "ฟรีแลนซ์",    icon: "💻", type: "income" },
+  sell:      { name: "ขายของ",      icon: "🏷️", type: "income" },
+  invest:    { name: "ลงทุน",       icon: "📈", type: "income" },
+  gift:      { name: "ของขวัญ",     icon: "🎁", type: "income" },
+  other_i:   { name: "อื่นๆ",       icon: "💰", type: "income" },
 };
 
 // ดักคำ → หมวด (ลำดับสำคัญ: รายรับก่อน แล้วค่อยรายจ่าย)
 function guessCategory(t) {
+  const tl = t.toLowerCase();
   // ── รายรับ ──
-  if (/เงินเดือน|salary|ได้เงินเดือน/.test(t))                                                              return { catId: "salary",   type: "income" };
-  if (/ฟรีแลนซ์|freelance|งานฟรี|free.?lance/.test(t))                                                     return { catId: "freelance", type: "income" };
-  if (/ลงทุน|invest|ปันผล|dividend|กำไร|profit|หุ้น|stock|crypto|คริปโต/.test(t))                          return { catId: "invest",    type: "income" };
-  if (/ของขวัญ|ได้รับของ|gift|present|แม่ให้|พ่อให้|โอนให้/.test(t))                                       return { catId: "gift",      type: "income" };
-  if (/ขาย/.test(t))                                                                                        return { catId: "sell",      type: "income" };
-  if (/รับเงิน|ได้เงิน|โบนัส|bonus|รายได้|รายรับ|งานพิเศษ|part.?time|พาร์ทไทม์|ค่าจ้าง|ค่าตอบแทน|commission|คอม|โอนเข้า/.test(t)) return { catId: "special", type: "income" };
-
-  // ── รายจ่าย ──
-  if (/ชานม|ไข่มุก|boba|bubble.?tea|ชาไทย|ชาเย็น|ชาร้อน|ชาเขียว|มัทฉะ|matcha|โกโก้|cocoa|โอวัลติน/.test(t)) return { catId: "drink",   type: "expense" };
-  if (/กาแฟ|coffee|cafe|คาเฟ่|espresso|latte|ลาเต้|คาปูชิโน|americano|starbucks|สตาร์บัค|amazon\s*cafe|อเมซอน\s*cafe|ดริป|drip|cold.?brew/.test(t)) return { catId: "drink", type: "expense" };
-
-  if (/grabfood|grab\s*food|foodpanda|panda|lineman|line\s*man|shopeefood|shopee\s*food|robinhood|เดลิเวอรี|delivery|ส่ง\s*อาหาร|สั่ง\s*อาหาร|สั่ง\s*กิน/.test(t)) return { catId: "deliver", type: "expense" };
-
-  if (/ข้าว|อาหาร|กิน|ทาน|มื้อ|เช้า|กลางวัน|เย็น|ก๋วยเตี๋ยว|ผัด|ต้ม|แกง|ยำ|ส้มตำ|หมู|ไก่|ปลา|กุ้ง|หอย|เนื้อ|pizza|พิซซ่า|sushi|ซูชิ|ราเม็ง|ramen|สเต็ก|steak|burger|เบอร์เกอร์|kfc|mcdonald|ชาบู|หมาล่า|hotpot|shabu|บุฟเฟ่|buffet|ขนม|เบเกอรี่|เค้ก|cake|ไอศครีม|ไอติม|ice.?cream|ของหวาน/.test(t)) return { catId: "food", type: "expense" };
-
-  if (/bts|mrt|รถไฟ|รถเมล์|รถตู้|สองแถว|แท็กซี่|taxi|grab\s*car|grabcar|bolt|uber|วินมอ|มอไซค์รับจ้าง|ทางด่วน|toll|ค่าน้ำมัน|น้ำมัน|petrol|gasoline|ปตท|บางจาก|เชลล์|shell|ตั๋ว|flight|บิน|สนามบิน|เดินทาง/.test(t)) return { catId: "travel", type: "expense" };
-
-  if (/ค่าห้อง|ค่าเช่า|เช่าห้อง|เช่าบ้าน|ที่พัก|หอพัก|คอนโด|condo|apartment|ค่าไฟ|ค่าน้ำ|ค่าส่วนกลาง|ค่าแก๊ส|โรงแรม|hotel|hostel/.test(t)) return { catId: "place", type: "expense" };
-
-  if (/netflix|nflx|spotify|youtube.?premium|apple.?music|apple.?tv|disney|hbo|prime.?video|amazon.?prime|icloud|google.?one|canva|adobe|notion|chatgpt|claude|subscription|membership/.test(t)) return { catId: "sub", type: "expense" };
-
-  if (/ค่าเน็ต|internet|wifi|wi-fi|ไวไฟ|broadband|fiber|เน็ตบ้าน/.test(t))                               return { catId: "net",    type: "expense" };
-  if (/ค่าโทร|เติมเน็ต|เติมเงิน|dtac|ais|true.?move|ทรูมูฟ|ซิม/.test(t))                                 return { catId: "phone",  type: "expense" };
-
-  if (/ครีม|เครื่องสำอาง|makeup|lipstick|ลิป|บลัช|แป้ง|serum|เซรั่ม|สกินแคร์|skincare|ตัดผม|ทำผม|ย้อมผม|ทำเล็บ|เล็บ|nail|สปา|spa|นวด|massage|gym|fitness|ออกกำลัง/.test(t)) return { catId: "beauty", type: "expense" };
-  if (/หมอ|ยา|โรงพยาบาล|โรงบาล|hospital|คลินิก|clinic|วัคซีน|vaccine|อาหารเสริม|supplement|วิตามิน|vitamin|ประกันสุขภาพ|ทำฟัน|กายภาพ/.test(t)) return { catId: "health", type: "expense" };
-
-  if (/บัตรเครดิต|credit.?card|จ่ายบัตร|ผ่อนบัตร/.test(t))                                               return { catId: "other", type: "expense" };
-  if (/ซื้อ|ช้อป|ชอป|shopee|lazada|temu|เสื้อผ้า|กางเกง|รองเท้า|กระเป๋า|ของใช้|เครื่องใช้|เฟอร์นิเจอร์|ikea|central|paragon|terminal|the.?mall|เซ็นทรัล|มาบุญครอง|mbk|พันทิป/.test(t)) return { catId: "shop", type: "expense" };
-
+  if (/เงินเดือน|salary|ได้เงินเดือน|payroll|เงินอาทิตย์|ค่าแรงรายวัน/.test(tl))                          return { catId: "salary",    type: "income" };
+  if (/ฟรีแลนซ์|freelance|งานฟรี|free.?lance|งานอิสระ/.test(tl))                                          return { catId: "freelance", type: "income" };
+  if (/ลงทุน|invest|ปันผล|dividend|กำไรหุ้น|profit|หุ้น|stock|crypto|คริปโต|พันธบัตร|bond|กองทุน|fund/.test(tl)) return { catId: "invest", type: "income" };
+  if (/ของขวัญ|ได้รับของ|gift|present|แม่ให้|พ่อให้|โอนให้|เงินจากครอบครัว/.test(tl))                    return { catId: "gift",      type: "income" };
+  if (/ขายของ|ขายสินค้า|ขายออนไลน์/.test(tl))                                                             return { catId: "sell",      type: "income" };
+  if (/รับเงิน|ได้เงิน|โบนัส|bonus|รายได้|รายรับ|งานพิเศษ|part.?time|พาร์ทไทม์|ค่าจ้าง|ค่าตอบแทน|commission|คอม|refund|คืนเงิน|lottery|ถูกล็อตเตอรี่|ถูกหวย|รางวัล|prize|โอนเข้า/.test(tl)) return { catId: "special", type: "income" };
+  // ── เครื่องดื่ม ──
+  if (/ชานม|ไข่มุก|boba|bubble.?tea|ชาไทย|ชาเย็น|ชาร้อน|ชาเขียว|มัทฉะ|matcha|โกโก้|cocoa|โอวัลติน|ชาพีช|ชาเลมอน|โอเลี้ยง|ชาชีส/.test(tl)) return { catId: "drink", type: "expense" };
+  if (/กาแฟ|coffee|cafe|คาเฟ่|espresso|latte|ลาเต้|คาปูชิโน|americano|starbucks|สตาร์บัค|amazon.?cafe|ดริป|drip|cold.?brew|frappuccino/.test(tl)) return { catId: "drink", type: "expense" };
+  if (/น้ำผลไม้|น้ำปั่น|น้ำมะพร้าว|น้ำอ้อย|smoothie|สมูทตี้|เครื่องดื่ม|น้ำอัดลม|soda|โซดา|น้ำหวาน|juice/.test(tl)) return { catId: "drink", type: "expense" };
+  // ── เดลิเวอรี ──
+  if (/grabfood|grab.?food|foodpanda|panda|lineman|line.?man|shopeefood|shopee.?food|robinhood|เดลิเวอรี|delivery|ส่งอาหาร|สั่งอาหาร|สั่งกิน|gojek/.test(tl)) return { catId: "deliver", type: "expense" };
+  // ── อาหาร ──
+  if (/ข้าว|อาหาร|กินข้าว|ทานข้าว|มื้อเช้า|มื้อกลาง|มื้อเย็น|กลางวัน|ก๋วยเตี๋ยว|ผัด|ต้ม|แกง|ยำ|ส้มตำ|ลาบ|หมูกระทะ|ไก่ทอด|ปลาทอด|กุ้ง|หอย|เนื้อ|pizza|พิซซ่า|sushi|ซูชิ|ราเม็ง|ramen|สเต็ก|steak|burger|เบอร์เกอร์|kfc|mcdonald|ชาบู|หมาล่า|hotpot|shabu|บุฟเฟ่|buffet|ข้าวมัน|ข้าวต้ม|โจ๊ก|ก๋วยจั๊บ|เบเกอรี่|bakery|เค้ก|cake|cookie|คุกกี้|ไอศครีม|ไอติม|ice.?cream|dessert|ของหวาน|บะหมี่|ซีฟู้ด|ปิ้งย่าง|สลัด|salad|แซนด์วิช|sandwich|โดนัท|donut|ลูกชิ้น|ไส้กรอก|หมูปิ้ง|ข้าวเหนียว|น้ำพริก|ขนมจีน|ข้าวผัด|ผัดไทย|ต้มยำ/.test(tl)) return { catId: "food", type: "expense" };
+  // ── เดินทาง ──
+  if (/bts|mrt|รถไฟ|รถเมล์|รถตู้|สองแถว|แท็กซี่|taxi|grabcar|bolt|uber|วินมอ|มอไซค์รับจ้าง|ทางด่วน|toll|expressway|ค่าน้ำมัน|น้ำมัน|petrol|gasoline|ปตท|บางจาก|เชลล์|shell|esso|ตั๋วเครื่อง|flight|สายการบิน|สนามบิน|เดินทาง|รถทัวร์|เรือ|boat|ferry|เช่ารถ/.test(tl)) return { catId: "travel", type: "expense" };
+  // ── ที่พัก ──
+  if (/ค่าห้อง|ค่าเช่า|เช่าห้อง|เช่าบ้าน|ที่พัก|หอพัก|คอนโด|condo|apartment|ค่าไฟ|ค่าน้ำ|ค่าส่วนกลาง|ค่าแก๊ส|โรงแรม|hotel|hostel|airbnb|mortgage|ผ่อนบ้าน/.test(tl)) return { catId: "place", type: "expense" };
+  // ── Subscription ──
+  if (/netflix|spotify|youtube.?premium|apple.?music|apple.?tv|disney|disneyplus|hbo|prime.?video|icloud|google.?one|canva|adobe|notion|chatgpt|claude|subscription|membership|joox|twitch|patreon/.test(tl)) return { catId: "sub", type: "expense" };
+  // ── เน็ต/โทรศัพท์ ──
+  if (/ค่าเน็ตบ้าน|internet|wifi|wi-fi|ไวไฟ|broadband|fiber|เน็ตบ้าน|true online|3bb/.test(tl))           return { catId: "net",   type: "expense" };
+  if (/ค่าโทร|เติมเน็ต|เติมเงิน|dtac|ais|true.?move|ทรูมูฟ|ซิม|เติมมือถือ/.test(tl))                     return { catId: "phone", type: "expense" };
+  // ── ความงาม ──
+  if (/ครีม|เครื่องสำอาง|makeup|lipstick|ลิป|บลัช|แป้ง|foundation|serum|เซรั่ม|สกินแคร์|skincare|ทำผม|ตัดผม|ย้อมผม|ทำเล็บ|nail|สปา|spa|นวด|massage|facial|wax|gym|fitness|ออกกำลัง|โยคะ|yoga|pilates/.test(tl)) return { catId: "beauty", type: "expense" };
+  // ── สุขภาพ ──
+  if (/หมอ|ยารักษา|โรงพยาบาล|โรงบาล|hospital|คลินิก|clinic|วัคซีน|vaccine|อาหารเสริม|supplement|วิตามิน|vitamin|ประกันสุขภาพ|ทำฟัน|กายภาพ|ตรวจสุขภาพ/.test(tl)) return { catId: "health", type: "expense" };
+  // ── ชอปปิ้ง ──
+  if (/ช้อป|ชอป|shopee|lazada|temu|เสื้อผ้า|กางเกง|รองเท้า|กระเป๋า|เครื่องใช้|เฟอร์นิเจอร์|ikea|central|paragon|เซ็นทรัล|มาบุญครอง|mbk|พันทิป|jib|banana|big c|lotus|tesco|makro|homepro|stationery|อุปกรณ์/.test(tl)) return { catId: "shop", type: "expense" };
+  // ── บันเทิง ──
+  if (/หนัง|cinema|major|sf|ตั๋วหนัง|movie|คอนเสิร์ต|concert|เกม|game|steam|playstation|xbox|party|ปาร์ตี้|ผับ|pub|karaoke|คาราโอเกะ/.test(tl)) return { catId: "entertain", type: "expense" };
+  // ── การศึกษา ──
+  if (/คอร์ส|course|หนังสือเรียน|ค่าเล่าเรียน|tuition|udemy|coursera|skillshare|training|seminar/.test(tl)) return { catId: "edu", type: "expense" };
+  // ── บริจาค ──
+  if (/บริจาค|donate|charity|วัด|temple|มูลนิธิ|foundation|กุศล|merit/.test(tl))                          return { catId: "charity",   type: "expense" };
+  // ── ยานพาหนะ ──
+  if (/ซ่อมรถ|ประกันรถ|ล้างรถ|ยางรถ|tyre|tire|อะไหล่รถ|มอเตอร์ไซค์|motorcycle/.test(tl))                return { catId: "vehicle",   type: "expense" };
+  // ── สัตว์เลี้ยง ──
+  if (/สัตว์เลี้ยง|แมว|หมา|dog|อาหารสัตว์|สัตวแพทย์|vet|pet/.test(tl))                                   return { catId: "pet",       type: "expense" };
+  // ── ประกัน ──
+  if (/ประกันชีวิต|ประกันภัย|life insurance|property insurance/.test(tl))                                  return { catId: "insurance", type: "expense" };
+  // ── โอนเงิน/บัตรเครดิต ──
+  if (/โอนเงิน|promptpay|พร้อมเพย์|ออมเงิน|ฝากเงิน|deposit|ถอนเงิน|withdraw|บัตรเครดิต|จ่ายค่าบัตร|creditcard/.test(tl)) return { catId: "transfer", type: "expense" };
   return { catId: "other", type: "expense" };
 }
 
