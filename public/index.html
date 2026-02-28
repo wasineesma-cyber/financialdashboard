@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="แม่ละเมียด">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#2563EB">
+<meta name="theme-color" content="#FF4785">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -18,19 +18,19 @@
 
 <style>
 :root {
-  --pink:       #2563EB;
-  --pink-light: #EFF6FF;
-  --pink-border:#93C5FD;
-  --pink-track: #BFDBFE;
-  --teal:       #059669;
-  --teal-light: #ECFDF5;
-  --teal-border:#6EE7B7;
-  --teal-track: #A7F3D0;
-  --bg:         #F1F5F9;
+  --pink:       #FF4785;
+  --pink-light: #FFF0F5;
+  --pink-border:#FFB0CC;
+  --pink-track: #FFD5E5;
+  --teal:       #6BBF2A;
+  --teal-light: #F3FBE8;
+  --teal-border:#AADE5A;
+  --teal-track: #D2F0A0;
+  --bg:         #FDF8FF;
   --white:      #FFFFFF;
-  --text:       #0F172A;
-  --sub:        #64748B;
-  --border:     #E2E8F0;
+  --text:       #1A0A0F;
+  --sub:        #7A6070;
+  --border:     #F0DCE8;
   --nav-h:      60px;
 }
 
@@ -40,12 +40,12 @@ body{padding-bottom:var(--nav-h);}
 
 /* ── HEADER ── */
 .header{
-  background:linear-gradient(135deg,#1D4ED8,var(--pink));
+  background:linear-gradient(135deg,#BADF40,var(--pink));
   padding:14px 18px;
   padding-top:calc(14px + env(safe-area-inset-top));
   display:flex;align-items:center;justify-content:center;
   position:relative;
-  box-shadow:0 2px 16px rgba(37,99,235,.25);
+  box-shadow:0 2px 16px rgba(255,71,133,.25);
 }
 .header-title{font-size:1.15rem;font-weight:900;color:#fff;letter-spacing:.04em;text-shadow:0 1px 4px rgba(0,0,0,.15);}
 .header-profile{
@@ -90,10 +90,10 @@ body{padding-bottom:var(--nav-h);}
 
 /* Balance */
 .balance-wrap{
-  background:linear-gradient(135deg,#1D4ED8,var(--pink));
+  background:linear-gradient(135deg,#BADF40,var(--pink));
   border-radius:24px;text-align:center;margin-bottom:14px;
   padding:28px 20px 22px;
-  box-shadow:0 8px 28px rgba(37,99,235,.28);
+  box-shadow:0 8px 28px rgba(255,71,133,.28);
 }
 .balance-label{font-size:.72rem;color:rgba(255,255,255,.75);font-weight:600;text-transform:uppercase;letter-spacing:.06em;}
 .balance-amount{font-size:2.6rem;font-weight:900;margin:4px 0 8px;color:#fff;}
@@ -176,7 +176,7 @@ body{padding-bottom:var(--nav-h);}
 /* Invite banner */
 .invite-banner{
   width:100%;padding:14px;margin-top:10px;
-  background:linear-gradient(135deg,var(--pink),#60A5FA);
+  background:linear-gradient(135deg,var(--pink),#D090FF);
   border:none;border-radius:14px;font-size:.88rem;font-weight:800;
   color:#fff;cursor:pointer;
   display:flex;align-items:center;justify-content:center;gap:8px;
@@ -405,7 +405,7 @@ body{padding-bottom:var(--nav-h);}
   width:64px;height:64px;border-radius:50%;
   object-fit:cover;flex-shrink:0;
   border:2px solid var(--pink-border);
-  box-shadow:0 2px 8px rgba(37,99,235,.15);
+  box-shadow:0 2px 8px rgba(255,71,133,.15);
 }
 .home-greeting-text{flex:1;}
 .home-greeting-title{font-size:1rem;font-weight:900;color:var(--text);}
@@ -472,7 +472,7 @@ body{padding-bottom:var(--nav-h);}
 /* ── SPLASH SCREEN ── */
 #splash{
   position:fixed;inset:0;z-index:9999;
-  background:linear-gradient(160deg,#1D4ED8,#2563EB 60%,#3B82F6);
+  background:linear-gradient(160deg,#BADF40,#FF85A2 60%,#D090FF);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:16px;
   transition:opacity .5s ease;
@@ -512,7 +512,7 @@ body{padding-bottom:var(--nav-h);}
 /* ── LINE LOGIN SCREEN ── */
 #lineLogin{
   position:fixed;inset:0;z-index:10000;
-  background:linear-gradient(160deg,#1D4ED8,#2563EB 60%,#3B82F6);
+  background:linear-gradient(160deg,#BADF40,#FF85A2 60%,#D090FF);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:32px;
 }
@@ -1003,7 +1003,7 @@ function updateLineProfileUI() {
 
   const hb = document.getElementById('headerProfile');
   if (hb && lineProfile.pictureUrl) {
-    hb.innerHTML = `<img src="${lineProfile.pictureUrl}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid #2563EB;">`;
+    hb.innerHTML = `<img src="${lineProfile.pictureUrl}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid #FF4785;">`;
     hasLinePic = true;
   }
   const nameEl = document.getElementById('lineNameDisplay');
@@ -1607,7 +1607,7 @@ function renderPieChart(){
     if(exp>0){
       ctx.beginPath();ctx.moveTo(cx,cy);
       ctx.arc(cx,cy,r,start,start+expAngle);
-      ctx.closePath();ctx.fillStyle='#2563EB';ctx.fill();
+      ctx.closePath();ctx.fillStyle='#FF4785';ctx.fill();
     }
     if(inc>0){
       ctx.beginPath();ctx.moveTo(cx,cy);
@@ -1622,7 +1622,7 @@ function renderPieChart(){
 
   document.getElementById('pieLegend').innerHTML=`
     <div class="pie-legend-item">
-      <div class="pie-dot" style="background:#2563EB;"></div>
+      <div class="pie-dot" style="background:#FF4785;"></div>
       <span>รายจ่าย ฿${fmt0(exp)}</span>
     </div>
     <div class="pie-legend-item">
