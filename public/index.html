@@ -888,7 +888,7 @@ function parseText(text){
   if(!amount) return null;
   var catId='food',catName='อาหาร',catIcon='🍜',type='expense';
   if(/เงินเดือน|รายรับ|ได้มา|รับเงิน|โอนเข้า/.test(text)){type='income';catId='salary';catName='รายรับ';catIcon='💼';}
-  else if(/กาแฟ|ชา|ไข่มุก|ชานม|น้ำ|coffee|matcha/.test(text)){catId='drink';catName='เครื่องดื่ม';catIcon='🧋';}
+  else if(/กาแฟ|ชา|ไข่มุก|ชานม|น้ำ|น้ำแข็ง|น้ำแข็งเปล่า|ชาชีส|coffee|matcha/.test(text)){catId='drink';catName='เครื่องดื่ม';catIcon='🧋';}
   else if(/grab|foodpanda|lineman|เดลิเวอรี/.test(text)){catId='deliver';catName='เดลิเวอรี';catIcon='🛵';}
   else if(/เดินทาง|รถ|แท็กซี่|bts|mrt|น้ำมัน/.test(text)){catId='travel';catName='เดินทาง';catIcon='🚌';}
   else if(/ช้อปปิ้ง|ซื้อของ|เสื้อ|กางเกง|รองเท้า/.test(text)){catId='shopping';catName='ช้อปปิ้ง';catIcon='🛍️';}
@@ -1233,6 +1233,7 @@ const EXP_CATS = [
   {id:'pet',       icon:'🐾', name:'สัตว์เลี้ยง'},
   {id:'insurance', icon:'🛡️', name:'ประกัน'},
   {id:'transfer',  icon:'💸', name:'โอนเงิน'},
+  {id:'creditcard',icon:'💳', name:'ค่าบัตรเครดิต'}
   {id:'other',     icon:'📦', name:'อื่นๆ'},
 ];
 const INC_CATS = [
@@ -1512,14 +1513,14 @@ function guessCategory(t){
   }
   let tl=t.toLowerCase();
   // ── รายรับ ──
-  if(/(?:^|\s)(เงินเดือน|salary|ได้เงินเดือน|payroll|เงินเดือนสิ้นเดือน)(?:$|\s)/.test(tl)) return {catId:'salary',type:'income'};
+  if(/(?:^|\s)(เงินเดือน|salary|ได้เงินเดือน|payroll|เงินเดือนสิ้นเดือน|เงินอาทิตย์|ค่าแรง|ค่าแรงรายวัน|เงินรายวัน|ได้เงิน|รับเงิน)(?:$|\s)/.test(tl)) return {catId:'salary',type:'income'};
   if(/(?:^|\s)(ฟรีแลนซ์|freelance|งานฟรี|free.?lance|งานอิสระ|gig work)(?:$|\s)/.test(tl)) return {catId:'freelance',type:'income'};
   if(/(?:^|\s)(ลงทุน|invest|ปันผล|dividend|กำไร|profit|หุ้น|stock|crypto|คริปโต|พันธบัตร|bond|กองทุน|fund|ผลตอบแทนจากการลงทุน|investment return)(?:$|\s)/.test(tl)) return {catId:'invest',type:'income'};
   if(/(?:^|\s)(ของขวัญ|ได้รับของ|gift|present|แม่ให้|พ่อให้|โอนให้|เงินจากครอบครัว|family transfer|เงินช่วยเหลือจากญาติ)(?:$|\s)/.test(tl)) return {catId:'gift',type:'income'};
   if(/(?:^|\s)(ขาย|sell|ขายของ|ขายสินค้า|ขายออนไลน์|sale of goods)(?!\s*อาหาร|กิน|ทาน)(?:$|\s)/.test(tl)) return {catId:'sell',type:'income'};
   if(/(?:^|\s)(รับเงิน|ได้เงิน|โบนัส|bonus|รายได้|งานพิเศษ|part.?time|พาร์ทไทม์|ค่าจ้าง|ค่าตอบแทน|commission|คอม|refund|คืนเงิน|lottery|ถูกหวย|รางวัล|prize|extra income|side hustle)(?:$|\s)/.test(tl)) return {catId:'special',type:'income'};
   // ── รายจ่าย ──
-  if(/(?:^|\s)(ชานม|ไข่มุก|boba|bubble.?tea|ชาไทย|ชาเย็น|ชาร้อน|ชามะนาว|ชาเขียว|มัทฉะ|matcha|โกโก้|cocoa|โอวัลติน|ช็อกโกแลต|chocolate drink)(?!\sขาย)(?:$|\s)/.test(tl)) return {catId:'drink',type:'expense'};
+  if(/(?:^|\s)(ชานม|ไข่มุก|boba|bubble.?tea|ชาไทย|ชาเย็น|ชาร้อน|ชามะนาว|ชาเขียว|มัทฉะ|matcha|โกโก้|cocoa|โอวัลติน|ช็อกโกแลต|ชาพีช|อเมริกาโน่|ลาเต้|chocolate drink)(?!\sขาย)(?:$|\s)/.test(tl)) return {catId:'drink',type:'expense'};
   if(/(?:^|\s)(กาแฟ|coffee|cafe|คาเฟ่|espresso|latte|ลาเต้|คาปูชิโน|americano|อเมริกาโน|starbucks|สตาร์บัค|amazon\scafe|อเมซอน\scafe|ดริป|drip|cold.?brew|โคลด์บรู|frappuccino)(?!\sขาย)(?:$|\s)/.test(tl)) return {catId:'drink',type:'expense'};
   if(/(?:^|\s)(น้ำ(?:ผลไม้|ปั่น|มะพร้าว|อ้อย)|smoothie|สมูทตี้|เครื่องดื่ม|น้ำอัดลม|soda|โซดา|น้ำหวาน|juice)(?!\s*ขาย)(?:$|\s)/.test(tl)) return {catId:'drink',type:'expense'};
   if(/(?:^|\s)(grabfood|grab\sfood|foodpanda|panda|lineman|line\sman|shopeefood|shopee\sfood|robinhood|เดลิเวอรี|delivery|ส่ง\sอาหาร|สั่ง\sอาหาร|สั่ง\sกิน|gojek|airasia food)(?:$|\s)/.test(tl)) return {catId:'deliver',type:'expense'};
@@ -1539,6 +1540,7 @@ function guessCategory(t){
   if(/(?:^|\s)(สัตว์เลี้ยง|pet|แมว|cat|หมา|dog|อาหารสัตว์|pet food|สัตวแพทย์|vet|ของเล่นสัตว์|pet toy)(?:$|\s)/.test(tl)) return {catId:'pet',type:'expense'};
   if(/(?:^|\s)(ประกัน(?!สุขภาพ|รถ)|life insurance|ประกันชีวิต|ประกันภัย|property insurance)(?:$|\s)/.test(tl)) return {catId:'insurance',type:'expense'};
   if(/(?:^|\s)(โอนเงิน|transfer|bank transfer|promptpay|พร้อมเพย์|ออมเงิน|savings|ฝากเงิน|deposit|ถอนเงิน|withdraw)(?:$|\s)/.test(tl)) return {catId:'transfer',type:'expense'};
+  if(/(?:^|\s)(บัตรเครดิต|จ่ายค่าบัตร|creditcard)(?:$|\s)/.test(tl)) return {catId:'transfer',type:'expense'};
   return {catId:'other',type:'expense'};
 }
 
