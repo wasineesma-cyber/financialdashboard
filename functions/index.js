@@ -140,7 +140,7 @@ exports.lineWebhook = onRequest(async (req, res) => {
   await docRef.set({ entries, updatedAt: new Date().toISOString() }, { merge: true });
 
   // --- reply flex card ---
-  const LIFF_ID = process.env.LIFF_ID || '2009230946-hp9vcPh3';
+  const LIFF_ID = process.env.LIFF_ID || '2009265283-X2umhDv5';
   const liffUrl = `https://liff.line.me/${LIFF_ID}?page=history&entryId=${encodeURIComponent(String(entry.id))}`;
   const cleanLiff = `https://liff.line.me/${LIFF_ID}`;
 
