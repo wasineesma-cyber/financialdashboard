@@ -926,7 +926,11 @@ function ok(){return ContentService.createTextOutput(JSON.stringify({status:'ok'
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title" id="sheetTitle">ตั้งงบหมวด</div>
-    <div style="font-size:.78rem;color:var(--sub);margin-bottom:10px;">ใส่ 0 หรือเว้นว่างเพื่อไม่ตั้งงบ</div>
+    <div style="font-size:.78rem;color:var(--sub);margin-bottom:6px;">ชื่อหมวด (แก้ได้)</div>
+    <input class="sheet-input" type="text" id="sheetCatName" placeholder="ชื่อที่อยากแสดง" style="margin-bottom:10px;">
+    <div style="font-size:.78rem;color:var(--sub);margin-bottom:6px;">คำจำแนกอัตโนมัติ (คั่นด้วยจุลภาค)</div>
+    <input class="sheet-input" type="text" id="sheetKeywords" placeholder="เช่น บัตรเครดิต, ktc, กดเงิน" style="margin-bottom:10px;">
+    <div style="font-size:.78rem;color:var(--sub);margin-bottom:6px;">ตั้งงบรายเดือน (ใส่ 0 = ไม่ตั้งงบ)</div>
     <input class="sheet-input" type="number" id="sheetInput" placeholder="0" inputmode="decimal">
     <div class="sheet-btns">
       <button class="btn-sheet-cancel" onclick="closeSheet()">ยกเลิก</button>
@@ -1242,6 +1246,9 @@ const TH_MS = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','ม
 // ══════ STATE ══════
 let entries  = JSON.parse(localStorage.getItem('dong_entries') || '[]');
 let budgets  = JSON.parse(localStorage.getItem('dong_budgets') || '{}');
+let catNames = JSON.parse(localStorage.getItem('dong_cat_names') || '{}');
+let catKeywords = JSON.parse(localStorage.getItem('dong_cat_keywords') || '{}');
+function catDispName(c){ return catNames[c.id] || c.name; }
 let isPremium = false;
 let premiumPlan = null;
 let premiumUntil = null;
@@ -1423,7 +1430,7 @@ function renderCatRows(){
     const fillStyle=isExp?'background:var(--pink);':'background:'+(INC_COLORS[c.id]||'var(--teal)')+';';
     return `<div class="cat-row">
       <div class="cat-row-top">
-        <span class="cat-row-name">${c.name}</span>
+        <span class="cat-row-name">${catDispName(c)}</span>
         <span class="cat-row-amt">${amtStr} / ${bgtStr}</span>
       </div>
       <div class="bar-track ${trackCls}">
@@ -1459,7 +1466,7 @@ function renderCatGrid2(){
   document.getElementById('catGrid2').innerHTML=cats.map(c=>`
     <div class="cat-chip2 ${selCatId===c.id?'sel '+selCls:''}" onclick="selCat2('${c.id}')">
       <div class="cc2-icon">${c.icon}</div>
-      <div class="cc2-name">${c.name}</div>
+      <div class="cc2-name">${catDispName(c)}</div>
     </div>`).join('');
 }
 function selCat2(id){ selCatId=id; renderCatGrid2(); }
@@ -1487,6 +1494,15 @@ function addEntry(){
 
 // ══════ PARSE CHAT ══════
 function guessCategory(t){
+  // ตรวจ custom keywords ก่อน
+  const _allCats=[...EXP_CATS,...INC_CATS];
+  const _incIds=new Set(INC_CATS.map(c=>c.id));
+  for(const c of _allCats){
+    const kws=catKeywords[c.id];
+    if(kws&&kws.length&&kws.some(kw=>t.includes(kw))){
+      return {catId:c.id, type:_incIds.has(c.id)?'income':'expense'};
+    }
+  }
   if(/เงินเดือน|salary|ได้เงินเดือน/.test(t)) return {catId:'salary', type:'income'};
   if(/ฟรีแลนซ์|freelance|งานฟรี|free.?lance/.test(t)) return {catId:'freelance', type:'income'};
   if(/ลงทุน|invest|ปันผล|dividend|กำไร|profit|หุ้น|stock|crypto|คริปโต/.test(t)) return {catId:'invest', type:'income'};
@@ -1566,8 +1582,8 @@ function renderBudgetList(){
   document.getElementById('budgetList').innerHTML=cats.map(c=>{
     const b=budgets[c.id];
     const bStr=b>0?'฿'+fmt0(b):'ไม่มีตั้งงบ';
-    return `<div class="budget-item" onclick="openSheet('${c.id}','${c.name}')">
-      <span class="bi-name">${c.name}</span>
+    return `<div class="budget-item" onclick="openSheet('${c.id}')">
+      <span class="bi-name">${catDispName(c)}</span>
       <div class="bi-right">
         <span class="bi-budget">งบ ${bStr}</span>
         <span class="bi-arrow">›</span>
@@ -1575,9 +1591,13 @@ function renderBudgetList(){
     </div>`;
   }).join('');
 }
-function openSheet(catId,catName){
+function openSheet(catId){
   editCatId=catId;
-  document.getElementById('sheetTitle').textContent='ตั้งงบ "'+catName+'"';
+  const allCats=[...EXP_CATS,...INC_CATS];
+  const cat=allCats.find(c=>c.id===catId);
+  document.getElementById('sheetTitle').textContent='แก้ไขหมวด "'+(cat?catDispName(cat):catId)+'"';
+  document.getElementById('sheetCatName').value=catNames[catId]||'';
+  document.getElementById('sheetKeywords').value=(catKeywords[catId]||[]).join(', ');
   document.getElementById('sheetInput').value=budgets[catId]>0?budgets[catId]:'';
   document.getElementById('btnSheetSave').className='btn-sheet-save '+(budgetTab==='income'?'inc-save':'');
   document.getElementById('budgetSheet').classList.remove('hidden');
@@ -1587,10 +1607,18 @@ function saveBudget(){
   const v=parseFloat(document.getElementById('sheetInput').value)||0;
   if(v>0) budgets[editCatId]=v;
   else delete budgets[editCatId];
+  const name=document.getElementById('sheetCatName').value.trim();
+  if(name) catNames[editCatId]=name;
+  else delete catNames[editCatId];
+  const kw=document.getElementById('sheetKeywords').value.split(',').map(s=>s.trim()).filter(Boolean);
+  if(kw.length) catKeywords[editCatId]=kw;
+  else delete catKeywords[editCatId];
   localStorage.setItem('dong_budgets',JSON.stringify(budgets));
+  localStorage.setItem('dong_cat_names',JSON.stringify(catNames));
+  localStorage.setItem('dong_cat_keywords',JSON.stringify(catKeywords));
   saveToCloud();
-  closeSheet(); renderBudgetList(); renderCatRows();
-  showToast('✅ บันทึกงบแล้ว');
+  closeSheet(); renderBudgetList(); renderCatRows(); renderCatGrid2();
+  showToast('✅ บันทึกแล้ว');
 }
 
 // ══════ HISTORY ══════
