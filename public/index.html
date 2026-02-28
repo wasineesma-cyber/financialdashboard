@@ -401,11 +401,16 @@ body{padding-bottom:var(--nav-h);}
   background:var(--white);border-radius:20px;
   box-shadow:0 1px 6px rgba(0,0,0,.07);
 }
+.home-banner{
+  width:100%;border-radius:20px;margin-bottom:14px;
+  box-shadow:0 4px 16px rgba(255,71,133,.2);
+  object-fit:cover;display:block;
+}
 .home-mascot{
-  width:64px;height:64px;border-radius:50%;
+  width:80px;height:80px;border-radius:50%;
   object-fit:cover;flex-shrink:0;
-  border:2px solid var(--pink-border);
-  box-shadow:0 2px 8px rgba(255,71,133,.15);
+  border:3px solid var(--pink-border);
+  box-shadow:0 2px 12px rgba(255,71,133,.22);
 }
 .home-greeting-text{flex:1;}
 .home-greeting-title{font-size:1rem;font-weight:900;color:var(--text);}
@@ -518,9 +523,10 @@ body{padding-bottom:var(--nav-h);}
 }
 #lineLogin.hidden{display:none;}
 .ll-mascot{
-  width:180px;margin-bottom:12px;
-  filter:drop-shadow(0 8px 24px rgba(0,0,0,.25));
-  animation:splashBounce .9s ease infinite alternate;
+  width:100%;max-width:320px;
+  border-radius:24px;margin-bottom:24px;
+  box-shadow:0 8px 32px rgba(0,0,0,.22);
+  object-fit:cover;
 }
 .ll-title{font-size:1.6rem;font-weight:900;color:#fff;margin-bottom:6px;letter-spacing:.04em;text-shadow:0 2px 8px rgba(0,0,0,.2);}
 .ll-sub{font-size:.85rem;color:rgba(255,255,255,.78);margin-bottom:32px;line-height:1.6;}
@@ -539,9 +545,7 @@ body{padding-bottom:var(--nav-h);}
 
 <!-- LINE LOGIN SCREEN -->
 <div id="lineLogin" class="hidden">
-  <img src="mascot.PNG" alt="แม่ละเมียด" class="ll-mascot">
-  <div class="ll-title">แม่ละเมียด</div>
-  <div style="font-size:.95rem;font-weight:600;color:rgba(255,255,255,.6);margin-bottom:4px;letter-spacing:.08em;">MAE LAMIET</div>
+  <img src="banner.PNG" alt="แม่ละเมียด" class="ll-mascot">
   <div class="ll-sub">เข้าสู่ระบบด้วย LINE<br>ข้อมูลปลอดภัยผูกกับบัญชี LINE ของคุณ</div>
   <button class="btn-line-login" onclick="liff.login()">
     <img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/LINE_New_App_Icon_%282020-12%29.png" alt="LINE">
@@ -583,6 +587,8 @@ body{padding-bottom:var(--nav-h);}
 
 <!-- ════════ PANEL: สรุป ════════ -->
 <div class="panel active" id="panel-home">
+
+  <img src="banner.PNG" alt="แม่ละเมียด" class="home-banner">
 
   <div class="home-greeting">
     <img src="mascot.PNG" alt="แม่ละเมียด" class="home-mascot">
