@@ -543,7 +543,15 @@ body{padding-bottom:var(--nav-h);}
 <!-- LINE LOGIN SCREEN -->
 <div id="lineLogin" class="hidden">
   <img src="icon-512.png" alt="แม่ละเมียด" class="ll-mascot">
-  <div class="ll-sub">กรุณาเปิดแอพผ่าน LINE<br>เพื่อเข้าใช้งานแม่ละเมียด</div>
+  <div class="ll-sub">เข้าสู่ระบบด้วย LINE<br>ข้อมูลปลอดภัยผูกกับบัญชี LINE ของคุณ</div>
+  <button class="btn-line-login" onclick="doLineLogin()">
+    <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <rect width="24" height="24" rx="6" fill="white" opacity="0.25"/>
+      <path d="M12 3.5C7.31 3.5 3.5 6.8 3.5 10.87c0 2.61 1.56 4.91 3.95 6.3l-.72 2.66a.4.4 0 0 0 .57.47l3.2-1.71c.5.08 1.01.12 1.5.12 4.69 0 8.5-3.3 8.5-7.37S16.69 3.5 12 3.5z" fill="white"/>
+    </svg>
+    เข้าสู่ระบบด้วย LINE
+  </button>
+  <button onclick="useFallbackUserId()" style="background:none;border:none;color:rgba(255,255,255,0.6);font-size:.8rem;margin-top:16px;cursor:pointer;text-decoration:underline;">ใช้แบบไม่ login (ข้อมูลไม่ซิงค์กับ LINE)</button>
 </div>
 
 <!-- SPLASH SCREEN -->
