@@ -997,7 +997,6 @@ function useFallbackUserId() {
   updateLineProfileUI();
   init();
 }
-
 function updateLineProfileUI() {
   hasLinePic = false;
   if (!lineProfile) return;
@@ -1028,6 +1027,7 @@ function updateLineProfileUI() {
     homeWrap.style.display = 'flex';
   }
 }
+
 
 // กดออกจากระบบ (ถ้าเป็น LINE จะ logout, ถ้าเป็น local จะล้าง local uid)
 function lineLogout(){
