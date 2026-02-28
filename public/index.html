@@ -1215,18 +1215,25 @@ function updateCloudStatus(msg) {
 
 // ══════ CONSTANTS ══════
 const EXP_CATS = [
-  {id:'food',    icon:'🍜', name:'อาหาร'},
-  {id:'drink',   icon:'🧋', name:'กาแฟ'},
-  {id:'deliver', icon:'🛵', name:'เดลิเวอรี'},
-  {id:'travel',  icon:'🚌', name:'เดินทาง'},
-  {id:'place',   icon:'🏠', name:'ที่พัก'},
-  {id:'shop',    icon:'🛍️', name:'ชอปปิ้ง'},
-  {id:'beauty',  icon:'💄', name:'ความงาม'},
-  {id:'health',  icon:'💊', name:'สุขภาพ'},
-  {id:'phone',   icon:'📱', name:'ค่าโทรศัพท์'},
-  {id:'net',     icon:'📶', name:'ค่าเน็ต'},
-  {id:'sub',     icon:'🎬', name:'Subscription'},
-  {id:'other',   icon:'📦', name:'อื่นๆ'},
+  {id:'food',      icon:'🍜', name:'อาหาร'},
+  {id:'drink',     icon:'🧋', name:'กาแฟ'},
+  {id:'deliver',   icon:'🛵', name:'เดลิเวอรี'},
+  {id:'travel',    icon:'🚌', name:'เดินทาง'},
+  {id:'place',     icon:'🏠', name:'ที่พัก'},
+  {id:'shop',      icon:'🛍️', name:'ชอปปิ้ง'},
+  {id:'beauty',    icon:'💄', name:'ความงาม'},
+  {id:'health',    icon:'💊', name:'สุขภาพ'},
+  {id:'phone',     icon:'📱', name:'ค่าโทรศัพท์'},
+  {id:'net',       icon:'📶', name:'ค่าเน็ต'},
+  {id:'sub',       icon:'🎬', name:'Subscription'},
+  {id:'entertain', icon:'🎡', name:'บันเทิง'},
+  {id:'edu',       icon:'📚', name:'การศึกษา'},
+  {id:'charity',   icon:'💝', name:'บริจาค'},
+  {id:'vehicle',   icon:'🚗', name:'ยานพาหนะ'},
+  {id:'pet',       icon:'🐾', name:'สัตว์เลี้ยง'},
+  {id:'insurance', icon:'🛡️', name:'ประกัน'},
+  {id:'transfer',  icon:'💸', name:'โอนเงิน'},
+  {id:'other',     icon:'📦', name:'อื่นๆ'},
 ];
 const INC_CATS = [
   {id:'salary',   icon:'💼', name:'เงินเดือน'},
@@ -1503,36 +1510,36 @@ function guessCategory(t){
       return {catId:c.id, type:_incIds.has(c.id)?'income':'expense'};
     }
   }
-  if(/เงินเดือน|salary|ได้เงินเดือน/.test(t)) return {catId:'salary', type:'income'};
-  if(/ฟรีแลนซ์|freelance|งานฟรี|free.?lance/.test(t)) return {catId:'freelance', type:'income'};
-  if(/ลงทุน|invest|ปันผล|dividend|กำไร|profit|หุ้น|stock|crypto|คริปโต/.test(t)) return {catId:'invest', type:'income'};
-  if(/ของขวัญ|ได้รับของ|gift|present|แม่ให้|พ่อให้|โอนให้/.test(t)) return {catId:'gift', type:'income'};
-  if(/ขาย/.test(t)) return {catId:'sell', type:'income'};
-  if(/รับเงิน|ได้เงิน|โบนัส|bonus|รายได้|งานพิเศษ|part.?time|พาร์ทไทม์|ค่าจ้าง|ค่าตอบแทน|commission|คอม/.test(t)) return {catId:'special', type:'income'};
-
-  if(/ชานม|ไข่มุก|boba|bubble.?tea|ชาไทย|ชาเย็น|ชาร้อน|ชามะนาว|ชาเขียว|มัทฉะ|matcha|โกโก้|cocoa|โอวัลติน/.test(t)) return {catId:'drink', type:'expense'};
-  if(/กาแฟ|coffee|cafe|คาเฟ่|espresso|latte|ลาเต้|คาปูชิโน|americano|อเมริกาโน|starbucks|สตาร์บัค|amazon\s*cafe|อเมซอน\s*cafe|ดริป|drip|cold.?brew|โคลด์บรู/.test(t)) return {catId:'drink', type:'expense'};
-  if(/น้ำ(?:ผลไม้|ปั่น|มะพร้าว|อ้อย)|smoothie|สมูทตี้|เครื่องดื่ม|ชา(?!เย็น|ร้อน)/.test(t)) return {catId:'drink', type:'expense'};
-
-  if(/grabfood|grab\s*food|foodpanda|panda|lineman|line\s*man|shopeefood|shopee\s*food|robinhood|เดลิเวอรี|delivery|ส่ง\s*อาหาร|สั่ง\s*อาหาร|สั่ง\s*กิน/.test(t)) return {catId:'deliver', type:'expense'};
-
-  if(/ข้าว|อาหาร|กิน|ทาน|มื้อ(?:เช้า|กลาง|เย็น)|เช้า|กลางวัน|เย็น|ก๋วยเตี๋ยว|ผัด|ต้ม|แกง|ยำ|ส้มตำ|ลาบ|หมู|ไก่|ปลา|กุ้ง|หอย|เนื้อ|pizza|พิซซ่า|sushi|ซูชิ|ราเม็ง|ramen|สเต็ก|steak|burger|เบอร์เกอร์|kfc|mcdonald|ชาบู|หมาล่า|hotpot|shabu|บุฟเฟ่|buffet|ข้าวมัน|ข้าวต้ม|โจ๊ก|ก๋วยจั๊บ|ขนม|เบเกอรี่|bakery|เค้ก|cake|cookie|คุกกี้|ไอศครีม|ไอติม|ice.?cream|dessert|ของหวาน|บะหมี่|ไก่ทอด|ซีฟู้ด|ปิ้งย่าง/.test(t)) return {catId:'food', type:'expense'};
-
-  if(/bts|mrt|รถไฟ|รถเมล์|รถตู้|สองแถว|แท็กซี่|taxi|grab\s*car|grabcar|bolt|uber|วินมอ|มอไซค์รับจ้าง|ทางด่วน|toll|expressway|ค่าน้ำมัน|น้ำมัน|petrol|gasoline|ปตท|บางจาก|เชลล์|shell|esso|ตั๋ว|flight|บิน|air(?:port|asia|line)|สายการบิน|สนามบิน|เดินทาง|รถทัวร์|van/.test(t)) return {catId:'travel', type:'expense'};
-
-  if(/ค่าห้อง|ค่าเช่า|เช่าห้อง|เช่าบ้าน|ที่พัก|หอพัก|คอนโด|condo|apartment|ค่าไฟ|ค่าน้ำ|ค่าส่วนกลาง|ค่าแก๊ส|โรงแรม|hotel|hostel/.test(t)) return {catId:'place', type:'expense'};
-
-  if(/netflix|nflx|spotify|youtube.?premium|apple.?music|apple.?tv|disney.?\+|disneyplus|hbo|prime.?video|amazon.?prime|icloud|google.?one|canva|adobe|notion|chatgpt|claude|subscription|membership/.test(t)) return {catId:'sub', type:'expense'};
-
-  if(/ค่าเน็ต(?!มือถือ)|internet|wifi|wi-fi|ไวไฟ|broadband|fiber|เน็ตบ้าน/.test(t)) return {catId:'net', type:'expense'};
-  if(/ค่าโทร|เติมเน็ต|เติมเงิน|dtac|ais|true.?move|ทรูมูฟ|ซิม/.test(t)) return {catId:'phone', type:'expense'};
-
-  if(/ครีม|เครื่องสำอาง|makeup|lipstick|ลิป|บลัช|แป้ง|foundation|serum|เซรั่ม|สกินแคร์|skincare|ทำผม|ตัดผม|ย้อมผม|ทำเล็บ|เล็บ|nail|สปา|spa|นวด|massage|facial|wax|แว็กซ์|gym|fitness|ออกกำลัง/.test(t)) return {catId:'beauty', type:'expense'};
-  if(/หมอ|ยา|โรงพยาบาล|โรงบาล|hospital|คลินิก|clinic|ฉีดวัคซีน|วัคซีน|vaccine|อาหารเสริม|supplement|วิตามิน|vitamin|ประกันสุขภาพ|ทำฟัน|จักษุ|กายภาพ/.test(t)) return {catId:'health', type:'expense'};
-
-  if(/ซื้อ|ช้อป|ชอป|shopee|lazada|temu|เสื้อผ้า|กางเกง|เสื้อ|รองเท้า|กระเป๋า|ของใช้|เครื่องใช้|เฟอร์นิเจอร์|ikea|central|paragon|terminal|the.?mall|เซ็นทรัล|มาบุญครอง|mbk|พันทิป|jib|banana|it/.test(t)) return {catId:'shop', type:'expense'};
-
-  return {catId:'other', type:'expense'};
+  let tl=t.toLowerCase();
+  // ── รายรับ ──
+  if(/(?:^|\s)(เงินเดือน|salary|ได้เงินเดือน|payroll|เงินเดือนสิ้นเดือน)(?:$|\s)/.test(tl)) return {catId:'salary',type:'income'};
+  if(/(?:^|\s)(ฟรีแลนซ์|freelance|งานฟรี|free.?lance|งานอิสระ|gig work)(?:$|\s)/.test(tl)) return {catId:'freelance',type:'income'};
+  if(/(?:^|\s)(ลงทุน|invest|ปันผล|dividend|กำไร|profit|หุ้น|stock|crypto|คริปโต|พันธบัตร|bond|กองทุน|fund|ผลตอบแทนจากการลงทุน|investment return)(?:$|\s)/.test(tl)) return {catId:'invest',type:'income'};
+  if(/(?:^|\s)(ของขวัญ|ได้รับของ|gift|present|แม่ให้|พ่อให้|โอนให้|เงินจากครอบครัว|family transfer|เงินช่วยเหลือจากญาติ)(?:$|\s)/.test(tl)) return {catId:'gift',type:'income'};
+  if(/(?:^|\s)(ขาย|sell|ขายของ|ขายสินค้า|ขายออนไลน์|sale of goods)(?!\s*อาหาร|กิน|ทาน)(?:$|\s)/.test(tl)) return {catId:'sell',type:'income'};
+  if(/(?:^|\s)(รับเงิน|ได้เงิน|โบนัส|bonus|รายได้|งานพิเศษ|part.?time|พาร์ทไทม์|ค่าจ้าง|ค่าตอบแทน|commission|คอม|refund|คืนเงิน|lottery|ถูกหวย|รางวัล|prize|extra income|side hustle)(?:$|\s)/.test(tl)) return {catId:'special',type:'income'};
+  // ── รายจ่าย ──
+  if(/(?:^|\s)(ชานม|ไข่มุก|boba|bubble.?tea|ชาไทย|ชาเย็น|ชาร้อน|ชามะนาว|ชาเขียว|มัทฉะ|matcha|โกโก้|cocoa|โอวัลติน|ช็อกโกแลต|chocolate drink)(?!\sขาย)(?:$|\s)/.test(tl)) return {catId:'drink',type:'expense'};
+  if(/(?:^|\s)(กาแฟ|coffee|cafe|คาเฟ่|espresso|latte|ลาเต้|คาปูชิโน|americano|อเมริกาโน|starbucks|สตาร์บัค|amazon\scafe|อเมซอน\scafe|ดริป|drip|cold.?brew|โคลด์บรู|frappuccino)(?!\sขาย)(?:$|\s)/.test(tl)) return {catId:'drink',type:'expense'};
+  if(/(?:^|\s)(น้ำ(?:ผลไม้|ปั่น|มะพร้าว|อ้อย)|smoothie|สมูทตี้|เครื่องดื่ม|น้ำอัดลม|soda|โซดา|น้ำหวาน|juice)(?!\s*ขาย)(?:$|\s)/.test(tl)) return {catId:'drink',type:'expense'};
+  if(/(?:^|\s)(grabfood|grab\sfood|foodpanda|panda|lineman|line\sman|shopeefood|shopee\sfood|robinhood|เดลิเวอรี|delivery|ส่ง\sอาหาร|สั่ง\sอาหาร|สั่ง\sกิน|gojek|airasia food)(?:$|\s)/.test(tl)) return {catId:'deliver',type:'expense'};
+  if(/(?:^|\s)(ข้าว|อาหาร|กิน|ทาน|มื้อ(?:เช้า|กลาง|เย็น)|เช้า|กลางวัน|เย็น|ก๋วยเตี๋ยว|ผัด|ต้ม|แกง|ยำ|ส้มตำ|ลาบ|หมู|ไก่|ปลา|กุ้ง|หอย|เนื้อ|pizza|พิซซ่า|sushi|ซูชิ|ราเม็ง|ramen|สเต็ก|steak|burger|เบอร์เกอร์|kfc|mcdonald|ชาบู|หมาล่า|hotpot|shabu|บุฟเฟ่|buffet|ข้าวมัน|ข้าวต้ม|โจ๊ก|ก๋วยจั๊บ|ขนม|เบเกอรี่|bakery|เค้ก|cake|cookie|คุกกี้|ไอศครีม|ไอติม|ice.?cream|dessert|ของหวาน|บะหมี่|ไก่ทอด|ซีฟู้ด|ปิ้งย่าง|สลัด|salad|แซนด์วิช|sandwich|โดนัท|donut)(?!\s*ขาย)(?:$|\s)/.test(tl)) return {catId:'food',type:'expense'};
+  if(/(?:^|\s)(bts|mrt|รถไฟ|รถเมล์|รถตู้|สองแถว|แท็กซี่|taxi|grab\s*car|grabcar|bolt|uber|วินมอ|มอไซค์รับจ้าง|ทางด่วน|toll|expressway|ค่าน้ำมัน|น้ำมัน|petrol|gasoline|ปตท|บางจาก|เชลล์|shell|esso|ตั๋ว|flight|บิน|air(?:port|asia|line)|สายการบิน|สนามบิน|เดินทาง|รถทัวร์|van|เรือ|boat|ferry|จักรยาน|bike|เช่ารถ|rent car)(?:$|\s)/.test(tl)) return {catId:'travel',type:'expense'};
+  if(/(?:^|\s)(ค่าห้อง|ค่าเช่า|เช่าห้อง|เช่าบ้าน|ที่พัก|หอพัก|คอนโด|condo|apartment|ค่าไฟ|ค่าน้ำ|ค่าส่วนกลาง|ค่าแก๊ส|โรงแรม|hotel|hostel|airbnb|ที่อยู่อาศัย|mortgage|ผ่อนบ้าน)(?:$|\s)/.test(tl)) return {catId:'place',type:'expense'};
+  if(/(?:^|\s)(netflix|nflx|spotify|youtube.?premium|apple.?music|apple.?tv|disney.?\+|disneyplus|hbo|prime.?video|amazon.?prime|icloud|google.?one|canva|adobe|notion|chatgpt|claude|subscription|membership|line music|joox|twitch|patreon)(?:$|\s)/.test(tl)) return {catId:'sub',type:'expense'};
+  if(/(?:^|\s)(ค่าเน็ต(?!มือถือ)|internet|wifi|wi-fi|ไวไฟ|broadband|fiber|เน็ตบ้าน|true online|ais fibre|3bb)(?:$|\s)/.test(tl)) return {catId:'net',type:'expense'};
+  if(/(?:^|\s)(ค่าโทร|เติมเน็ต|เติมเงิน|dtac|ais|true.?move|ทรูมูฟ|ซิม|top up|เติมมือถือ|ค่าแพ็กเกจ|package)(?:$|\s)/.test(tl)) return {catId:'phone',type:'expense'};
+  if(/(?:^|\s)(ครีม|เครื่องสำอาง|makeup|lipstick|ลิป|บลัช|แป้ง|foundation|serum|เซรั่ม|สกินแคร์|skincare|ทำผม|ตัดผม|ย้อมผม|ทำเล็บ|เล็บ|nail|สปา|spa|นวด|massage|facial|wax|แว็กซ์|gym|fitness|ออกกำลัง|โยคะ|yoga|pilates|personal trainer)(?:$|\s)/.test(tl)) return {catId:'beauty',type:'expense'};
+  if(/(?:^|\s)(หมอ|ยา|โรงพยาบาล|โรงบาล|hospital|คลินิก|clinic|ฉีดวัคซีน|วัคซีน|vaccine|อาหารเสริม|supplement|วิตามิน|vitamin|ประกันสุขภาพ|ทำฟัน|จักษุ|กายภาพ|ตรวจสุขภาพ|health check|ยารักษา|medicine)(?:$|\s)/.test(tl)) return {catId:'health',type:'expense'};
+  if(/(?:^|\s)(ซื้อ|ช้อป|ชอป|shopee|lazada|temu|เสื้อผ้า|กางเกง|เสื้อ|รองเท้า|กระเป๋า|ของใช้|เครื่องใช้|เฟอร์นิเจอร์|ikea|central|paragon|terminal|the.?mall|เซ็นทรัล|มาบุญครอง|mbk|พันทิป|jib|banana|it|big c|lotus|tesco|makro|homepro|เครื่องเขียน|stationery|อุปกรณ์|equipment)(?!\s*ขาย)(?:$|\s)/.test(tl)) return {catId:'shop',type:'expense'};
+  if(/(?:^|\s)(หนัง|cinema|major|sf|ตั๋วหนัง|movie|คอนเสิร์ต|concert|ticket|เกม|game|steam|playstation|xbox|entertainment|party|ปาร์ตี้|bar|ผับ|pub|karaoke|คาราโอเกะ)(?:$|\s)/.test(tl)) return {catId:'entertain',type:'expense'};
+  if(/(?:^|\s)(เรียน|course|คอร์ส|หนังสือ|book|education|training|seminar|workshop|udemy|coursera|skillshare|ค่าเล่าเรียน|tuition)(?:$|\s)/.test(tl)) return {catId:'edu',type:'expense'};
+  if(/(?:^|\s)(บริจาค|donate|charity|วัด|temple|มูลนิธิ|foundation|ช่วยเหลือ|aid|กุศล|merit)(?:$|\s)/.test(tl)) return {catId:'charity',type:'expense'};
+  if(/(?:^|\s)(ซ่อมรถ|repair|ประกันรถ|car insurance|ล้างรถ|wash|ยาง|tyre|tire|อะไหล่|parts|vehicle|มอเตอร์ไซค์|motorcycle)(?:$|\s)/.test(tl)) return {catId:'vehicle',type:'expense'};
+  if(/(?:^|\s)(สัตว์เลี้ยง|pet|แมว|cat|หมา|dog|อาหารสัตว์|pet food|สัตวแพทย์|vet|ของเล่นสัตว์|pet toy)(?:$|\s)/.test(tl)) return {catId:'pet',type:'expense'};
+  if(/(?:^|\s)(ประกัน(?!สุขภาพ|รถ)|life insurance|ประกันชีวิต|ประกันภัย|property insurance)(?:$|\s)/.test(tl)) return {catId:'insurance',type:'expense'};
+  if(/(?:^|\s)(โอนเงิน|transfer|bank transfer|promptpay|พร้อมเพย์|ออมเงิน|savings|ฝากเงิน|deposit|ถอนเงิน|withdraw)(?:$|\s)/.test(tl)) return {catId:'transfer',type:'expense'};
+  return {catId:'other',type:'expense'};
 }
 
 function parseChat(){
