@@ -1518,9 +1518,9 @@ function guessCategory(t){
   if(/(?:^|\s)(ลงทุน|invest|ปันผล|dividend|กำไร|profit|หุ้น|stock|crypto|คริปโต|พันธบัตร|bond|กองทุน|fund|ผลตอบแทนจากการลงทุน|investment return)(?:$|\s)/.test(tl)) return {catId:'invest',type:'income'};
   if(/(?:^|\s)(ของขวัญ|ได้รับของ|gift|present|แม่ให้|พ่อให้|โอนให้|เงินจากครอบครัว|family transfer|เงินช่วยเหลือจากญาติ)(?:$|\s)/.test(tl)) return {catId:'gift',type:'income'};
   if(/(?:^|\s)(ขาย|sell|ขายของ|ขายสินค้า|ขายออนไลน์|sale of goods)(?!\s*อาหาร|กิน|ทาน)(?:$|\s)/.test(tl)) return {catId:'sell',type:'income'};
-  if(/(?:^|\s)(รับเงิน|ได้เงิน|โบนัส|bonus|รายได้|งานพิเศษ|part.?time|พาร์ทไทม์|ค่าจ้าง|ค่าตอบแทน|commission|คอม|refund|คืนเงิน|lottery|ถูกหวย|รางวัล|prize|extra income|side hustle)(?:$|\s)/.test(tl)) return {catId:'special',type:'income'};
+  if(/(?:^|\s)(รับเงิน|ได้เงิน|โบนัส|bonus|รายได้|งานพิเศษ|part.?time|พาร์ทไทม์|ค่าจ้าง|ค่าตอบแทน|commission|คอม|refund|คืนเงิน|lottery|ถูกล็อตเตอรี่|ถูกหวย|รางวัล|prize|extra income|side hustle)(?:$|\s)/.test(tl)) return {catId:'special',type:'income'};
   // ── รายจ่าย ──
-  if(/(?:^|\s)(ชานม|ไข่มุก|boba|bubble.?tea|ชาไทย|ชาเย็น|ชาร้อน|ชามะนาว|ชาเขียว|มัทฉะ|matcha|โกโก้|cocoa|โอวัลติน|ช็อกโกแลต|ชาพีช|อเมริกาโน่|ลาเต้|chocolate drink)(?!\sขาย)(?:$|\s)/.test(tl)) return {catId:'drink',type:'expense'};
+  if(/(?:^|\s)(ชานม|ไข่มุก|boba|bubble.?tea|ชาไทย|ชาเย็น|ชาร้อน|ชามะนาว|ชาเขียว|มัทฉะ|matcha|โกโก้|cocoa|โอวัลติน|ช็อกโกแลต|ชาพีช|ชา|ชาเลมอน|โอวันติน|โอเลี้ยง|ชาชีส|chocolate drink)(?!\sขาย)(?:$|\s)/.test(tl)) return {catId:'drink',type:'expense'};
   if(/(?:^|\s)(กาแฟ|coffee|cafe|คาเฟ่|espresso|latte|ลาเต้|คาปูชิโน|americano|อเมริกาโน|starbucks|สตาร์บัค|amazon\scafe|อเมซอน\scafe|ดริป|drip|cold.?brew|โคลด์บรู|frappuccino)(?!\sขาย)(?:$|\s)/.test(tl)) return {catId:'drink',type:'expense'};
   if(/(?:^|\s)(น้ำ(?:ผลไม้|ปั่น|มะพร้าว|อ้อย)|smoothie|สมูทตี้|เครื่องดื่ม|น้ำอัดลม|soda|โซดา|น้ำหวาน|juice)(?!\s*ขาย)(?:$|\s)/.test(tl)) return {catId:'drink',type:'expense'};
   if(/(?:^|\s)(grabfood|grab\sfood|foodpanda|panda|lineman|line\sman|shopeefood|shopee\sfood|robinhood|เดลิเวอรี|delivery|ส่ง\sอาหาร|สั่ง\sอาหาร|สั่ง\sกิน|gojek|airasia food)(?:$|\s)/.test(tl)) return {catId:'deliver',type:'expense'};
