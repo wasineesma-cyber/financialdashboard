@@ -140,6 +140,9 @@ exports.lineWebhook = onRequest(async (req, res) => {
   await docRef.set({ entries, updatedAt: new Date().toISOString() }, { merge: true });
 
   // --- reply flex card ---
+  const LIFF_ID = '2009265283-X2umhDv5';
+  const liffUrl = `https://liff.line.me/${LIFF_ID}?page=history&entryId=${encodeURIComponent(String(entry.id))}`;
+
   await lineReply(replyToken, [{
     type: "flex",
     altText: `บันทึกแล้ว: ${entry.catName} ฿${entry.amount}`,
@@ -158,6 +161,12 @@ exports.lineWebhook = onRequest(async (req, res) => {
               { type: "text", text: `฿${entry.amount}`, size: "md", weight: "bold", align: "end", flex: 2 },
             ],
           },
+        ],
+      },
+      footer: {
+        type: "box", layout: "vertical", spacing: "sm",
+        contents: [
+          { type: "button", style: "primary", color: "#FF4785", action: { type: "uri", label: "ดูรายการนี้", uri: liffUrl } },
         ],
       },
     },
