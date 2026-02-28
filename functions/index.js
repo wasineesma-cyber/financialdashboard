@@ -130,50 +130,90 @@ exports.lineWebhook = onRequest(async (req, res) => {
   const data = snap.exists ? snap.data() : {};
   const entries = Array.isArray(data?.entries) ? data.entries : [];
 
-  // --- parse text (ส่ง entries เก่าไปช่วยเรียนรู้) ---
-  const entry = parseLineText(text, entries);
-  if (!entry) {
-    await lineReply(replyToken, [{ type: "text", text: 'พิมพ์แบบนี้ได้เลย เช่น "อาหาร 50" หรือ "ชาไข่มุก 65" 🙂' }]);
+  // --- parse text → อาจได้ 1 หรือหลายรายการ ---
+  const newEntries = parseMultiEntries(text, entries);
+  if (!newEntries) {
+    await lineReply(replyToken, [{ type: "text", text: 'พิมพ์แบบนี้ได้เลย เช่น "อาหาร 50" หรือ "ข้าว 80 กาแฟ 45 grab 120" 🙂' }]);
     return res.status(200).send("OK");
   }
 
   // --- save to Firestore ---
-  entries.push(entry);
+  for (const e of newEntries) entries.push(e);
   await docRef.set({ entries, updatedAt: new Date().toISOString() }, { merge: true });
 
   // --- reply flex card ---
   const LIFF_ID = '2009265283-X2umhDv5';
-  const liffUrl = `https://liff.line.me/${LIFF_ID}?page=history&entryId=${encodeURIComponent(String(entry.id))}`;
+  const historyUrl = `https://liff.line.me/${LIFF_ID}?page=history`;
 
-  await lineReply(replyToken, [{
-    type: "flex",
-    altText: `บันทึกแล้ว: ${entry.catName} ฿${entry.amount}`,
-    contents: {
-      type: "bubble",
-      size: "mega",
-      body: {
-        type: "box", layout: "vertical", spacing: "md",
-        contents: [
-          { type: "text", text: "✅ บันทึกแล้ว", weight: "bold", size: "lg" },
-          {
-            type: "box", layout: "baseline", spacing: "sm",
-            contents: [
-              { type: "text", text: entry.catIcon || "💾", size: "xl", flex: 0 },
-              { type: "text", text: entry.catName, size: "md", flex: 4, wrap: true },
-              { type: "text", text: `฿${entry.amount}`, size: "md", weight: "bold", align: "end", flex: 2 },
-            ],
-          },
-        ],
+  let flexMsg;
+  if (newEntries.length === 1) {
+    const entry = newEntries[0];
+    const liffUrl = `https://liff.line.me/${LIFF_ID}?page=history&entryId=${encodeURIComponent(String(entry.id))}`;
+    flexMsg = {
+      type: "flex",
+      altText: `บันทึกแล้ว: ${entry.catName} ฿${entry.amount}`,
+      contents: {
+        type: "bubble", size: "mega",
+        body: {
+          type: "box", layout: "vertical", spacing: "md",
+          contents: [
+            { type: "text", text: "✅ บันทึกแล้ว", weight: "bold", size: "lg" },
+            {
+              type: "box", layout: "baseline", spacing: "sm",
+              contents: [
+                { type: "text", text: entry.catIcon || "💾", size: "xl", flex: 0 },
+                { type: "text", text: entry.catName, size: "md", flex: 4, wrap: true },
+                { type: "text", text: `฿${entry.amount}`, size: "md", weight: "bold", align: "end", flex: 2 },
+              ],
+            },
+          ],
+        },
+        footer: {
+          type: "box", layout: "vertical", spacing: "sm",
+          contents: [{ type: "button", style: "primary", color: "#FF4785", action: { type: "uri", label: "ดูรายการนี้", uri: liffUrl } }],
+        },
       },
-      footer: {
-        type: "box", layout: "vertical", spacing: "sm",
-        contents: [
-          { type: "button", style: "primary", color: "#FF4785", action: { type: "uri", label: "ดูรายการนี้", uri: liffUrl } },
-        ],
+    };
+  } else {
+    // หลายรายการ
+    const total = newEntries.reduce((s, e) => s + e.amount, 0);
+    const rows = newEntries.map(e => ({
+      type: "box", layout: "baseline", spacing: "sm",
+      contents: [
+        { type: "text", text: e.catIcon || "💾", size: "md", flex: 0 },
+        { type: "text", text: e.catName, size: "sm", flex: 3, color: "#555555", wrap: true },
+        { type: "text", text: `฿${e.amount}`, size: "sm", weight: "bold", align: "end", flex: 2 },
+      ],
+    }));
+    flexMsg = {
+      type: "flex",
+      altText: `บันทึก ${newEntries.length} รายการ รวม ฿${total}`,
+      contents: {
+        type: "bubble", size: "mega",
+        body: {
+          type: "box", layout: "vertical", spacing: "md",
+          contents: [
+            { type: "text", text: `✅ บันทึก ${newEntries.length} รายการแล้ว`, weight: "bold", size: "lg" },
+            ...rows,
+            { type: "separator" },
+            {
+              type: "box", layout: "baseline", spacing: "sm",
+              contents: [
+                { type: "text", text: "รวม", size: "sm", flex: 3, color: "#555555" },
+                { type: "text", text: `฿${total}`, size: "sm", weight: "bold", align: "end", flex: 2 },
+              ],
+            },
+          ],
+        },
+        footer: {
+          type: "box", layout: "vertical", spacing: "sm",
+          contents: [{ type: "button", style: "primary", color: "#FF4785", action: { type: "uri", label: "ดูประวัติ", uri: historyUrl } }],
+        },
       },
-    },
-  }]);
+    };
+  }
 
+  await lineReply(replyToken, [flexMsg]);
   return res.status(200).send("OK");
 });
 
@@ -246,39 +286,54 @@ function guessCategory(t) {
   return { catId: "other", type: "expense" };
 }
 
-function parseLineText(text, previousEntries = []) {
-  const rawAmt = (text.match(/[\d,]+(\.\d+)?/) || [])[0];
-  const amount = parseFloat((rawAmt || "").replace(/,/g, "")) || 0;
-  if (!amount) return null;
+// เรียนรู้หมวดจาก entries เก่าถ้า guessed เป็น 'other'
+function applyLearning(catId, type, context, previousEntries) {
+  if (catId !== "other" || previousEntries.length === 0) return { catId, type };
+  const words = context.replace(/[\d,\.]+/g, "").trim().split(/\s+/).filter(w => w.length > 2);
+  if (words.length === 0) return { catId, type };
+  const recent = [...previousEntries].reverse().slice(0, 60);
+  for (const e of recent) {
+    const prevNote = (e.note || "").toLowerCase();
+    if (words.some(w => prevNote.includes(w))) return { catId: e.catId, type: e.type };
+  }
+  return { catId, type };
+}
 
-  const t = text.toLowerCase();
-  const guessed = guessCategory(t);
-  let { catId, type } = guessed;
+// แยกข้อความเป็น 1 หรือหลายรายการอัตโนมัติ
+// เช่น "ข้าว 80 กาแฟ 65 grab 120" → 3 รายการ
+function parseMultiEntries(text, previousEntries = []) {
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const createdAt = now.toISOString();
 
-  // ── เรียนรู้จากรายการที่ผ่านมา (ถ้ายังจำแนกไม่ได้) ──
-  if (catId === "other" && previousEntries.length > 0) {
-    const words = t.replace(/[\d,\.]+/g, "").trim().split(/\s+/).filter(w => w.length > 2);
-    if (words.length > 0) {
-      const recent = [...previousEntries].reverse().slice(0, 60);
-      for (const e of recent) {
-        const prevNote = (e.note || "").toLowerCase();
-        if (words.some(w => prevNote.includes(w))) {
-          catId = e.catId;
-          type = e.type;
-          break;
-        }
-      }
-    }
+  // แยกข้อความโดยเก็บตัวเลขไว้เป็น delimiter
+  const parts = text.split(/([\d,]+(?:\.\d+)?)/);
+  const results = [];
+
+  for (let i = 1; i < parts.length; i += 2) {
+    const amount = parseFloat(parts[i].replace(/,/g, ""));
+    if (!amount || amount < 1) continue;
+
+    // context = ข้อความก่อน + ตัวเลข + ข้อความหลัง (เพื่อจับ keyword)
+    const before = parts[i - 1] || "";
+    const after  = parts[i + 1] || "";
+    const context = (before + " " + parts[i] + " " + after).toLowerCase();
+
+    const guessed = guessCategory(context);
+    const { catId, type } = applyLearning(guessed.catId, guessed.type, context, previousEntries);
+
+    const meta = CAT_META[catId] || CAT_META["other"];
+    const note = (before + parts[i]).trim() || text;
+
+    results.push({
+      id: Date.now() + results.length,
+      type, amount, catId,
+      catName: meta.name, catIcon: meta.icon,
+      note,
+      date: today, createdAt,
+      source: "line-webhook",
+    });
   }
 
-  const meta = CAT_META[catId] || CAT_META["other"];
-
-  return {
-    id: Date.now(), type, amount, catId,
-    catName: meta.name, catIcon: meta.icon,
-    note: text,
-    date: new Date().toISOString().slice(0, 10),
-    createdAt: new Date().toISOString(),
-    source: "line-webhook",
-  };
+  return results.length > 0 ? results : null;
 }

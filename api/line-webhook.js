@@ -146,46 +146,54 @@ function guessCategory(t) {
   return { catId: "other", type: "expense" };
 }
 
-// ---------- parse text ----------
-function parseTextToEntry(text, previousEntries = []) {
-  const rawAmt = (text.match(/[\d,]+(\.\d+)?/) || [])[0];
-  const amount = parseFloat((rawAmt || "").replace(/,/g, "")) || 0;
-  if (!amount) return null;
+// เรียนรู้หมวดจาก entries เก่าถ้า guessed เป็น 'other'
+function applyLearning(catId, type, context, previousEntries) {
+  if (catId !== "other" || previousEntries.length === 0) return { catId, type };
+  const words = context.replace(/[\d,\.]+/g, "").trim().split(/\s+/).filter(w => w.length > 2);
+  if (words.length === 0) return { catId, type };
+  const recent = [...previousEntries].reverse().slice(0, 60);
+  for (const e of recent) {
+    const prevNote = (e.note || "").toLowerCase();
+    if (words.some(w => prevNote.includes(w))) return { catId: e.catId, type: e.type };
+  }
+  return { catId, type };
+}
 
-  const t = text.toLowerCase();
-  const guessed = guessCategory(t);
-  let { catId, type } = guessed;
+// แยกข้อความเป็น 1 หรือหลายรายการอัตโนมัติ
+// เช่น "ข้าว 80 กาแฟ 65 grab 120" → 3 รายการ
+function parseMultiEntries(text, previousEntries = []) {
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const createdAt = now.toISOString();
 
-  // ── เรียนรู้จากรายการที่ผ่านมา (ถ้ายังจำแนกไม่ได้) ──
-  if (catId === "other" && previousEntries.length > 0) {
-    const words = t.replace(/[\d,\.]+/g, "").trim().split(/\s+/).filter(w => w.length > 2);
-    if (words.length > 0) {
-      const recent = [...previousEntries].reverse().slice(0, 60);
-      for (const e of recent) {
-        const prevNote = (e.note || "").toLowerCase();
-        if (words.some(w => prevNote.includes(w))) {
-          catId = e.catId;
-          type = e.type;
-          break;
-        }
-      }
-    }
+  const parts = text.split(/([\d,]+(?:\.\d+)?)/);
+  const results = [];
+
+  for (let i = 1; i < parts.length; i += 2) {
+    const amount = parseFloat(parts[i].replace(/,/g, ""));
+    if (!amount || amount < 1) continue;
+
+    const before  = parts[i - 1] || "";
+    const after   = parts[i + 1] || "";
+    const context = (before + " " + parts[i] + " " + after).toLowerCase();
+
+    const guessed = guessCategory(context);
+    const { catId, type } = applyLearning(guessed.catId, guessed.type, context, previousEntries);
+
+    const meta = CAT_META[catId] || CAT_META["other"];
+    const note = (before + parts[i]).trim() || text;
+
+    results.push({
+      id: Date.now() + results.length,
+      type, amount, catId,
+      catName: meta.name, catIcon: meta.icon,
+      note,
+      date: today, createdAt,
+      source: "line-webhook",
+    });
   }
 
-  const meta = CAT_META[catId] || CAT_META["other"];
-
-  return {
-    id: Date.now(),
-    type,
-    amount,
-    catId,
-    catName: meta.name,
-    catIcon: meta.icon,
-    note: text,
-    date: new Date().toISOString().slice(0, 10),
-    createdAt: new Date().toISOString(),
-    source: "line-webhook",
-  };
+  return results.length > 0 ? results : null;
 }
 
 // ---------- firebase init (แบบ 3 คีย์) ----------
@@ -270,30 +278,67 @@ export default async function handler(req, res) {
     const prevData = snap.exists ? snap.data() : {};
     const prevEntries = Array.isArray(prevData?.entries) ? prevData.entries : [];
 
-    const entry = parseTextToEntry(text, prevEntries);
-    if (!entry) {
-      await replyMessage(replyToken, [{ type: “text”, text: “พิมพ์แบบนี้ได้เลย เช่น “อาหาร 50” หรือ “ชาไข่มุก 65” 🙂” }]);
+    // --- parse → อาจได้ 1 หรือหลายรายการ ---
+    const newEntries = parseMultiEntries(text, prevEntries);
+    if (!newEntries) {
+      await replyMessage(replyToken, [{ type: “text”, text: “พิมพ์แบบนี้ได้เลย เช่น “อาหาร 50” หรือ “ข้าว 80 กาแฟ 45 grab 120” 🙂” }]);
       return res.status(200).send(“OK”);
     }
 
-    // --- เซฟเข้า Firestore ---
-    const entryId = await saveEntryToFirestore({ userId, entry });
+    // --- เซฟทุกรายการเข้า Firestore ในครั้งเดียว ---
+    const allEntries = [...prevEntries, ...newEntries];
+    await docRef.set({ entries: allEntries, updatedAt: new Date().toISOString() }, { merge: true });
 
-    // --- ทำ LIFF deep link ---
+    // --- ทำ LIFF URL ---
     const LIFF_ID = process.env.LIFF_ID;
-    if (!LIFF_ID) throw new Error("Missing LIFF_ID");
+    if (!LIFF_ID) throw new Error(“Missing LIFF_ID”);
+    const historyUrl = `https://liff.line.me/${LIFF_ID}?page=history`;
 
-    const liffUrl = `https://liff.line.me/${LIFF_ID}?page=history&entryId=${encodeURIComponent(entryId)}`;
+    let flexMsg;
+    if (newEntries.length === 1) {
+      const entry = newEntries[0];
+      const liffUrl = `${historyUrl}&entryId=${encodeURIComponent(String(entry.id))}`;
+      flexMsg = makeFlexReceipt({ catName: entry.catName, catIcon: entry.catIcon, amount: entry.amount, liffUrl });
+    } else {
+      const total = newEntries.reduce((s, e) => s + e.amount, 0);
+      const rows = newEntries.map(e => ({
+        type: “box”, layout: “baseline”, spacing: “sm”,
+        contents: [
+          { type: “text”, text: e.catIcon || “💾”, size: “md”, flex: 0 },
+          { type: “text”, text: e.catName, size: “sm”, flex: 3, color: “#555555”, wrap: true },
+          { type: “text”, text: `฿${e.amount}`, size: “sm”, weight: “bold”, align: “end”, flex: 2 },
+        ],
+      }));
+      flexMsg = {
+        type: “flex”,
+        altText: `บันทึก ${newEntries.length} รายการ รวม ฿${total}`,
+        contents: {
+          type: “bubble”, size: “mega”,
+          body: {
+            type: “box”, layout: “vertical”, spacing: “md”,
+            contents: [
+              { type: “text”, text: `✅ บันทึก ${newEntries.length} รายการแล้ว`, weight: “bold”, size: “lg” },
+              ...rows,
+              { type: “separator” },
+              {
+                type: “box”, layout: “baseline”, spacing: “sm”,
+                contents: [
+                  { type: “text”, text: “รวม”, size: “sm”, flex: 3, color: “#555555” },
+                  { type: “text”, text: `฿${total}`, size: “sm”, weight: “bold”, align: “end”, flex: 2 },
+                ],
+              },
+            ],
+          },
+          footer: {
+            type: “box”, layout: “vertical”, spacing: “sm”,
+            contents: [{ type: “button”, style: “primary”, color: “#FF4785”, action: { type: “uri”, label: “ดูประวัติ”, uri: historyUrl } }],
+          },
+        },
+      };
+    }
 
-    const flex = makeFlexReceipt({
-      catName: entry.catName,
-      catIcon: entry.catIcon,
-      amount: entry.amount,
-      liffUrl,
-    });
-
-    await replyMessage(replyToken, [flex]);
-    return res.status(200).send("OK");
+    await replyMessage(replyToken, [flexMsg]);
+    return res.status(200).send(“OK”);
   } catch (e) {
     // ตรงนี้สำคัญ: ถ้าเซฟไม่เข้า ให้ดูใน Vercel Logs
     console.error("line-webhook error:", e);
