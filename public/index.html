@@ -348,6 +348,8 @@ body{padding-bottom:var(--nav-h);}
 .tx2-amt{font-size:1.05rem;font-weight:800;flex-shrink:0;}
 .tx2.expense .tx2-amt{color:var(--pink);}
 .tx2.income  .tx2-amt{color:var(--teal);}
+.tx2-edit{background:none;border:none;cursor:pointer;color:#DDD;font-size:.9rem;padding:4px;border-radius:6px;transition:color .2s;}
+.tx2-edit:hover{color:var(--teal);}
 .tx2-del{background:none;border:none;cursor:pointer;color:#DDD;font-size:.9rem;padding:4px;border-radius:6px;transition:color .2s;}
 .tx2-del:hover{color:var(--pink);}
 .tx2.highlight{animation:hlPulse .5s ease 3;}
@@ -1478,7 +1480,8 @@ function addEntry(){
   document.getElementById('inputAmt').value='';
   document.getElementById('noteField').value='';
   document.querySelectorAll('.q-chip').forEach(c=>c.classList.remove('sel'));
-  showToast(addType==='expense'?`❤️ บันทึกรายจ่ายแล้ว`:`💚 บันทึกรายรับแล้ว`);
+  const savedName=note||cat.name;
+  showToast(addType==='expense'?`❤️ บันทึกแล้ว: ${savedName}`:`💚 บันทึกแล้ว: ${savedName}`);
   goPanel('panel-home');
 }
 
@@ -1607,6 +1610,7 @@ function renderHistory(){
         <div class="tx2-meta">${e.catName} · ${fmtDate(e.date)}</div>
       </div>
       <div class="tx2-amt">${e.type==='income'?'+':'-'}฿${fmt0(e.amount)}</div>
+      <button class="tx2-edit" onclick="editEntry(${e.id})">✏️</button>
       <button class="tx2-del" onclick="delEntry(${e.id})">🗑️</button>
     </div>`).join('');
 }
@@ -1614,6 +1618,26 @@ function delEntry(id){
   entries=entries.filter(e=>e.id!==id);
   save(); renderAll(); renderHistory();
   showToast('🗑️ ลบแล้ว');
+}
+function editEntry(id){
+  const el=document.querySelector(`.tx2[data-id="${id}"] .tx2-desc`);
+  const entry=entries.find(e=>e.id===id);
+  if(!el||!entry) return;
+  const inp=document.createElement('input');
+  inp.type='text'; inp.value=entry.note;
+  inp.style.cssText='width:100%;border:none;border-bottom:2px solid var(--pink);background:transparent;font-size:1rem;font-weight:600;outline:none;padding:0;color:var(--text);';
+  el.innerHTML=''; el.appendChild(inp); inp.focus(); inp.select();
+  function commit(){
+    const v=inp.value.trim();
+    if(!v){showToast('ต้องมีชื่อนะ');inp.focus();return;}
+    entry.note=v; save(); renderHistory();
+    showToast('✅ แก้ชื่อแล้ว');
+  }
+  inp.addEventListener('blur',commit);
+  inp.addEventListener('keydown',ev=>{
+    if(ev.key==='Enter'){ev.preventDefault();inp.blur();}
+    if(ev.key==='Escape'){inp.removeEventListener('blur',commit);renderHistory();}
+  });
 }
 
 // ══════ SETTINGS ══════
