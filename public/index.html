@@ -350,6 +350,8 @@ body{padding-bottom:var(--nav-h);}
 .tx2.income  .tx2-amt{color:var(--teal);}
 .tx2-del{background:none;border:none;cursor:pointer;color:#DDD;font-size:.9rem;padding:4px;border-radius:6px;transition:color .2s;}
 .tx2-del:hover{color:var(--pink);}
+.tx2.highlight{animation:hlPulse .5s ease 3;}
+@keyframes hlPulse{0%,100%{box-shadow:0 1px 4px rgba(0,0,0,.05);}50%{box-shadow:0 0 0 3px rgba(255,71,133,.4);}}
 .empty2{text-align:center;padding:40px 20px;color:var(--sub);font-size:.9rem;}
 
 /* ── ตั้งค่า PANEL ── */
@@ -1319,7 +1321,8 @@ function init(){
     ci.addEventListener('focus',()=>{ setTimeout(()=>ci.scrollIntoView({behavior:'smooth',block:'center'}),300); });
   }
 
-  loadFromCloud().then(()=>{ renderAll(); renderBudgetList(); });
+  handleDeepLink();
+  loadFromCloud().then(()=>{ renderAll(); renderBudgetList(); handleDeepLink(); });
 }
 
 function todayStr(){ return new Date().toISOString().slice(0,10); }
@@ -1342,6 +1345,24 @@ function goPanel(id){
   if(nb) nb.classList.add('active');
   if(id==='panel-history') renderHistory();
   if(id==='panel-budget') renderBudgetList();
+}
+
+function handleDeepLink(){
+  const params=new URLSearchParams(window.location.search);
+  const page=params.get('page');
+  const entryId=params.get('entryId');
+  if(!page) return;
+  if(page==='history'){
+    goPanel('panel-history');
+    if(entryId){
+      const el=document.querySelector(`[data-id="${entryId}"]`);
+      if(el){
+        el.scrollIntoView({behavior:'smooth',block:'center'});
+        el.classList.add('highlight');
+        setTimeout(()=>el.classList.remove('highlight'),1500);
+      }
+    }
+  }
 }
 
 function cyclePeriod(){ showToast('ฟีเจอร์หลายรอบงบกำลังมาเร็วๆ นี้!'); }
@@ -1578,7 +1599,7 @@ function renderHistory(){
   const c=document.getElementById('txList2');
   if(!data.length){c.innerHTML=`<div class="empty2">ยังไม่มีรายการเลยนะ</div>`;return;}
   c.innerHTML=data.map(e=>`
-    <div class="tx2 ${e.type}">
+    <div class="tx2 ${e.type}" data-id="${e.id}">
       <div class="tx2-icon">${e.catIcon||'💰'}</div>
       <div class="tx2-info">
         <div class="tx2-desc">${esc(e.note)}</div>
