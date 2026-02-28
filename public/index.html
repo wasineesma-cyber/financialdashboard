@@ -982,7 +982,13 @@ async function initLiff() {
       return;
     }
 
-    // ถ้าอยู่ใน LIFF แต่ยังไม่ login → โชว์หน้าล็อกอิน
+    // ถ้าอยู่ใน LINE browser → auto login ทันที (ไม่ต้องกดปุ่ม)
+    if (liff.isInClient()) {
+      liff.login();
+      return;
+    }
+
+    // ถ้าเปิดจาก browser ทั่วไป → โชว์หน้าล็อกอิน
     const ll = document.getElementById('lineLogin');
     if (ll) ll.classList.remove('hidden');
 
