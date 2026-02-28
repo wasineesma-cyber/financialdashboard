@@ -169,7 +169,6 @@ exports.lineWebhook = onRequest(async (req, res) => {
         type: "box", layout: "vertical", spacing: "sm",
         contents: [
           { type: "button", style: "primary", color: "#FF4785", action: { type: "uri", label: "ดูรายการนี้", uri: liffUrl } },
-          { type: "button", style: "secondary", action: { type: "uri", label: "เปิดหน้าแอพ", uri: cleanLiff } },
         ],
       },
     },
