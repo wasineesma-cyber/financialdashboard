@@ -1157,7 +1157,15 @@ async function loadFromCloud() {
     const doc = await db.collection('dongNote').doc(userId).get();
     if (doc.exists) {
       const data = doc.data();
-      if (data.entries) { entries = data.entries; localStorage.setItem('dong_entries', JSON.stringify(entries)); }
+      if (data.entries) {
+        // Merge: preserve local entries not yet in cloud (race condition fix)
+        const cloudIds = new Set(data.entries.map(e => e.id));
+        const localOnly = entries.filter(e => !cloudIds.has(e.id));
+        entries = [...data.entries, ...localOnly];
+        entries.sort((a,b) => b.id - a.id);
+        localStorage.setItem('dong_entries', JSON.stringify(entries));
+        if (localOnly.length > 0) saveToCloud();
+      }
       if (data.budgets) { budgets = data.budgets; localStorage.setItem('dong_budgets', JSON.stringify(budgets)); }
       // โหลด premium status
       isPremium    = checkIsPremium(data);
