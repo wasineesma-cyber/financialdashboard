@@ -394,6 +394,30 @@ body{padding-bottom:var(--nav-h);}
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+/* ── HOME GREETING ── */
+.home-greeting{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 16px;margin-bottom:14px;
+  background:var(--white);border-radius:20px;
+  box-shadow:0 1px 6px rgba(0,0,0,.07);
+}
+.home-mascot{
+  width:64px;height:64px;border-radius:50%;
+  object-fit:cover;flex-shrink:0;
+  border:2px solid var(--pink-border);
+  box-shadow:0 2px 8px rgba(37,99,235,.15);
+}
+.home-greeting-text{flex:1;}
+.home-greeting-title{font-size:1rem;font-weight:900;color:var(--text);}
+.home-greeting-sub{font-size:.75rem;color:var(--sub);margin-top:2px;}
+.home-user-wrap{display:flex;align-items:center;gap:8px;margin-top:6px;}
+.home-user-pic{
+  width:32px;height:32px;border-radius:50%;
+  object-fit:cover;border:2px solid var(--pink);
+  display:none;
+}
+.home-user-name{font-size:.82rem;font-weight:600;color:var(--pink);}
+
 /* ── CHAT BOX (home) ── */
 .chat-box{
   background:var(--white);border-radius:16px;padding:14px;
@@ -559,6 +583,18 @@ body{padding-bottom:var(--nav-h);}
 
 <!-- ════════ PANEL: สรุป ════════ -->
 <div class="panel active" id="panel-home">
+
+  <div class="home-greeting">
+    <img src="mascot.PNG" alt="แม่ละเมียด" class="home-mascot">
+    <div class="home-greeting-text">
+      <div class="home-greeting-title">แม่ละเมียด</div>
+      <div class="home-greeting-sub">Mae Lamiet · บันทึกการเงินส่วนตัว</div>
+      <div class="home-user-wrap" id="homeUserWrap" style="display:none;">
+        <img id="homeUserPic" class="home-user-pic" src="" alt="">
+        <span class="home-user-name" id="homeUserName"></span>
+      </div>
+    </div>
+  </div>
 
   <div class="balance-wrap">
     <div class="balance-label">เหลือเก็บ</div>
@@ -977,6 +1013,19 @@ function updateLineProfileUI() {
   if (picEl && lineProfile.pictureUrl) {
     picEl.src = lineProfile.pictureUrl;
     picEl.style.display = 'block';
+  }
+
+  // แสดงรูปและชื่อ LINE ใน home greeting
+  const homeWrap = document.getElementById('homeUserWrap');
+  const homeUserPic  = document.getElementById('homeUserPic');
+  const homeUserName = document.getElementById('homeUserName');
+  if (homeWrap && lineProfile.displayName) {
+    if (homeUserPic && lineProfile.pictureUrl) {
+      homeUserPic.src = lineProfile.pictureUrl;
+      homeUserPic.style.display = 'block';
+    }
+    if (homeUserName) homeUserName.textContent = 'สวัสดี, ' + lineProfile.displayName;
+    homeWrap.style.display = 'flex';
   }
 }
 
