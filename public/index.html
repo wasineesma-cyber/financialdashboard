@@ -988,6 +988,7 @@ async function initLiff() {
       document.getElementById('lineLogin').classList.add('hidden');
       updateLineProfileUI();
       init();
+      hideSplash(800); // ไม่รอ window.load เผื่อ video block
       return;
     }
 
@@ -1760,13 +1761,15 @@ function showToast(msg){
 }
 
 // ══════ SPLASH ══════
-window.addEventListener('load', () => {
-  const sp = document.getElementById('splash');
+function hideSplash(delay) {
   setTimeout(() => {
-    sp.classList.add('hide');
-    setTimeout(() => sp.remove(), 520);
-  }, 1400);
-});
+    const sp = document.getElementById('splash');
+    if (sp) { sp.classList.add('hide'); setTimeout(() => sp.remove(), 520); }
+  }, delay || 0);
+}
+// ปิด splash หลัง load เสร็จ หรือสูงสุด 4 วินาที (กัน video block window.load ใน LINE browser)
+window.addEventListener('load', () => hideSplash(1400));
+setTimeout(() => hideSplash(0), 4000);
 
 // ══════ INSTALL BANNER (iOS) ══════
 function isInStandalone() {
