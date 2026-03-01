@@ -991,10 +991,15 @@ async function initLiff() {
       return;
     }
 
-    // ถ้าอยู่ใน LINE browser → auto login ทันที (ไม่ต้องกดปุ่ม)
+    // ถ้าอยู่ใน LINE browser → auto login (ป้องกัน redirect loop ด้วย sessionStorage)
     if (liff.isInClient()) {
-      liff.login();
-      return;
+      if (!sessionStorage.getItem('liff_login_tried')) {
+        sessionStorage.setItem('liff_login_tried', '1');
+        liff.login();
+        return;
+      }
+      // ลอง login แล้วแต่ยังไม่สำเร็จ → แสดงปุ่มให้กดเอง
+      sessionStorage.removeItem('liff_login_tried');
     }
 
     // ถ้าเปิดจาก browser ทั่วไป → โชว์หน้าล็อกอิน
