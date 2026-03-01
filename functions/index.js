@@ -47,7 +47,7 @@ exports.lineWebhook = onRequest(async (req, res) => {
   await docRef.set({ entries, updatedAt: new Date().toISOString() }, { merge: true });
 
   // --- reply flex card ---
-  const LIFF_ID = '2009265283-X2umhDv5';
+  const LIFF_ID = process.env.LIFF_ID;
   const historyUrl = `https://liff.line.me/${LIFF_ID}?page=history`;
 
   let flexMsg;
