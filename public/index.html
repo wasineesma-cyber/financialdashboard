@@ -14,6 +14,7 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<meta name="description" content="แม่ละเมียด — แอพจดบันทึกรายรับรายจ่ายส่วนตัว ช่วยให้บริหารงบประมาณรายเดือนได้ง่าย บันทึกรายการผ่านบอท LINE พูดภาษาธรรมชาติได้เลย ซิงค์ข้อมูลขึ้น Google Sheet อัตโนมัติ ดูสรุปยอด ดูกราฟ Export CSV ได้ทุกเมื่อ เข้าสู่ระบบด้วย LINE สะดวก รวดเร็ว">
 <title>แม่ละเมียด</title>
 
 <style>
@@ -60,18 +61,57 @@ body{padding-bottom:var(--nav-h);}
   height:var(--nav-h);
   background:var(--white);
   border-top:1px solid var(--border);
-  display:grid;grid-template-columns:repeat(5,1fr);
+  display:grid;grid-template-columns:repeat(6,1fr);
   padding-bottom:env(safe-area-inset-bottom);
   z-index:100;
 }
 .nav-btn{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:3px;background:none;border:none;cursor:pointer;
-  color:var(--sub);font-size:.58rem;font-weight:600;letter-spacing:.02em;
+  color:var(--sub);font-size:.52rem;font-weight:600;letter-spacing:.01em;
   transition:color .2s;
 }
 .nav-btn .ni{font-size:1.3rem;}
 .nav-btn.active{color:var(--pink);}
+
+/* ── GUIDE PANEL ── */
+.guide-hero{
+  background:linear-gradient(135deg,#BADF40,var(--pink));
+  border-radius:20px;padding:20px 18px 18px;margin-bottom:16px;
+  box-shadow:0 6px 20px rgba(255,71,133,.22);
+}
+.guide-hero-title{font-size:1.2rem;font-weight:900;color:#fff;margin-bottom:4px;}
+.guide-hero-sub{font-size:.75rem;color:rgba(255,255,255,.88);}
+.guide-section-title{font-size:.7rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin:18px 0 10px;}
+.rich-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px;}
+.rich-card{
+  background:var(--white);border:1.5px solid var(--border);border-radius:16px;
+  padding:14px 12px 12px;position:relative;overflow:hidden;
+}
+.rich-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,#BADF40,var(--pink));
+}
+.rich-slot{
+  position:absolute;top:8px;right:10px;
+  font-size:.62rem;font-weight:700;color:var(--sub);opacity:.6;
+}
+.rich-icon{font-size:1.8rem;margin-bottom:6px;}
+.rich-name{font-size:.85rem;font-weight:800;color:var(--text);margin-bottom:4px;}
+.rich-desc{font-size:.72rem;color:var(--sub);line-height:1.45;}
+.rich-url-box{
+  background:var(--bg);border:1px solid var(--border);border-radius:10px;
+  padding:10px 12px;margin-top:12px;cursor:pointer;
+}
+.rich-url-label{font-size:.65rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;}
+.rich-url-val{font-size:.68rem;color:var(--pink);word-break:break-all;font-weight:600;}
+.rich-copy-hint{font-size:.6rem;color:var(--sub);margin-top:4px;opacity:.7;}
+.guide-note-card{
+  background:var(--pink-light);border:1px solid var(--pink-border);
+  border-radius:14px;padding:14px 14px;margin-top:8px;
+}
+.guide-note-title{font-size:.78rem;font-weight:800;color:var(--pink);margin-bottom:8px;}
+.guide-note-step{font-size:.73rem;color:var(--text);line-height:1.6;margin-bottom:4px;}
 
 /* ── PANELS ── */
 .panel{display:none;max-width:480px;margin:0 auto;padding:14px 14px;}
@@ -810,6 +850,119 @@ body{padding-bottom:var(--nav-h);}
   </div>
 </div>
 
+<!-- ════════ PANEL: คู่มือ ════════ -->
+<div class="panel" id="panel-guide">
+
+  <div class="guide-hero">
+    <div class="guide-hero-title">📖 คู่มือแม่ละเมียด</div>
+    <div class="guide-hero-sub">อธิบายแต่ละหน้า + ลิงก์สำหรับทำ LINE Rich Menu 6 ช่อง</div>
+  </div>
+
+  <div class="guide-section-title">6 ช่องสำหรับ Rich Menu</div>
+  <div class="rich-grid">
+
+    <!-- ช่อง 1 -->
+    <div class="rich-card">
+      <span class="rich-slot">ช่อง 1</span>
+      <div class="rich-icon">🏠</div>
+      <div class="rich-name">สรุปยอด</div>
+      <div class="rich-desc">ดูยอดคงเหลือ รายรับ-รายจ่าย และกราฟสรุปประจำเดือน</div>
+      <div class="rich-url-box" onclick="copyRichUrl('home',this)">
+        <div class="rich-url-label">URL สำหรับ Rich Menu</div>
+        <div class="rich-url-val">https://liff.line.me/2009265283-X2umhDv5?page=home</div>
+        <div class="rich-copy-hint">แตะเพื่อคัดลอก</div>
+      </div>
+    </div>
+
+    <!-- ช่อง 2 -->
+    <div class="rich-card">
+      <span class="rich-slot">ช่อง 2</span>
+      <div class="rich-icon">✏️</div>
+      <div class="rich-name">บันทึกรายการ</div>
+      <div class="rich-desc">เพิ่มรายจ่าย-รายรับ เลือกหมวด ใส่จำนวนเงินและหมายเหตุ</div>
+      <div class="rich-url-box" onclick="copyRichUrl('add',this)">
+        <div class="rich-url-label">URL สำหรับ Rich Menu</div>
+        <div class="rich-url-val">https://liff.line.me/2009265283-X2umhDv5?page=add</div>
+        <div class="rich-copy-hint">แตะเพื่อคัดลอก</div>
+      </div>
+    </div>
+
+    <!-- ช่อง 3 -->
+    <div class="rich-card">
+      <span class="rich-slot">ช่อง 3</span>
+      <div class="rich-icon">🥧</div>
+      <div class="rich-name">หมวด / งบ</div>
+      <div class="rich-desc">ตั้งงบรายหมวด ดูแถบความคืบหน้าว่าใช้ไปแล้วเท่าไหร่</div>
+      <div class="rich-url-box" onclick="copyRichUrl('budget',this)">
+        <div class="rich-url-label">URL สำหรับ Rich Menu</div>
+        <div class="rich-url-val">https://liff.line.me/2009265283-X2umhDv5?page=budget</div>
+        <div class="rich-copy-hint">แตะเพื่อคัดลอก</div>
+      </div>
+    </div>
+
+    <!-- ช่อง 4 -->
+    <div class="rich-card">
+      <span class="rich-slot">ช่อง 4</span>
+      <div class="rich-icon">📋</div>
+      <div class="rich-name">รายการทั้งหมด</div>
+      <div class="rich-desc">ดูประวัติทุกรายการ กรองตามเดือนหรือประเภท</div>
+      <div class="rich-url-box" onclick="copyRichUrl('history',this)">
+        <div class="rich-url-label">URL สำหรับ Rich Menu</div>
+        <div class="rich-url-val">https://liff.line.me/2009265283-X2umhDv5?page=history</div>
+        <div class="rich-copy-hint">แตะเพื่อคัดลอก</div>
+      </div>
+    </div>
+
+    <!-- ช่อง 5 -->
+    <div class="rich-card">
+      <span class="rich-slot">ช่อง 5</span>
+      <div class="rich-icon">⚙️</div>
+      <div class="rich-name">ตั้งค่า</div>
+      <div class="rich-desc">จัดการ LINE Account, เชื่อม Google Sheet, Export CSV, อัพเกรด Premium</div>
+      <div class="rich-url-box" onclick="copyRichUrl('settings',this)">
+        <div class="rich-url-label">URL สำหรับ Rich Menu</div>
+        <div class="rich-url-val">https://liff.line.me/2009265283-X2umhDv5?page=settings</div>
+        <div class="rich-copy-hint">แตะเพื่อคัดลอก</div>
+      </div>
+    </div>
+
+    <!-- ช่อง 6 -->
+    <div class="rich-card">
+      <span class="rich-slot">ช่อง 6</span>
+      <div class="rich-icon">📖</div>
+      <div class="rich-name">คู่มือ</div>
+      <div class="rich-desc">หน้านี้ — อธิบายแต่ละหน้าและลิงก์สำหรับทำ Rich Menu</div>
+      <div class="rich-url-box" onclick="copyRichUrl('guide',this)">
+        <div class="rich-url-label">URL สำหรับ Rich Menu</div>
+        <div class="rich-url-val">https://liff.line.me/2009265283-X2umhDv5?page=guide</div>
+        <div class="rich-copy-hint">แตะเพื่อคัดลอก</div>
+      </div>
+    </div>
+
+  </div><!-- /rich-grid -->
+
+  <div class="guide-section-title">วิธีสร้าง Rich Menu 6 ช่อง</div>
+  <div class="guide-note-card">
+    <div class="guide-note-title">📌 ขั้นตอนใน LINE Official Account Manager</div>
+    <div class="guide-note-step">1️⃣ เข้า <b>manager.line.biz</b> → เลือก OA ของคุณ</div>
+    <div class="guide-note-step">2️⃣ ไปที่ <b>Rich menu</b> → กด <b>Create</b></div>
+    <div class="guide-note-step">3️⃣ เลือก Template <b>"Large" 6 grids (3×2)</b></div>
+    <div class="guide-note-step">4️⃣ อัปโหลดรูป Rich Menu ขนาด <b>2500 × 1686 px</b></div>
+    <div class="guide-note-step">5️⃣ แต่ละช่อง → Action Type: <b>Link</b> → วาง URL ช่องนั้น ๆ</div>
+    <div class="guide-note-step">6️⃣ กด <b>Save</b> และเปิดใช้งาน ✅</div>
+  </div>
+
+  <div class="guide-note-card" style="margin-top:10px;background:var(--teal-light);border-color:var(--teal-border);">
+    <div class="guide-note-title" style="color:var(--teal);">💬 บอท LINE — พิมพ์บันทึกได้เลย</div>
+    <div class="guide-note-step">ส่งข้อความใน LINE ได้เลย เช่น<br>
+      <b>"กาแฟ 65"</b> → บันทึกรายจ่าย 65 บาท หมวดอาหาร<br>
+      <b>"เงินเดือน 15000"</b> → บันทึกรายรับ 15,000 บาท<br>
+      <b>"สรุป"</b> → บอทตอบยอดเดือนนี้กลับมา
+    </div>
+  </div>
+
+</div><!-- /panel-guide -->
+
 <!-- ── BOTTOM NAV ── -->
 <nav class="bottom-nav">
   <button class="nav-btn active" id="nav-home"     onclick="goPanel('panel-home')"><span class="ni">🏠</span>สรุป</button>
@@ -817,6 +970,7 @@ body{padding-bottom:var(--nav-h);}
   <button class="nav-btn"        id="nav-budget"   onclick="goPanel('panel-budget')"><span class="ni">🥧</span>หมวด/งบ</button>
   <button class="nav-btn"        id="nav-history"  onclick="goPanel('panel-history')"><span class="ni">📋</span>รายการ</button>
   <button class="nav-btn"        id="nav-settings" onclick="goPanel('panel-settings')"><span class="ni">⚙️</span>ตั้งค่า</button>
+  <button class="nav-btn"        id="nav-guide"    onclick="goPanel('panel-guide')"><span class="ni">📖</span>คู่มือ</button>
 </nav>
 
 <!-- Google Sheet modal -->
@@ -1792,6 +1946,21 @@ function dismissInstall() {
 // ══════ SERVICE WORKER ══════
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+// ══════ DEEP LINK ?page= ══════
+(function applyDeepLink(){
+  const p = new URLSearchParams(window.location.search).get('page');
+  if(p) goPanel('panel-'+p);
+})();
+
+// ══════ COPY RICH MENU URL ══════
+function copyRichUrl(page, el){
+  const url = 'https://liff.line.me/2009265283-X2umhDv5?page=' + page;
+  navigator.clipboard.writeText(url).then(()=>{
+    const hint = el.querySelector('.rich-copy-hint');
+    if(hint){ hint.textContent = '✅ คัดลอกแล้ว!'; setTimeout(()=>{ hint.textContent='แตะเพื่อคัดลอก'; },2000); }
+  }).catch(()=>{ showToast('คัดลอกไม่ได้ — กรุณา copy URL เอง'); });
 }
 
 // START
