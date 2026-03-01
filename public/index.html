@@ -755,11 +755,24 @@ body{padding-bottom:var(--nav-h);}
   <div id="premiumUpgradeCard" class="upgrade-card" style="display:none;">
     <div class="up-title">👑 แม่ละเมียด Premium</div>
     <div class="up-sub">ปลดล็อกทุกฟีเจอร์ ซิงค์ Sheet · บอท LINE · Export ฯลฯ</div>
-    <div style="text-align:center;padding:16px 0 8px;">
-      <div style="font-size:2rem;">🚧</div>
-      <div style="font-size:1rem;font-weight:700;margin-top:6px;">Coming Soon</div>
-      <div style="font-size:.8rem;opacity:.8;margin-top:4px;">ระบบสมัครสมาชิกกำลังจะมาเร็วๆ นี้ค่ะ</div>
+    <div class="plan-grid">
+      <div class="plan-card selected" id="planMonthly" onclick="selectPlan('monthly')">
+        <div class="p-name">รายเดือน</div>
+        <div class="p-price">฿59</div>
+        <div class="p-per">/เดือน</div>
+      </div>
+      <div class="plan-card" id="planYearly" onclick="selectPlan('yearly')">
+        <div class="p-name">รายปี</div>
+        <div class="p-price">฿360</div>
+        <div class="p-per">/ปี</div>
+      </div>
+      <div class="plan-card" id="planLifetime" onclick="selectPlan('lifetime')">
+        <div class="p-name">ตลอดชีพ</div>
+        <div class="p-price">฿999</div>
+        <div class="p-per">one-time</div>
+      </div>
     </div>
+    <button class="btn-upgrade" onclick="goUpgrade()">อัพเกรดเลย 🚀</button>
   </div>
 
   <div id="premiumActiveCard" class="settings-card" style="display:none;">
