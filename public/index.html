@@ -964,7 +964,10 @@ let hasLinePic = false;
 
 async function initLiff() {
   try {
-    await liff.init({ liffId: LIFF_ID });
+    await Promise.race([
+      liff.init({ liffId: LIFF_ID }),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('LIFF timeout')), 6000))
+    ]);
 
     if (liff.isLoggedIn()) {
       lineProfile = await liff.getProfile();
