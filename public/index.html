@@ -32,19 +32,19 @@
 
 <style>
 :root {
-  --pink:       #FF4785;
-  --pink-light: #FFF0F5;
-  --pink-border:#FFB0CC;
-  --pink-track: #FFD5E5;
-  --teal:       #6BBF2A;
-  --teal-light: #F3FBE8;
-  --teal-border:#AADE5A;
-  --teal-track: #D2F0A0;
-  --bg:         #FDF8FF;
+  --pink:       #BE185D;
+  --pink-light: #FDF2F8;
+  --pink-border:#F9A8D4;
+  --pink-track: #FBCFE8;
+  --teal:       #047857;
+  --teal-light: #ECFDF5;
+  --teal-border:#6EE7B7;
+  --teal-track: #A7F3D0;
+  --bg:         #F5F5F7;
   --white:      #FFFFFF;
-  --text:       #1A0A0F;
-  --sub:        #7A6070;
-  --border:     #F0DCE8;
+  --text:       #111827;
+  --sub:        #6B7280;
+  --border:     #E5E7EB;
   --nav-h:      60px;
 }
 
@@ -54,7 +54,7 @@ body{padding-bottom:var(--nav-h);}
 
 /* ── HEADER ── */
 .header{
-  background:linear-gradient(135deg,#BADF40,var(--pink));
+  background:linear-gradient(135deg,#831843,#BE185D);
   padding:14px 18px;
   padding-top:calc(14px + env(safe-area-inset-top));
   display:flex;align-items:center;justify-content:center;
@@ -89,7 +89,7 @@ body{padding-bottom:var(--nav-h);}
 
 /* ── GUIDE PANEL ── */
 .guide-hero{
-  background:linear-gradient(135deg,#BADF40,var(--pink));
+  background:linear-gradient(135deg,#831843,#BE185D);
   border-radius:20px;padding:20px 18px 18px;margin-bottom:16px;
   box-shadow:0 6px 20px rgba(255,71,133,.22);
 }
@@ -103,7 +103,7 @@ body{padding-bottom:var(--nav-h);}
 }
 .rich-card::before{
   content:'';position:absolute;top:0;left:0;right:0;height:4px;
-  background:linear-gradient(90deg,#BADF40,var(--pink));
+  background:linear-gradient(90deg,#831843,#BE185D);
 }
 .rich-slot{
   position:absolute;top:8px;right:10px;
@@ -439,6 +439,32 @@ body{padding-bottom:var(--nav-h);}
 .btn-upgrade{width:100%;background:#fff;color:#764ba2;font-weight:800;font-size:.9rem;border:none;border-radius:12px;padding:12px;cursor:pointer;}
 .btn-upgrade:active{opacity:.85;}
 
+/* ── EDIT ENTRY SHEET ── */
+.edit-cat-scroll{overflow-x:auto;margin-bottom:14px;-webkit-overflow-scrolling:touch;}
+.edit-cat-scroll::-webkit-scrollbar{display:none;}
+.edit-cat-row{display:flex;gap:8px;padding:2px;width:max-content;}
+.edit-cat-chip{
+  display:inline-flex;flex-direction:column;align-items:center;gap:3px;
+  padding:8px 10px;border-radius:12px;border:2px solid var(--border);
+  background:var(--white);cursor:pointer;font-size:.65rem;font-weight:600;
+  white-space:nowrap;transition:all .15s;flex-shrink:0;color:var(--sub);
+}
+.edit-cat-chip .ec-icon{font-size:1.3rem;}
+.edit-cat-chip.ec-sel{border-color:var(--pink);background:var(--pink-light);color:var(--pink);}
+.edit-cat-chip.ec-sel.ec-inc{border-color:var(--teal);background:var(--teal-light);color:var(--teal);}
+
+/* ── SCAN BUTTON ── */
+.btn-scan{
+  width:100%;padding:14px;border:2px dashed var(--border);border-radius:14px;
+  background:var(--white);color:var(--sub);font-size:.9rem;font-weight:600;
+  cursor:pointer;margin-bottom:10px;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font-family:inherit;
+}
+.btn-scan:active{background:var(--bg);border-color:var(--pink);color:var(--pink);}
+.btn-scan.scanning{opacity:.65;pointer-events:none;}
+.scan-badge{font-size:.6rem;background:#047857;color:#fff;padding:1px 6px;border-radius:8px;font-weight:700;letter-spacing:.04em;}
+
 /* ── TOAST ── */
 .toast{
   position:fixed;bottom:calc(var(--nav-h)+16px);left:50%;
@@ -529,7 +555,7 @@ body{padding-bottom:var(--nav-h);}
 /* ── SPLASH SCREEN ── */
 #splash{
   position:fixed;inset:0;z-index:9999;
-  background:linear-gradient(160deg,#BADF40,#FF85A2 60%,#D090FF);
+  background:linear-gradient(160deg,#500724,#BE185D 60%,#9D174D);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:16px;
   transition:opacity .5s ease;
@@ -569,7 +595,7 @@ body{padding-bottom:var(--nav-h);}
 /* ── LINE LOGIN SCREEN ── */
 #lineLogin{
   position:fixed;inset:0;z-index:10000;
-  background:linear-gradient(160deg,#BADF40,#FF85A2 60%,#D090FF);
+  background:linear-gradient(160deg,#500724,#BE185D 60%,#9D174D);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:32px;
 }
@@ -742,6 +768,11 @@ body{padding-bottom:var(--nav-h);}
   <div class="cat-grid2" id="catGrid2"></div>
 
   <input class="note-field" id="noteField" placeholder="รายละเอียด (ไม่บังคับ)">
+
+  <input type="file" id="scanInput" accept="image/*" style="display:none" onchange="handleScan(this)">
+  <button class="btn-scan" id="btnScan" onclick="document.getElementById('scanInput').click()">
+    📷 อ่านจากรูป (ใบเสร็จ/สลิป) <span class="scan-badge">ทดลองใช้</span>
+  </button>
 
   <button class="btn-add exp-btn" id="btnAdd" onclick="addEntry()">บันทึก ✓</button>
 </div>
@@ -1099,6 +1130,26 @@ function ok(){return ContentService.createTextOutput(JSON.stringify({status:'ok'
     <div class="sheet-btns">
       <button class="btn-sheet-cancel" onclick="closeSheet()">ยกเลิก</button>
       <button class="btn-sheet-save" id="btnSheetSave" onclick="saveBudget()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Entry Bottom Sheet -->
+<div class="overlay hidden" id="editEntrySheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="editSheetTitle">✏️ แก้ไขรายการ</div>
+    <div style="font-size:.78rem;color:var(--sub);margin-bottom:10px;" id="editSheetTypeBadge"></div>
+    <div class="edit-cat-scroll">
+      <div class="edit-cat-row" id="editCatRow"></div>
+    </div>
+    <div style="font-size:.78rem;color:var(--sub);margin-bottom:6px;">จำนวนเงิน</div>
+    <input class="sheet-input" type="number" id="editAmtInput" placeholder="0" inputmode="decimal" style="margin-bottom:10px;">
+    <div style="font-size:.78rem;color:var(--sub);margin-bottom:6px;">หมายเหตุ</div>
+    <input class="sheet-input" type="text" id="editNoteInput" placeholder="รายละเอียด">
+    <div class="sheet-btns" style="margin-top:4px;">
+      <button class="btn-sheet-cancel" onclick="closeEditSheet()">ยกเลิก</button>
+      <button class="btn-sheet-save" id="btnEditSave" onclick="saveEditEntry()">บันทึก ✓</button>
     </div>
   </div>
 </div>
@@ -1534,16 +1585,37 @@ function handleDeepLink(){
   const params=new URLSearchParams(window.location.search);
   const page=params.get('page');
   const entryId=params.get('entryId');
+  const action=params.get('action');
   if(!page) return;
+
+  if(page==='add'){
+    goPanel('panel-add');
+    return;
+  }
+
   if(page==='history'){
     goPanel('panel-history');
     if(entryId){
-      const el=document.querySelector(`[data-id="${entryId}"]`);
-      if(el){
-        el.scrollIntoView({behavior:'smooth',block:'center'});
-        el.classList.add('highlight');
-        setTimeout(()=>el.classList.remove('highlight'),1500);
+      const id=parseInt(entryId);
+      // action=delete: ลบรายการทันที
+      if(action==='delete'){
+        const idx=entries.findIndex(e=>e.id===id);
+        if(idx!==-1){
+          entries.splice(idx,1);
+          save(); renderAll(); renderHistory();
+          showToast('🗑️ ลบรายการแล้ว');
+        }
+        return;
       }
+      // highlight entry
+      setTimeout(()=>{
+        const el=document.querySelector(`[data-id="${id}"]`);
+        if(el){
+          el.scrollIntoView({behavior:'smooth',block:'center'});
+          el.classList.add('highlight');
+          setTimeout(()=>el.classList.remove('highlight'),1500);
+        }
+      }, 300);
     }
   }
 }
@@ -1836,25 +1908,69 @@ function delEntry(id){
   save(); renderAll(); renderHistory();
   showToast('🗑️ ลบแล้ว');
 }
+// ══════ EDIT ENTRY SHEET ══════
+let _editId = null;
+let _editSelCat = null;
+
 function editEntry(id){
-  const el=document.querySelector(`.tx2[data-id="${id}"] .tx2-desc`);
-  const entry=entries.find(e=>e.id===id);
-  if(!el||!entry) return;
-  const inp=document.createElement('input');
-  inp.type='text'; inp.value=entry.note;
-  inp.style.cssText='width:100%;border:none;border-bottom:2px solid var(--pink);background:transparent;font-size:1rem;font-weight:600;outline:none;padding:0;color:var(--text);';
-  el.innerHTML=''; el.appendChild(inp); inp.focus(); inp.select();
-  function commit(){
-    const v=inp.value.trim();
-    if(!v){showToast('ต้องมีชื่อนะ');inp.focus();return;}
-    entry.note=v; save(); renderHistory();
-    showToast('✅ แก้ชื่อแล้ว');
-  }
-  inp.addEventListener('blur',commit);
-  inp.addEventListener('keydown',ev=>{
-    if(ev.key==='Enter'){ev.preventDefault();inp.blur();}
-    if(ev.key==='Escape'){inp.removeEventListener('blur',commit);renderHistory();}
+  const entry = entries.find(e => e.id === id);
+  if(!entry) return;
+  _editId = id;
+  _editSelCat = entry.catId;
+
+  const isInc = entry.type === 'income';
+  const cats = isInc ? INC_CATS : EXP_CATS;
+
+  document.getElementById('editSheetTypeBadge').textContent = isInc ? '📈 รายรับ' : '📉 รายจ่าย';
+  document.getElementById('editAmtInput').value = entry.amount;
+  document.getElementById('editNoteInput').value = entry.note || '';
+  document.getElementById('btnEditSave').className = 'btn-sheet-save' + (isInc ? ' inc-save' : '');
+
+  const row = document.getElementById('editCatRow');
+  row.innerHTML = cats.map(c => `
+    <div class="edit-cat-chip ${c.id === _editSelCat ? 'ec-sel'+(isInc?' ec-inc':'') : ''}"
+         onclick="selectEditCat('${c.id}',this,${isInc})">
+      <span class="ec-icon">${c.icon}</span>
+      <span>${catDispName(c)}</span>
+    </div>`).join('');
+
+  document.getElementById('editEntrySheet').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('editAmtInput').focus(), 200);
+}
+
+function selectEditCat(id, el, isInc){
+  _editSelCat = id;
+  document.querySelectorAll('#editCatRow .edit-cat-chip').forEach(c=>{
+    c.classList.remove('ec-sel','ec-inc');
   });
+  el.classList.add('ec-sel');
+  if(isInc) el.classList.add('ec-inc');
+}
+
+function closeEditSheet(){
+  document.getElementById('editEntrySheet').classList.add('hidden');
+  _editId = null;
+}
+
+function saveEditEntry(){
+  const entry = entries.find(e => e.id === _editId);
+  if(!entry) return;
+  const amt = parseFloat(document.getElementById('editAmtInput').value);
+  const note = document.getElementById('editNoteInput').value.trim();
+  if(!amt || amt <= 0){ showToast('ใส่จำนวนเงินด้วยนะ'); return; }
+
+  const cats = entry.type === 'income' ? INC_CATS : EXP_CATS;
+  const cat = cats.find(c => c.id === _editSelCat) || cats[cats.length-1];
+
+  entry.amount = amt;
+  entry.note   = note || cat.name;
+  entry.catId  = cat.id;
+  entry.catName= catDispName(cat);
+  entry.catIcon= cat.icon;
+
+  save(); renderAll(); renderHistory();
+  closeEditSheet();
+  showToast('✅ แก้ไขรายการแล้ว');
 }
 
 // ══════ SETTINGS ══════
@@ -1977,6 +2093,55 @@ function copyRichUrl(page, el){
     const hint = el.querySelector('.rich-copy-hint');
     if(hint){ hint.textContent = '✅ คัดลอกแล้ว!'; setTimeout(()=>{ hint.textContent='แตะเพื่อคัดลอก'; },2000); }
   }).catch(()=>{ showToast('คัดลอกไม่ได้ — กรุณา copy URL เอง'); });
+}
+
+// ══════ SCAN IMAGE (OCR via Gemini) ══════
+const FUNC_BASE = 'https://asia-southeast1-don-note-f2bcd.cloudfunctions.net';
+
+function toBase64(file){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.readAsDataURL(file);
+    r.onload=()=>resolve(r.result);
+    r.onerror=reject;
+  });
+}
+
+async function handleScan(input){
+  const file=input.files[0];
+  if(!file) return;
+  const btn=document.getElementById('btnScan');
+  btn.textContent='⏳ กำลังวิเคราะห์รูป...';
+  btn.classList.add('scanning');
+  try{
+    const b64=await toBase64(file);
+    const resp=await fetch(FUNC_BASE+'/analyzeImage',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({imageBase64:b64,userId:userId||'unknown'})
+    });
+    const data=await resp.json();
+    if(data.error){
+      showToast('❌ ไม่พบข้อมูลในรูป ลองรูปใบเสร็จอื่น');
+      return;
+    }
+    // เติมข้อมูลในฟอร์ม
+    if(data.type==='income') setAddType('income');
+    else setAddType('expense');
+    if(data.amount) document.getElementById('inputAmt').value=data.amount;
+    if(data.note)   document.getElementById('noteField').value=data.note;
+    if(data.catId){
+      selCatId=data.catId;
+      renderCatGrid2();
+    }
+    showToast('✅ วิเคราะห์สำเร็จ — ตรวจสอบข้อมูลก่อนกด บันทึก');
+  }catch(e){
+    showToast('❌ เกิดข้อผิดพลาด กรุณาลองใหม่');
+  }finally{
+    btn.innerHTML='📷 อ่านจากรูป (ใบเสร็จ/สลิป) <span class="scan-badge">ทดลองใช้</span>';
+    btn.classList.remove('scanning');
+    input.value='';
+  }
 }
 
 // START

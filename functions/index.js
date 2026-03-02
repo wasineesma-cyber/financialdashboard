@@ -46,14 +46,16 @@ exports.lineWebhook = onRequest(async (req, res) => {
   for (const e of newEntries) entries.push(e);
   await docRef.set({ entries, updatedAt: new Date().toISOString() }, { merge: true });
 
-  // --- reply flex card ---
   const LIFF_ID = process.env.LIFF_ID;
+  const addUrl     = `https://liff.line.me/${LIFF_ID}?page=add`;
   const historyUrl = `https://liff.line.me/${LIFF_ID}?page=history`;
 
   let flexMsg;
   if (newEntries.length === 1) {
     const entry = newEntries[0];
-    const liffUrl = `https://liff.line.me/${LIFF_ID}?page=history&entryId=${encodeURIComponent(String(entry.id))}`;
+    const entryUrl = `https://liff.line.me/${LIFF_ID}?page=history&entryId=${encodeURIComponent(String(entry.id))}`;
+    const deleteUrl = `https://liff.line.me/${LIFF_ID}?page=history&entryId=${encodeURIComponent(String(entry.id))}&action=delete`;
+
     flexMsg = {
       type: "flex",
       altText: `บันทึกแล้ว: ${entry.catName} ฿${entry.amount}`,
@@ -62,20 +64,41 @@ exports.lineWebhook = onRequest(async (req, res) => {
         body: {
           type: "box", layout: "vertical", spacing: "md",
           contents: [
-            { type: "text", text: "✅ บันทึกแล้ว", weight: "bold", size: "lg" },
+            { type: "text", text: "✅ บันทึกแล้ว", weight: "bold", size: "lg", color: "#111827" },
             {
               type: "box", layout: "baseline", spacing: "sm",
               contents: [
                 { type: "text", text: entry.catIcon || "💾", size: "xl", flex: 0 },
-                { type: "text", text: entry.catName, size: "md", flex: 4, wrap: true },
-                { type: "text", text: `฿${entry.amount}`, size: "md", weight: "bold", align: "end", flex: 2 },
+                { type: "text", text: entry.catName, size: "md", flex: 4, wrap: true, color: "#374151" },
+                { type: "text", text: `฿${entry.amount}`, size: "md", weight: "bold", align: "end", flex: 2, color: "#BE185D" },
               ],
             },
-          ],
+            entry.note && entry.note !== entry.catName ? {
+              type: "text", text: entry.note, size: "sm", color: "#6B7280", wrap: true,
+            } : null,
+          ].filter(Boolean),
         },
         footer: {
           type: "box", layout: "vertical", spacing: "sm",
-          contents: [{ type: "button", style: "primary", color: "#FF4785", action: { type: "uri", label: "ดูรายการนี้", uri: liffUrl } }],
+          contents: [
+            {
+              type: "button", style: "primary", color: "#BE185D", height: "sm",
+              action: { type: "uri", label: "✏️ จดเพิ่มเอง (ละเอียด)", uri: addUrl },
+            },
+            {
+              type: "box", layout: "horizontal", spacing: "sm",
+              contents: [
+                {
+                  type: "button", style: "secondary", height: "sm",
+                  action: { type: "uri", label: "📊 ดูสรุป", uri: entryUrl },
+                },
+                {
+                  type: "button", style: "secondary", height: "sm",
+                  action: { type: "uri", label: "🗑️ ลบ", uri: deleteUrl },
+                },
+              ],
+            },
+          ],
         },
       },
     };
@@ -86,8 +109,8 @@ exports.lineWebhook = onRequest(async (req, res) => {
       type: "box", layout: "baseline", spacing: "sm",
       contents: [
         { type: "text", text: e.catIcon || "💾", size: "md", flex: 0 },
-        { type: "text", text: e.catName, size: "sm", flex: 3, color: "#555555", wrap: true },
-        { type: "text", text: `฿${e.amount}`, size: "sm", weight: "bold", align: "end", flex: 2 },
+        { type: "text", text: e.catName, size: "sm", flex: 3, color: "#374151", wrap: true },
+        { type: "text", text: `฿${e.amount}`, size: "sm", weight: "bold", align: "end", flex: 2, color: "#BE185D" },
       ],
     }));
     flexMsg = {
@@ -98,21 +121,30 @@ exports.lineWebhook = onRequest(async (req, res) => {
         body: {
           type: "box", layout: "vertical", spacing: "md",
           contents: [
-            { type: "text", text: `✅ บันทึก ${newEntries.length} รายการแล้ว`, weight: "bold", size: "lg" },
+            { type: "text", text: `✅ บันทึก ${newEntries.length} รายการแล้ว`, weight: "bold", size: "lg", color: "#111827" },
             ...rows,
             { type: "separator" },
             {
               type: "box", layout: "baseline", spacing: "sm",
               contents: [
-                { type: "text", text: "รวม", size: "sm", flex: 3, color: "#555555" },
-                { type: "text", text: `฿${total}`, size: "sm", weight: "bold", align: "end", flex: 2 },
+                { type: "text", text: "รวม", size: "sm", flex: 3, color: "#6B7280" },
+                { type: "text", text: `฿${total}`, size: "sm", weight: "bold", align: "end", flex: 2, color: "#BE185D" },
               ],
             },
           ],
         },
         footer: {
           type: "box", layout: "vertical", spacing: "sm",
-          contents: [{ type: "button", style: "primary", color: "#FF4785", action: { type: "uri", label: "ดูประวัติ", uri: historyUrl } }],
+          contents: [
+            {
+              type: "button", style: "primary", color: "#BE185D", height: "sm",
+              action: { type: "uri", label: "✏️ จดเพิ่มเอง (ละเอียด)", uri: addUrl },
+            },
+            {
+              type: "button", style: "secondary", height: "sm",
+              action: { type: "uri", label: "📊 ดูประวัติ", uri: historyUrl },
+            },
+          ],
         },
       },
     };
@@ -120,6 +152,73 @@ exports.lineWebhook = onRequest(async (req, res) => {
 
   await lineReply(replyToken, [flexMsg]);
   return res.status(200).send("OK");
+});
+
+// ══════ Analyze Image (OCR via Gemini Vision) ══════
+exports.analyzeImage = onRequest(async (req, res) => {
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.set("Access-Control-Allow-Headers", "Content-Type");
+  if (req.method === "OPTIONS") return res.status(204).send("");
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+
+  const { imageBase64 } = req.body || {};
+  if (!imageBase64) return res.status(400).json({ error: "Missing imageBase64" });
+
+  const GEMINI_KEY = process.env.GEMINI_API_KEY;
+  if (!GEMINI_KEY) return res.status(500).json({ error: "Gemini API key not configured" });
+
+  const prompt = `วิเคราะห์รูปนี้ว่าเป็นใบเสร็จ/สลิปการจ่ายเงิน/รายการค่าใช้จ่ายหรือไม่
+ถ้าใช่ ให้ตอบเป็น JSON เท่านั้น (ไม่มีข้อความอื่น):
+{"amount": <ตัวเลขจำนวนเงินรวม>, "note": "<รายละเอียดสั้นๆ>", "type": "expense", "catId": "<หมวด>"}
+
+catId ที่เลือกได้: food, drink, deliver, travel, place, shop, beauty, health, phone, net, sub, entertain, edu, charity, vehicle, pet, insurance, transfer, other
+
+ถ้าเป็นรายรับให้ใช้ type: "income" และ catId จาก: salary, special, freelance, sell, invest, gift, other_i
+
+ถ้าไม่ใช่ใบเสร็จหรือหาข้อมูลไม่ได้ ตอบ: {"error": "not_receipt"}`;
+
+  try {
+    const b64data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
+    // ตรวจ mime type
+    const mime = imageBase64.startsWith("data:image/png") ? "image/png"
+               : imageBase64.startsWith("data:image/webp") ? "image/webp"
+               : "image/jpeg";
+
+    const geminiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { text: prompt },
+              { inline_data: { mime_type: mime, data: b64data } },
+            ],
+          }],
+          generationConfig: { temperature: 0.1, maxOutputTokens: 256 },
+        }),
+      }
+    );
+
+    if (!geminiRes.ok) {
+      const err = await geminiRes.text();
+      console.error("Gemini error:", err);
+      return res.status(500).json({ error: "Gemini API error" });
+    }
+
+    const geminiData = await geminiRes.json();
+    const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const match = rawText.match(/\{[\s\S]*?\}/);
+    if (!match) return res.status(200).json({ error: "parse_failed" });
+
+    const parsed = JSON.parse(match[0]);
+    return res.status(200).json(parsed);
+  } catch (e) {
+    console.error("analyzeImage error:", e);
+    return res.status(500).json({ error: e.message });
+  }
 });
 
 // ── helpers ──
@@ -226,13 +325,11 @@ function applyLearning(catId, type, context, previousEntries) {
 }
 
 // แยกข้อความเป็น 1 หรือหลายรายการอัตโนมัติ
-// เช่น "ข้าว 80 กาแฟ 65 grab 120" → 3 รายการ
 function parseMultiEntries(text, previousEntries = []) {
   const now = new Date();
   const today = now.toISOString().slice(0, 10);
   const createdAt = now.toISOString();
 
-  // แยกข้อความโดยเก็บตัวเลขไว้เป็น delimiter
   const parts = text.split(/([\d,]+(?:\.\d+)?)/);
   const results = [];
 
@@ -240,7 +337,6 @@ function parseMultiEntries(text, previousEntries = []) {
     const amount = parseFloat(parts[i].replace(/,/g, ""));
     if (!amount || amount < 1) continue;
 
-    // context = ข้อความก่อน + ตัวเลข + ข้อความหลัง (เพื่อจับ keyword)
     const before = parts[i - 1] || "";
     const after  = parts[i + 1] || "";
     const context = (before + " " + parts[i] + " " + after).toLowerCase();
