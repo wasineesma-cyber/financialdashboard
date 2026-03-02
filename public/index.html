@@ -670,14 +670,10 @@ body{padding-bottom:var(--nav-h);}
 <div class="panel active" id="panel-home">
 
   <div class="home-greeting">
-    <img src="mascot.PNG" alt="แม่ละเมียด" class="home-mascot">
+    <img src="mascot.PNG" alt="แม่ละเมียด" class="home-mascot" id="homeMascot">
     <div class="home-greeting-text">
-      <div class="home-greeting-title">แม่ละเมียด</div>
-      <div class="home-greeting-sub">Mae Lamiet · บันทึกการเงินส่วนตัว</div>
-      <div class="home-user-wrap" id="homeUserWrap" style="display:none;">
-        <img id="homeUserPic" class="home-user-pic" src="" alt="">
-        <span class="home-user-name" id="homeUserName"></span>
-      </div>
+      <div class="home-greeting-title" id="homeGreetTitle">แม่ละเมียด</div>
+      <div class="home-greeting-sub" id="homeGreetSub">Mae Lamiet · บันทึกการเงินส่วนตัว</div>
     </div>
   </div>
 
@@ -1246,9 +1242,27 @@ function updateLineProfileUI() {
   hasLinePic = false;
   if (!lineProfile) return;
 
+  // แสดง LINE profile ใน home greeting (แทน mascot เมื่อ login ด้วย LINE)
+  if (lineProfile) {
+    const mascot = document.getElementById('homeMascot');
+    if (mascot && lineProfile.pictureUrl) {
+      mascot.src = lineProfile.pictureUrl;
+      mascot.style.border = '3px solid var(--pink)';
+      mascot.style.boxShadow = '0 2px 16px rgba(190,24,93,.25)';
+    }
+    const titleEl = document.getElementById('homeGreetTitle');
+    if (titleEl && lineProfile.displayName) {
+      const firstName = lineProfile.displayName.split(' ')[0];
+      titleEl.textContent = 'สวัสดี, ' + firstName + ' 👋';
+    }
+    const subEl = document.getElementById('homeGreetSub');
+    if (subEl) subEl.innerHTML = 'เชื่อมผ่าน LINE ✅ · ซิงค์ Cloud อัตโนมัติ';
+  }
+
+  // user chip ใน header
   const hb = document.getElementById('headerProfile');
-  if (hb && lineProfile.pictureUrl) {
-    hb.innerHTML = `<img src="${lineProfile.pictureUrl}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid var(--pink);">`;
+  if (hb && lineProfile?.pictureUrl) {
+    hb.innerHTML = `<img src="${lineProfile.pictureUrl}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.8);display:block;" onclick="goPanel('panel-settings')" title="${lineProfile?.displayName||''}">`;
     hasLinePic = true;
   }
   const nameEl = document.getElementById('lineNameDisplay');
@@ -1259,18 +1273,6 @@ function updateLineProfileUI() {
     picEl.style.display = 'block';
   }
 
-  // แสดงรูปและชื่อ LINE ใน home greeting
-  const homeWrap = document.getElementById('homeUserWrap');
-  const homeUserPic  = document.getElementById('homeUserPic');
-  const homeUserName = document.getElementById('homeUserName');
-  if (homeWrap && lineProfile.displayName) {
-    if (homeUserPic && lineProfile.pictureUrl) {
-      homeUserPic.src = lineProfile.pictureUrl;
-      homeUserPic.style.display = 'block';
-    }
-    if (homeUserName) homeUserName.textContent = 'สวัสดี, ' + lineProfile.displayName;
-    homeWrap.style.display = 'flex';
-  }
 }
 
 
@@ -1722,19 +1724,29 @@ function setAmt(v){
 }
 
 function addEntry(){
-  const amt=parseFloat(document.getElementById('inputAmt').value);
-  if(!amt||amt<=0){ showToast('ใส่จำนวนเงินก่อนนะ'); return; }
-  const note=document.getElementById('noteField').value.trim();
-  const allCats=[...EXP_CATS,...INC_CATS];
-  const cat=allCats.find(c=>c.id===selCatId)||allCats[0];
-  entries.push({id:Date.now(),type:addType,amount:amt,catId:cat.id,catIcon:cat.icon,catName:cat.name,note:note||cat.name,date:todayStr()});
-  save(); renderAll();
-  document.getElementById('inputAmt').value='';
-  document.getElementById('noteField').value='';
-  document.querySelectorAll('.q-chip').forEach(c=>c.classList.remove('sel'));
-  const savedName=note||cat.name;
-  showToast(addType==='expense'?`❤️ บันทึกแล้ว: ${savedName}`:`💚 บันทึกแล้ว: ${savedName}`);
-  goPanel('panel-home');
+  try{
+    const amt=parseFloat(document.getElementById('inputAmt').value);
+    if(!amt||amt<=0){ showToast('ใส่จำนวนเงินก่อนนะ'); return; }
+    const note=document.getElementById('noteField').value.trim();
+    const allCats=[...EXP_CATS,...INC_CATS];
+    const cat=allCats.find(c=>c.id===selCatId)||allCats[0];
+    entries.push({
+      id:Date.now(),type:addType,amount:amt,
+      catId:cat.id,catIcon:cat.icon,catName:catDispName(cat),
+      note:note||catDispName(cat),date:todayStr()
+    });
+    save();
+    try{ renderAll(); }catch(e){ console.warn('renderAll:',e); }
+    document.getElementById('inputAmt').value='';
+    document.getElementById('noteField').value='';
+    document.querySelectorAll('.q-chip').forEach(c=>c.classList.remove('sel'));
+    const savedName=note||catDispName(cat);
+    showToast(addType==='expense'?`❤️ บันทึกแล้ว: ${savedName}`:`💚 บันทึกแล้ว: ${savedName}`);
+    goPanel('panel-home');
+  }catch(e){
+    console.error('addEntry error:',e);
+    showToast('❌ บันทึกไม่สำเร็จ กรุณาลองใหม่');
+  }
 }
 
 // ══════ PARSE CHAT ══════
