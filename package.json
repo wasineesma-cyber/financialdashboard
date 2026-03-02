@@ -1,21 +1,13 @@
 {
-  "name": "donnote-functions",
-  "description": "Don Note LINE Bot & Sync - Firebase Cloud Functions",
+  "name": "maelamed-app",
+  "description": "Mae La Mied - LINE Bot & Financial Tracker",
   "version": "1.0.0",
   "type": "module",
-  "main": "index.js",
   "engines": {
     "node": "20"
   },
   "dependencies": {
-    "firebase-admin": "^11.11.0",
-    "firebase-functions": "^5.0.0",
-    "@line/bot-sdk": "^9.0.0",
-    "express": "^4.19.0",
-    "cors": "^2.8.5"
-  },
-  "devDependencies": {
-    "firebase-functions-test": "^3.1.0"
+    "firebase-admin": "^11.11.0"
   },
   "private": true
 }
