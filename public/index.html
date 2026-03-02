@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="แม่ละเมียด">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#FF4785">
+<meta name="theme-color" content="#BE185D">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.JPG">
 <link rel="icon" type="image/jpeg" href="icon.JPG">
@@ -59,7 +59,7 @@ body{padding-bottom:var(--nav-h);}
   padding-top:calc(14px + env(safe-area-inset-top));
   display:flex;align-items:center;justify-content:center;
   position:relative;
-  box-shadow:0 2px 16px rgba(255,71,133,.25);
+  box-shadow:0 2px 16px rgba(190,24,93,.25);
 }
 .header-title{font-size:1.15rem;font-weight:900;color:#fff;letter-spacing:.04em;text-shadow:0 1px 4px rgba(0,0,0,.15);}
 .header-profile{
@@ -91,7 +91,7 @@ body{padding-bottom:var(--nav-h);}
 .guide-hero{
   background:linear-gradient(135deg,#831843,#BE185D);
   border-radius:20px;padding:20px 18px 18px;margin-bottom:16px;
-  box-shadow:0 6px 20px rgba(255,71,133,.22);
+  box-shadow:0 6px 20px rgba(190,24,93,.22);
 }
 .guide-hero-title{font-size:1.2rem;font-weight:900;color:#fff;margin-bottom:4px;}
 .guide-hero-sub{font-size:.75rem;color:rgba(255,255,255,.88);}
@@ -143,10 +143,10 @@ body{padding-bottom:var(--nav-h);}
 
 /* Balance */
 .balance-wrap{
-  background:linear-gradient(135deg,#BADF40,var(--pink));
+  background:linear-gradient(135deg,#831843,#BE185D);
   border-radius:24px;text-align:center;margin-bottom:14px;
   padding:28px 20px 22px;
-  box-shadow:0 8px 28px rgba(255,71,133,.28);
+  box-shadow:0 8px 28px rgba(190,24,93,.28);
 }
 .balance-label{font-size:.72rem;color:rgba(255,255,255,.75);font-weight:600;text-transform:uppercase;letter-spacing:.06em;}
 .balance-amount{font-size:2.6rem;font-weight:900;margin:4px 0 8px;color:#fff;}
@@ -229,7 +229,7 @@ body{padding-bottom:var(--nav-h);}
 /* Invite banner */
 .invite-banner{
   width:100%;padding:14px;margin-top:10px;
-  background:linear-gradient(135deg,var(--pink),#D090FF);
+  background:linear-gradient(135deg,var(--pink),#7C3AED);
   border:none;border-radius:14px;font-size:.88rem;font-weight:800;
   color:#fff;cursor:pointer;
   display:flex;align-items:center;justify-content:center;gap:8px;
@@ -304,7 +304,7 @@ body{padding-bottom:var(--nav-h);}
   font-size:1rem;font-weight:800;color:#fff;cursor:pointer;
   transition:opacity .2s;letter-spacing:.02em;
 }
-.btn-add.exp-btn{background:var(--pink);box-shadow:0 4px 14px rgba(255,71,133,.3);}
+.btn-add.exp-btn{background:var(--pink);box-shadow:0 4px 14px rgba(190,24,93,.3);}
 .btn-add.inc-btn{background:var(--teal);box-shadow:0 4px 14px rgba(0,201,167,.3);}
 .btn-add:active{transform:scale(.98);}
 
@@ -406,7 +406,7 @@ body{padding-bottom:var(--nav-h);}
 .tx2-del{background:none;border:none;cursor:pointer;color:#DDD;font-size:.9rem;padding:4px;border-radius:6px;transition:color .2s;}
 .tx2-del:hover{color:var(--pink);}
 .tx2.highlight{animation:hlPulse .5s ease 3;}
-@keyframes hlPulse{0%,100%{box-shadow:0 1px 4px rgba(0,0,0,.05);}50%{box-shadow:0 0 0 3px rgba(255,71,133,.4);}}
+@keyframes hlPulse{0%,100%{box-shadow:0 1px 4px rgba(0,0,0,.05);}50%{box-shadow:0 0 0 3px rgba(190,24,93,.4);}}
 .empty2{text-align:center;padding:40px 20px;color:var(--sub);font-size:.9rem;}
 
 /* ── ตั้งค่า PANEL ── */
@@ -488,7 +488,7 @@ body{padding-bottom:var(--nav-h);}
   width:80px;height:80px;border-radius:50%;
   object-fit:cover;flex-shrink:0;
   border:3px solid var(--pink-border);
-  box-shadow:0 2px 12px rgba(255,71,133,.22);
+  box-shadow:0 2px 12px rgba(190,24,93,.22);
 }
 .home-greeting-text{flex:1;}
 .home-greeting-title{font-size:1rem;font-weight:900;color:var(--text);}
@@ -625,7 +625,8 @@ body{padding-bottom:var(--nav-h);}
 <!-- LINE LOGIN SCREEN -->
 <div id="lineLogin" class="hidden">
   <img src="mascot.PNG" alt="แม่ละเมียด" class="ll-mascot">
-  <div class="ll-sub">เข้าสู่ระบบด้วย LINE<br>ข้อมูลปลอดภัยผูกกับบัญชี LINE ของคุณ</div>
+  <div class="ll-title">แม่ละเมียด</div>
+  <div class="ll-sub">บันทึกรายรับ-รายจ่ายผ่าน LINE<br>ซิงค์ Cloud อัตโนมัติ · ปลอดภัยกับบัญชี LINE ของคุณ</div>
   <button class="btn-line-login" onclick="doLineLogin()">
     <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <rect width="24" height="24" rx="6" fill="white" opacity="0.25"/>
@@ -1194,7 +1195,6 @@ let userId = null;
 let lineProfile = null;
 let hasLinePic = false;
 
-/* ... โค้ดส่วนอื่นของฝ้ายต่อเหมือนเดิม ... */
 
 async function initLiff() {
   try {
@@ -1248,7 +1248,7 @@ function updateLineProfileUI() {
 
   const hb = document.getElementById('headerProfile');
   if (hb && lineProfile.pictureUrl) {
-    hb.innerHTML = `<img src="${lineProfile.pictureUrl}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid #FF4785;">`;
+    hb.innerHTML = `<img src="${lineProfile.pictureUrl}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid var(--pink);">`;
     hasLinePic = true;
   }
   const nameEl = document.getElementById('lineNameDisplay');
@@ -2014,7 +2014,7 @@ function renderPieChart(){
     if(exp>0){
       ctx.beginPath();ctx.moveTo(cx,cy);
       ctx.arc(cx,cy,r,start,start+expAngle);
-      ctx.closePath();ctx.fillStyle='#FF4785';ctx.fill();
+      ctx.closePath();ctx.fillStyle='#BE185D';ctx.fill();
     }
     if(inc>0){
       ctx.beginPath();ctx.moveTo(cx,cy);
@@ -2029,7 +2029,7 @@ function renderPieChart(){
 
   document.getElementById('pieLegend').innerHTML=`
     <div class="pie-legend-item">
-      <div class="pie-dot" style="background:#FF4785;"></div>
+      <div class="pie-dot" style="background:#BE185D;"></div>
       <span>รายจ่าย ฿${fmt0(exp)}</span>
     </div>
     <div class="pie-legend-item">
