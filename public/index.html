@@ -408,6 +408,41 @@ body{padding-bottom:var(--nav-h);}
 }
 .gtc-arrow{color:var(--sub);flex-shrink:0;}
 .gtc-res{color:var(--sub);flex:1;line-height:1.4;}
+.privacy-card{
+  background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%);
+  border:1.5px solid #86efac;border-radius:16px;padding:16px;margin-top:8px;
+}
+.privacy-card-title{
+  font-size:.9rem;font-weight:800;color:#15803d;
+  display:flex;align-items:center;gap:6px;margin-bottom:10px;
+}
+.privacy-row{
+  display:flex;align-items:flex-start;gap:8px;
+  font-size:.8rem;color:#166534;line-height:1.5;padding:5px 0;
+  border-bottom:1px solid rgba(134,239,172,.4);
+}
+.privacy-row:last-child{border-bottom:none;}
+.privacy-icon{flex-shrink:0;font-size:1rem;}
+.friend-card{
+  background:var(--white);border-radius:16px;padding:16px;
+  box-shadow:0 1px 4px rgba(0,0,0,.06);border:1.5px solid var(--border);
+  margin-top:8px;
+}
+.friend-card-title{
+  font-size:.9rem;font-weight:800;color:var(--pink);
+  display:flex;align-items:center;gap:6px;margin-bottom:10px;
+}
+.friend-row{
+  display:flex;align-items:flex-start;gap:8px;
+  font-size:.8rem;color:var(--text);line-height:1.5;padding:5px 0;
+  border-bottom:1px solid var(--border);
+}
+.friend-row:last-child{border-bottom:none;}
+.friend-num{
+  min-width:22px;height:22px;border-radius:50%;
+  background:var(--pink);color:#fff;font-size:.7rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
 .filter-row2{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;}
 .filter-row2 select,.filter-row2 input[type="month"]{
   padding:8px 12px;border:1px solid var(--border);border-radius:10px;
@@ -1002,6 +1037,62 @@ body{padding-bottom:var(--nav-h);}
       ✏️ แก้ไขรายการได้ตลอดเวลาในหน้า "รายการทั้งหมด"<br>
       📷 สแกนใบเสร็จ → ระบบอ่านตัวเลขและหมวดให้อัตโนมัติ
     </div>
+  </div>
+
+  <div class="guide-section-title">🔒 ความปลอดภัยของข้อมูล</div>
+
+  <div class="privacy-card">
+    <div class="privacy-card-title">🛡️ ข้อมูลเป็นของคุณ 100%</div>
+    <div class="privacy-row">
+      <span class="privacy-icon">🗄️</span>
+      <span>ข้อมูลเก็บใน <b>Firebase Firestore</b> แยกตาม LINE ID ของแต่ละคน — ไม่มีใครเข้าถึงข้อมูลของคุณได้</span>
+    </div>
+    <div class="privacy-row">
+      <span class="privacy-icon">🚫</span>
+      <span>แอพนี้<b>ไม่ใช่บอทเก็บข้อมูล</b> — ไม่มีการรวบรวม วิเคราะห์ หรือขายข้อมูลส่วนตัวให้ใคร</span>
+    </div>
+    <div class="privacy-row">
+      <span class="privacy-icon">👤</span>
+      <span>ข้อมูลที่แอพใช้มีเพียง <b>LINE Display Name</b> และ <b>รายรับ-รายจ่าย</b> ที่คุณบันทึกเองเท่านั้น</span>
+    </div>
+    <div class="privacy-row">
+      <span class="privacy-icon">🗑️</span>
+      <span>ลบข้อมูลทั้งหมดของตัวเองได้ตลอดเวลาในหน้า <b>ตั้งค่า → ลบบัญชี</b></span>
+    </div>
+    <div class="privacy-row">
+      <span class="privacy-icon">🔐</span>
+      <span>เชื่อม Google Sheet ได้ถ้าอยากสำรองข้อมูลไว้ใน Google Drive ของตัวเอง</span>
+    </div>
+  </div>
+
+  <div class="guide-section-title">🌟 คำแนะนำสำหรับเพื่อน</div>
+
+  <div class="friend-card">
+    <div class="friend-card-title">✨ ทำให้ได้ผลสุด</div>
+    <div class="friend-row">
+      <span class="friend-num">1</span>
+      <span>บันทึกทุกวัน แม้แค่ 20 บาท — สะสม 1 เดือนแล้วจะเห็นว่าเงินหายไปไหน</span>
+    </div>
+    <div class="friend-row">
+      <span class="friend-num">2</span>
+      <span>ใช้บอท LINE พิมพ์ทันทีที่จ่าย เช่น <b>"ข้าว 50"</b> — ไม่ต้องเปิดแอพ ไม่ลืม</span>
+    </div>
+    <div class="friend-row">
+      <span class="friend-num">3</span>
+      <span>ตั้งงบแต่ละหมวดในหน้า <b>หมวด/งบ</b> แล้วดูแถบก่อนซื้อของทุกครั้ง</span>
+    </div>
+    <div class="friend-row">
+      <span class="friend-num">4</span>
+      <span>ต้นเดือนเปิดดู <b>สรุปยอด</b> — เปรียบเทียบกับเดือนที่แล้วว่าดีขึ้นไหม</span>
+    </div>
+    <div class="friend-row">
+      <span class="friend-num">5</span>
+      <span>ถ้าลืมบันทึก ยังแก้ไขย้อนหลังได้ในหน้า <b>รายการทั้งหมด</b> ✏️</span>
+    </div>
+  </div>
+
+  <div style="text-align:center;font-size:.72rem;color:var(--sub);padding:16px 0 8px;">
+    มีคำถามหรือปัญหาการใช้งาน<br>แจ้งได้เลยในแชท LINE 💬
   </div>
 
 </div><!-- /panel-guide -->
