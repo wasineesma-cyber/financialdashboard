@@ -379,7 +379,35 @@ body{padding-bottom:var(--nav-h);}
 .btn-sheet-save.inc-save{background:var(--teal);}
 .btn-sheet-cancel{background:var(--bg);color:var(--sub);}
 
-/* ── รายการ PANEL ── */
+/* ── USER GUIDE CARDS ── */
+.user-guide-card{
+  display:flex;align-items:flex-start;gap:12px;
+  background:var(--white);border-radius:14px;padding:14px;
+  margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.05);
+}
+.ugc-icon{
+  font-size:1.5rem;flex-shrink:0;width:44px;height:44px;
+  border-radius:12px;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+}
+.ugc-body{flex:1;}
+.ugc-title{font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:3px;}
+.ugc-desc{font-size:.78rem;color:var(--sub);line-height:1.55;}
+.guide-tip-card{
+  background:var(--white);border-radius:14px;padding:14px;
+  box-shadow:0 1px 4px rgba(0,0,0,.05);border:1px solid var(--border);
+}
+.gtc-row{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 0;border-bottom:1px solid var(--border);font-size:.8rem;
+}
+.gtc-row:last-child{border-bottom:none;}
+.gtc-msg{
+  background:var(--bg);border-radius:8px;padding:3px 8px;
+  font-weight:600;color:var(--text);flex-shrink:0;
+}
+.gtc-arrow{color:var(--sub);flex-shrink:0;}
+.gtc-res{color:var(--sub);flex:1;line-height:1.4;}
 .filter-row2{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;}
 .filter-row2 select,.filter-row2 input[type="month"]{
   padding:8px 12px;border:1px solid var(--border);border-radius:10px;
@@ -895,110 +923,84 @@ body{padding-bottom:var(--nav-h);}
 <div class="panel" id="panel-guide">
 
   <div class="guide-hero">
-    <div class="guide-hero-title">📖 คู่มือแม่ละเมียด</div>
-    <div class="guide-hero-sub">อธิบายแต่ละหน้า + ลิงก์สำหรับทำ LINE Rich Menu 6 ช่อง</div>
+    <div class="guide-hero-title">📖 คู่มือใช้งาน</div>
+    <div class="guide-hero-sub">แม่ละเมียด · Mae Lamiet</div>
   </div>
 
-  <div class="guide-section-title">6 ช่องสำหรับ Rich Menu</div>
-  <div class="rich-grid">
+  <div class="guide-section-title">หน้าหลักในแอพ</div>
 
-    <!-- ช่อง 1 -->
-    <div class="rich-card">
-      <span class="rich-slot">ช่อง 1</span>
-      <div class="rich-icon">🏠</div>
-      <div class="rich-name">สรุปยอด</div>
-      <div class="rich-desc">ดูยอดคงเหลือ รายรับ-รายจ่าย และกราฟสรุปประจำเดือน</div>
-      <div class="rich-url-box" onclick="copyRichUrl('home',this)">
-        <div class="rich-url-label">URL สำหรับ Rich Menu</div>
-        <div class="rich-url-val">https://liff.line.me/2009265283-X2umhDv5?page=home</div>
-        <div class="rich-copy-hint">แตะเพื่อคัดลอก</div>
-      </div>
+  <div class="user-guide-card">
+    <div class="ugc-icon">🏠</div>
+    <div class="ugc-body">
+      <div class="ugc-title">สรุปยอด (หน้าแรก)</div>
+      <div class="ugc-desc">ดูยอดเหลือเก็บ รายรับ-รายจ่ายของเดือนนี้ และกราฟแยกหมวด<br>พิมพ์สั้นๆ เช่น "กาแฟ 65" ในช่องด้านล่างเพื่อบันทึกเร็ว</div>
     </div>
-
-    <!-- ช่อง 2 -->
-    <div class="rich-card">
-      <span class="rich-slot">ช่อง 2</span>
-      <div class="rich-icon">✏️</div>
-      <div class="rich-name">บันทึกรายการ</div>
-      <div class="rich-desc">เพิ่มรายจ่าย-รายรับ เลือกหมวด ใส่จำนวนเงินและหมายเหตุ</div>
-      <div class="rich-url-box" onclick="copyRichUrl('add',this)">
-        <div class="rich-url-label">URL สำหรับ Rich Menu</div>
-        <div class="rich-url-val">https://liff.line.me/2009265283-X2umhDv5?page=add</div>
-        <div class="rich-copy-hint">แตะเพื่อคัดลอก</div>
-      </div>
-    </div>
-
-    <!-- ช่อง 3 -->
-    <div class="rich-card">
-      <span class="rich-slot">ช่อง 3</span>
-      <div class="rich-icon">🥧</div>
-      <div class="rich-name">หมวด / งบ</div>
-      <div class="rich-desc">ตั้งงบรายหมวด ดูแถบความคืบหน้าว่าใช้ไปแล้วเท่าไหร่</div>
-      <div class="rich-url-box" onclick="copyRichUrl('budget',this)">
-        <div class="rich-url-label">URL สำหรับ Rich Menu</div>
-        <div class="rich-url-val">https://liff.line.me/2009265283-X2umhDv5?page=budget</div>
-        <div class="rich-copy-hint">แตะเพื่อคัดลอก</div>
-      </div>
-    </div>
-
-    <!-- ช่อง 4 -->
-    <div class="rich-card">
-      <span class="rich-slot">ช่อง 4</span>
-      <div class="rich-icon">📋</div>
-      <div class="rich-name">รายการทั้งหมด</div>
-      <div class="rich-desc">ดูประวัติทุกรายการ กรองตามเดือนหรือประเภท</div>
-      <div class="rich-url-box" onclick="copyRichUrl('history',this)">
-        <div class="rich-url-label">URL สำหรับ Rich Menu</div>
-        <div class="rich-url-val">https://liff.line.me/2009265283-X2umhDv5?page=history</div>
-        <div class="rich-copy-hint">แตะเพื่อคัดลอก</div>
-      </div>
-    </div>
-
-    <!-- ช่อง 5 -->
-    <div class="rich-card">
-      <span class="rich-slot">ช่อง 5</span>
-      <div class="rich-icon">⚙️</div>
-      <div class="rich-name">ตั้งค่า</div>
-      <div class="rich-desc">จัดการ LINE Account, เชื่อม Google Sheet, Export CSV, อัพเกรด Premium</div>
-      <div class="rich-url-box" onclick="copyRichUrl('settings',this)">
-        <div class="rich-url-label">URL สำหรับ Rich Menu</div>
-        <div class="rich-url-val">https://liff.line.me/2009265283-X2umhDv5?page=settings</div>
-        <div class="rich-copy-hint">แตะเพื่อคัดลอก</div>
-      </div>
-    </div>
-
-    <!-- ช่อง 6 -->
-    <div class="rich-card">
-      <span class="rich-slot">ช่อง 6</span>
-      <div class="rich-icon">📖</div>
-      <div class="rich-name">คู่มือ</div>
-      <div class="rich-desc">หน้านี้ — อธิบายแต่ละหน้าและลิงก์สำหรับทำ Rich Menu</div>
-      <div class="rich-url-box" onclick="copyRichUrl('guide',this)">
-        <div class="rich-url-label">URL สำหรับ Rich Menu</div>
-        <div class="rich-url-val">https://liff.line.me/2009265283-X2umhDv5?page=guide</div>
-        <div class="rich-copy-hint">แตะเพื่อคัดลอก</div>
-      </div>
-    </div>
-
-  </div><!-- /rich-grid -->
-
-  <div class="guide-section-title">วิธีสร้าง Rich Menu 6 ช่อง</div>
-  <div class="guide-note-card">
-    <div class="guide-note-title">📌 ขั้นตอนใน LINE Official Account Manager</div>
-    <div class="guide-note-step">1️⃣ เข้า <b>manager.line.biz</b> → เลือก OA ของคุณ</div>
-    <div class="guide-note-step">2️⃣ ไปที่ <b>Rich menu</b> → กด <b>Create</b></div>
-    <div class="guide-note-step">3️⃣ เลือก Template <b>"Large" 6 grids (3×2)</b></div>
-    <div class="guide-note-step">4️⃣ อัปโหลดรูป Rich Menu ขนาด <b>2500 × 1686 px</b></div>
-    <div class="guide-note-step">5️⃣ แต่ละช่อง → Action Type: <b>Link</b> → วาง URL ช่องนั้น ๆ</div>
-    <div class="guide-note-step">6️⃣ กด <b>Save</b> และเปิดใช้งาน ✅</div>
   </div>
 
-  <div class="guide-note-card" style="margin-top:10px;background:var(--teal-light);border-color:var(--teal-border);">
-    <div class="guide-note-title" style="color:var(--teal);">💬 บอท LINE — พิมพ์บันทึกได้เลย</div>
-    <div class="guide-note-step">ส่งข้อความใน LINE ได้เลย เช่น<br>
-      <b>"กาแฟ 65"</b> → บันทึกรายจ่าย 65 บาท หมวดอาหาร<br>
-      <b>"เงินเดือน 15000"</b> → บันทึกรายรับ 15,000 บาท<br>
-      <b>"สรุป"</b> → บอทตอบยอดเดือนนี้กลับมา
+  <div class="user-guide-card">
+    <div class="ugc-icon">✏️</div>
+    <div class="ugc-body">
+      <div class="ugc-title">บันทึกรายการ</div>
+      <div class="ugc-desc">เลือกหมวด → กรอกจำนวนเงิน → ใส่หมายเหตุ → กด บันทึก<br>หรือกด 📷 <b>อ่านจากรูป</b> เพื่อสแกนใบเสร็จอัตโนมัติ</div>
+    </div>
+  </div>
+
+  <div class="user-guide-card">
+    <div class="ugc-icon">🥧</div>
+    <div class="ugc-body">
+      <div class="ugc-title">หมวดหมู่ / งบประมาณ</div>
+      <div class="ugc-desc">ตั้งงบรายเดือนแต่ละหมวด เช่น อาหาร 3,000 บาท<br>แอพจะแสดงแถบว่าใช้ไปแล้วเท่าไหร่เทียบกับงบที่ตั้งไว้</div>
+    </div>
+  </div>
+
+  <div class="user-guide-card">
+    <div class="ugc-icon">📋</div>
+    <div class="ugc-body">
+      <div class="ugc-title">รายการทั้งหมด</div>
+      <div class="ugc-desc">ดูประวัติทุกรายการ กรองตามเดือนหรือประเภท<br>กด ✏️ เพื่อแก้ไขหมวด/จำนวน หรือ 🗑️ เพื่อลบ</div>
+    </div>
+  </div>
+
+  <div class="user-guide-card">
+    <div class="ugc-icon">⚙️</div>
+    <div class="ugc-body">
+      <div class="ugc-title">ตั้งค่า</div>
+      <div class="ugc-desc">ดูข้อมูล LINE · เชื่อม Google Sheet เพื่อ backup<br>Export CSV · อัพเกรด Premium</div>
+    </div>
+  </div>
+
+  <div class="guide-section-title">💬 บอท LINE · บันทึกเร็วสุด</div>
+
+  <div class="guide-tip-card">
+    <div class="gtc-row">
+      <span class="gtc-msg">"กาแฟ 65"</span>
+      <span class="gtc-arrow">→</span>
+      <span class="gtc-res">🧋 บันทึกรายจ่าย ฿65 หมวดเครื่องดื่ม</span>
+    </div>
+    <div class="gtc-row">
+      <span class="gtc-msg">"ข้าว 80 grab 120"</span>
+      <span class="gtc-arrow">→</span>
+      <span class="gtc-res">บันทึก 2 รายการพร้อมกัน ✅</span>
+    </div>
+    <div class="gtc-row">
+      <span class="gtc-msg">"เงินเดือน 20000"</span>
+      <span class="gtc-arrow">→</span>
+      <span class="gtc-res">💼 บันทึกรายรับ ฿20,000</span>
+    </div>
+    <div class="gtc-row">
+      <span class="gtc-msg">"ชาไข่มุก 55 ข้าวมัน 60 bts 44"</span>
+      <span class="gtc-arrow">→</span>
+      <span class="gtc-res">บันทึก 3 รายการทีเดียว</span>
+    </div>
+  </div>
+
+  <div class="guide-tip-card" style="margin-top:8px;background:var(--teal-light);border-color:var(--teal-border);">
+    <div style="font-size:.85rem;font-weight:700;color:var(--teal);margin-bottom:8px;">💡 เคล็ดลับ</div>
+    <div style="font-size:.8rem;color:var(--text);line-height:1.7;">
+      📌 แอพจดจำหมวดอัตโนมัติ — ยิ่งบันทึกบ่อย ยิ่งแม่นยำ<br>
+      ☁️ ข้อมูลซิงค์ Cloud ทุกครั้งที่บันทึก ปลอดภัย<br>
+      ✏️ แก้ไขรายการได้ตลอดเวลาในหน้า "รายการทั้งหมด"<br>
+      📷 สแกนใบเสร็จ → ระบบอ่านตัวเลขและหมวดให้อัตโนมัติ
     </div>
   </div>
 

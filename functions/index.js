@@ -46,7 +46,7 @@ exports.lineWebhook = onRequest(async (req, res) => {
   for (const e of newEntries) entries.push(e);
   await docRef.set({ entries, updatedAt: new Date().toISOString() }, { merge: true });
 
-  const LIFF_ID = process.env.LIFF_ID;
+  const LIFF_ID = process.env.LIFF_ID || '2009265283-X2umhDv5';
   const addUrl     = `https://liff.line.me/${LIFF_ID}?page=add`;
   const historyUrl = `https://liff.line.me/${LIFF_ID}?page=history`;
 
