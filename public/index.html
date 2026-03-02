@@ -11,6 +11,19 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.JPG">
 <link rel="icon" type="image/jpeg" href="icon.JPG">
+<script>
+// Safety: ซ่อน splash ไม่เกิน 7 วินาที แม้ external scripts โหลดไม่ได้
+(function(){
+  setTimeout(function(){
+    var sp = document.getElementById('splash');
+    if(sp && !sp.classList.contains('hide')){
+      sp.style.transition='opacity .5s ease';
+      sp.style.opacity='0';
+      sp.style.pointerEvents='none';
+    }
+  }, 7000);
+})();
+</script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -1106,11 +1119,14 @@ const firebaseConfig = {
 };
 
 // ✅ สำคัญมาก: initialize + firestore instance
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-// (แนะนำ) ปรับ Firestore ให้ชัดเจนเรื่อง timestamp
-db.settings({ ignoreUndefinedProperties: true });
+let db = null;
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+  db.settings({ ignoreUndefinedProperties: true });
+} catch(e) {
+  console.warn('Firebase init failed:', e);
+}
 
 
 // ══════ LIFF + LINE LOGIN ══════
@@ -1315,7 +1331,7 @@ function exportCSV() {
 // ══════ CLOUD SYNC ══════
 async function saveToCloud() {
   try {
-    if(!userId) return;
+    if(!userId || !db) return;
     await db.collection('dongNote').doc(userId).set({
       entries: entries,
       budgets: budgets,
@@ -1329,7 +1345,7 @@ async function saveToCloud() {
 
 async function loadFromCloud() {
   try {
-    if(!userId) return;
+    if(!userId || !db) return;
     const doc = await db.collection('dongNote').doc(userId).get();
     if (doc.exists) {
       const data = doc.data();
