@@ -11,6 +11,7 @@ import marketRouter from './routes/market.js';
 import tradesRouter from './routes/trades.js';
 import ordersRouter from './routes/orders.js';
 import systemRouter from './routes/system.js';
+import aiRouter from './routes/ai.js';
 import { logger } from './services/logger.js';
 
 const __dir = dirname(fileURLToPath(import.meta.url));
@@ -32,6 +33,7 @@ app.use('/api/market', marketRouter);
 app.use('/api/trades', tradesRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/system', systemRouter);
+app.use('/api/ai', aiRouter);
 
 // ── Serve static frontend ───────────────────────────────────────────────────
 const publicDir = join(__dir, '..', 'public');

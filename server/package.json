@@ -18,6 +18,7 @@
     "uuid": "^9.0.1",
     "axios": "^1.6.8",
     "dotenv": "^16.4.5",
-    "winston": "^3.13.0"
+    "winston": "^3.13.0",
+    "@anthropic-ai/sdk": "^0.39.0"
   }
 }

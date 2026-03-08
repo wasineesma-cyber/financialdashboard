@@ -181,6 +181,46 @@
                border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ── AI card ──────────────────────────────────────────────────── */
+    #ai-card {
+      background: var(--bg3); border: 1px solid #3a3f5c;
+      border-radius: var(--radius); padding: 14px; margin-bottom: 14px; display: none;
+    }
+    #ai-card.show { display: block; }
+    .ai-direction {
+      font-size: 28px; font-weight: 800; letter-spacing: 1px; margin: 6px 0;
+    }
+    .ai-dir-BUY  { color: var(--buy); }
+    .ai-dir-SELL { color: var(--sell); }
+    .ai-dir-WAIT { color: var(--warn); }
+    .ai-confidence-bar {
+      height: 6px; background: var(--border); border-radius: 3px; margin: 6px 0;
+    }
+    .ai-confidence-fill {
+      height: 100%; border-radius: 3px; background: var(--accent); transition: width .5s;
+    }
+    .ai-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; font-size: 12px;
+    }
+    .ai-levels { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+    .ai-level-chip {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 4px; padding: 2px 6px; font-size: 11px; font-family: monospace;
+    }
+    .ai-reasoning {
+      margin-top: 10px; font-size: 12px; color: var(--text2);
+      border-left: 2px solid var(--accent); padding-left: 10px; line-height: 1.6;
+    }
+    .ai-caution {
+      margin-top: 8px; font-size: 12px; color: var(--warn);
+      background: rgba(240,192,64,.07); border-radius: 5px; padding: 6px 10px;
+    }
+
+    /* ── AI suggest badge on SL/TP ────────────────────────────────── */
+    .suggest-row { display: flex; gap: 6px; align-items: flex-end; flex: 1; min-width: 120px; }
+    .suggest-row .form-group { flex: 1; }
+    .btn-ai-suggest { padding: 5px 8px; font-size: 11px; align-self: flex-end; white-space: nowrap; }
+
     /* ── Confirm modal ────────────────────────────────────────────── */
     #confirm-modal {
       position: fixed; inset: 0; background: rgba(0,0,0,.6);
@@ -230,6 +270,9 @@
       </button>
       <button class="nav-btn" data-panel="orders">
         <span class="icon">📋</span><span>Order</span>
+      </button>
+      <button class="nav-btn" data-panel="ai">
+        <span class="icon">🤖</span><span>AI</span>
       </button>
       <button class="nav-btn" data-panel="settings">
         <span class="icon">⚙️</span><span>ตั้งค่า</span>
@@ -294,13 +337,18 @@
             </div>
           </div>
           <div class="form-row">
-            <div class="form-group">
-              <label>SL (pips)</label>
-              <input id="tr-sl" type="number" value="50" min="0" step="1" />
+            <div class="suggest-row">
+              <div class="form-group">
+                <label>SL (pips)</label>
+                <input id="tr-sl" type="number" value="50" min="0" step="1" />
+              </div>
             </div>
-            <div class="form-group">
-              <label>TP (pips)</label>
-              <input id="tr-tp" type="number" value="100" min="0" step="1" />
+            <div class="suggest-row">
+              <div class="form-group">
+                <label>TP (pips)</label>
+                <input id="tr-tp" type="number" value="100" min="0" step="1" />
+              </div>
+              <button class="btn btn-ghost btn-ai-suggest" id="btn-ai-suggest" title="ให้ AI แนะนำ SL/TP">AI แนะนำ</button>
             </div>
             <div class="form-group">
               <label>Comment</label>
@@ -362,6 +410,78 @@
           <div id="orders-body" style="overflow-x:auto">
             <div style="padding:16px" class="text-sm">กำลังโหลด...</div>
           </div>
+        </div>
+      </div>
+
+      <!-- ── AI Analysis ───────────────────────────────── -->
+      <div class="panel" id="panel-ai">
+        <div class="section-title">AI วิเคราะห์ตลาด</div>
+
+        <div class="card">
+          <div class="card-title">เลือก Symbol และ Timeframe</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Symbol</label>
+              <select id="ai-symbol"></select>
+            </div>
+            <div class="form-group">
+              <label>Timeframe</label>
+              <select id="ai-tf">
+                <option value="M15">M15</option>
+                <option value="H1" selected>H1</option>
+                <option value="H4">H4</option>
+                <option value="D1">D1</option>
+              </select>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-accent" id="btn-ai-analyze">วิเคราะห์ด้วย AI</button>
+          </div>
+          <p class="text-sm mt-8">AI จะวิเคราะห์ OHLC 100 แท่งล่าสุด พร้อม SMA / ATR / RSI และแนะนำ BUY / SELL / WAIT</p>
+        </div>
+
+        <!-- AI result card -->
+        <div id="ai-card">
+          <div class="flex-between">
+            <div>
+              <div class="text-sm" id="ai-symbol-tf">-</div>
+              <div class="ai-direction" id="ai-direction">-</div>
+            </div>
+            <div style="text-align:right">
+              <div class="text-sm">Confidence</div>
+              <div id="ai-confidence-num" style="font-size:20px;font-weight:700">-</div>
+            </div>
+          </div>
+          <div class="ai-confidence-bar mt-4">
+            <div class="ai-confidence-fill" id="ai-confidence-fill" style="width:0%"></div>
+          </div>
+
+          <div class="ai-grid mt-8">
+            <div>
+              <div class="text-sm">Trend</div>
+              <div id="ai-trend" style="font-weight:600">-</div>
+            </div>
+            <div>
+              <div class="text-sm">Price</div>
+              <div id="ai-price" style="font-weight:600;font-family:monospace">-</div>
+            </div>
+            <div>
+              <div class="text-sm">Support</div>
+              <div class="ai-levels" id="ai-support">-</div>
+            </div>
+            <div>
+              <div class="text-sm">Resistance</div>
+              <div class="ai-levels" id="ai-resistance">-</div>
+            </div>
+          </div>
+
+          <div class="ai-reasoning" id="ai-reasoning">-</div>
+          <div class="ai-caution" id="ai-caution" style="display:none"></div>
+
+          <div class="btn-row mt-12">
+            <button class="btn btn-ghost btn-sm" id="btn-ai-use-signal">ใช้สัญญาณนี้ในหน้าเทรด</button>
+          </div>
+          <div class="text-sm mt-4" id="ai-analyzed-at"></div>
         </div>
       </div>
 
@@ -529,8 +649,9 @@ function updateAcctBar(acct) {
 }
 
 function populateSymbolSelect() {
-  const sel = document.getElementById('tr-symbol');
-  sel.innerHTML = watchlist.map(s => '<option value="' + s + '">' + s + '</option>').join('');
+  const opts = watchlist.map(s => '<option value="' + s + '">' + s + '</option>').join('');
+  document.getElementById('tr-symbol').innerHTML = opts;
+  document.getElementById('ai-symbol').innerHTML = opts;
 }
 
 // ── Watchlist / quotes ────────────────────────────────────────────
@@ -773,6 +894,141 @@ document.getElementById('btn-check-health').addEventListener('click', async () =
       '<div class="health-row"><span class="dot dot-ok"></span> API: <strong>connected</strong></div>';
   } catch (err) {
     el.innerHTML = '<span style="color:var(--sell)">Error: ' + err.message + '</span>';
+  }
+});
+
+// ── AI – state ────────────────────────────────────────────────────
+let lastAiAnalysis = null;
+
+// ── AI – Option A: Chart Analysis ────────────────────────────────
+document.getElementById('btn-ai-analyze').addEventListener('click', async () => {
+  const symbol = document.getElementById('ai-symbol').value;
+  const tf     = document.getElementById('ai-tf').value;
+  if (!symbol) { showToast('เลือก symbol ก่อน', true); return; }
+
+  const btn = document.getElementById('btn-ai-analyze');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> AI กำลังวิเคราะห์...';
+
+  try {
+    const data = await api('POST', '/api/ai/analyze', { symbol, timeframe: tf });
+    lastAiAnalysis = data;
+    renderAiCard(data);
+  } catch (err) {
+    showToast('AI วิเคราะห์ไม่สำเร็จ: ' + err.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'วิเคราะห์ด้วย AI';
+  }
+});
+
+function renderAiCard(data) {
+  const a = data.analysis;
+  const card = document.getElementById('ai-card');
+
+  document.getElementById('ai-symbol-tf').textContent = data.symbol + ' ' + data.timeframe;
+
+  const dirEl = document.getElementById('ai-direction');
+  dirEl.textContent = a.direction;
+  dirEl.className   = 'ai-direction ai-dir-' + a.direction;
+
+  document.getElementById('ai-confidence-num').textContent = a.confidence + '%';
+  document.getElementById('ai-confidence-fill').style.width = a.confidence + '%';
+
+  const trendColors = { UPTREND: 'var(--buy)', DOWNTREND: 'var(--sell)', RANGING: 'var(--warn)' };
+  document.getElementById('ai-trend').textContent = a.trend;
+  document.getElementById('ai-trend').style.color = trendColors[a.trend] || '';
+
+  const bid = data.quote?.bid;
+  document.getElementById('ai-price').textContent = bid ? bid.toFixed(5) : '-';
+
+  const support    = (a.key_levels?.support    || []).map(p => '<span class="ai-level-chip">' + p + '</span>').join('');
+  const resistance = (a.key_levels?.resistance || []).map(p => '<span class="ai-level-chip">' + p + '</span>').join('');
+  document.getElementById('ai-support').innerHTML    = support    || '-';
+  document.getElementById('ai-resistance').innerHTML = resistance || '-';
+
+  document.getElementById('ai-reasoning').textContent = a.reasoning || '';
+
+  const cautionEl = document.getElementById('ai-caution');
+  if (a.caution) {
+    cautionEl.textContent  = 'ข้อควรระวัง: ' + a.caution;
+    cautionEl.style.display = '';
+  } else {
+    cautionEl.style.display = 'none';
+  }
+
+  document.getElementById('ai-analyzed-at').textContent = 'วิเคราะห์เมื่อ ' + new Date(data.analyzed_at).toLocaleTimeString('th-TH');
+  card.classList.add('show');
+}
+
+// "ใช้สัญญาณนี้" – switch to Trade panel with direction pre-filled
+document.getElementById('btn-ai-use-signal').addEventListener('click', () => {
+  if (!lastAiAnalysis) return;
+  const a = lastAiAnalysis.analysis;
+  if (a.direction === 'WAIT') { showToast('AI แนะนำ WAIT – ยังไม่เหมาะสมเปิด order', true); return; }
+
+  // Pre-fill trade form
+  const symSel = document.getElementById('tr-symbol');
+  for (let i = 0; i < symSel.options.length; i++) {
+    if (symSel.options[i].value === lastAiAnalysis.symbol) { symSel.selectedIndex = i; break; }
+  }
+  document.getElementById('tr-side').value = a.direction;
+
+  // Navigate to trade panel
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector('[data-panel="trade"]').classList.add('active');
+  document.getElementById('panel-trade').classList.add('active');
+
+  showToast('โหลดสัญญาณ ' + a.direction + ' ' + lastAiAnalysis.symbol + ' แล้ว');
+});
+
+// ── AI – Option C: Suggest SL/TP ─────────────────────────────────
+document.getElementById('btn-ai-suggest').addEventListener('click', async () => {
+  const symbol = document.getElementById('tr-symbol').value;
+  const side   = document.getElementById('tr-side').value;
+  const tf     = document.getElementById('ai-tf')?.value || 'H1';
+  if (!symbol) { showToast('เลือก symbol ก่อน', true); return; }
+
+  const btn = document.getElementById('btn-ai-suggest');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>';
+
+  try {
+    // Get current quote to use as entry
+    const q = await api('GET', '/api/market/quotes/' + symbol);
+    const entry = side === 'BUY' ? q.ask : q.bid;
+
+    const data = await api('POST', '/api/ai/suggest-levels', { symbol, side, entry, timeframe: tf });
+    const lv   = data.levels;
+
+    // Fill SL/TP pips into form
+    document.getElementById('tr-sl').value = Math.round(lv.sl_pips);
+    document.getElementById('tr-tp').value = Math.round(lv.tp_pips);
+
+    // Show summary toast
+    showToast('AI แนะนำ SL ' + Math.round(lv.sl_pips) + ' pips / TP ' + Math.round(lv.tp_pips) + ' pips (R:R ' + lv.rr_ratio.toFixed(1) + ')');
+
+    // Show detailed info in a mini card below
+    const detailId = 'ai-suggest-detail';
+    let detailEl = document.getElementById(detailId);
+    if (!detailEl) {
+      detailEl = document.createElement('div');
+      detailEl.id = detailId;
+      detailEl.style.cssText = 'margin-top:10px;font-size:12px;color:var(--text2);background:var(--bg3);border-radius:6px;padding:10px;border:1px solid var(--border)';
+      document.getElementById('btn-ai-suggest').parentElement.after(detailEl);
+    }
+    detailEl.innerHTML =
+      '<strong style="color:var(--accent)">AI แนะนำ SL/TP</strong><br>' +
+      'SL: ' + lv.sl_price + ' (' + Math.round(lv.sl_pips) + ' pips) – ' + lv.sl_basis + '<br>' +
+      'TP: ' + lv.tp_price + ' (' + Math.round(lv.tp_pips) + ' pips) – ' + lv.tp_basis + '<br>' +
+      'R:R = 1:' + lv.rr_ratio.toFixed(1) +
+      (lv.notes ? '<br><em>' + lv.notes + '</em>' : '');
+  } catch (err) {
+    showToast('AI แนะนำ SL/TP ไม่สำเร็จ: ' + err.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'AI แนะนำ';
   }
 });
 
