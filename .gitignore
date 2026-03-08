@@ -1,0 +1,8 @@
+node_modules/
+server/node_modules/
+server/logs/
+server/.env
+mt5_bridge/.env
+mt5_bridge/__pycache__/
+*.pyc
+.DS_Store
